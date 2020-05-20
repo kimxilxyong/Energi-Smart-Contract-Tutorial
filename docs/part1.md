@@ -82,6 +82,16 @@ true
 
 * Go to the faucet and beg for some tNRGs
 * 
+
+### 5. Setup a easy to use solidity IDE
+ * Go to https://remix.ethereum.org
+ * Activate plugins needed for solidity
+  
+   ![Plugins](https://i.ibb.co/C7N2x76/Remix-IDEPlugins.png)
+
+
+
+
 ___
 
 ---
