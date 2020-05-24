@@ -12,7 +12,7 @@ pragma experimental ABIEncoderV2;
  */
 contract OwnedContract {
     
-    uint8 constant public version = 100;
+    uint8 constant public version = 101;
 
     // The creator of this contract
     address private owner;
