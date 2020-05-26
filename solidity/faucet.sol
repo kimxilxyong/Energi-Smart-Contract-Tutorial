@@ -1,10 +1,12 @@
-pragma solidity >=0.5.0;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.6.0;
 
 /**
  * SPDX-License-Identifier: MIT
  * Copyright (c) 2020 Kim Il Yong 
  */
+ 
+import "./safemath.sol"; 
+import "./signedsafemath.sol"; 
 
 /**
  * @title OwnedContract
@@ -64,6 +66,9 @@ contract OwnedContract {
  */
 contract Faucet is OwnedContract {
     
+    using SafeMath for uint;
+    using SignedSafeMath for int;
+    
     event ReceiveDonation(address indexed donor, uint amount, uint donationnumber, uint timestamp);
     event WithdrawMoney(address indexed to, uint indexed amount);
     
@@ -105,19 +110,26 @@ contract Faucet is OwnedContract {
         selfdestruct(_to);
     }
     
+    receive() external payable {
+        Donation();
+    }
+    
      /**
      * @dev called when contract receives funding
      */
     function Donation() public payable {
+        require(msg.sender != address(0),  "address is null");
+        require((Donations[msg.sender].numPayments + 1 > Donations[msg.sender].numPayments), "uint32 overflow");
         
-        totalBalance = totalBalance + msg.value;
-        uint32 numPayments = Donations[msg.sender].numPayments + 1;
+        uint32 numPayments;
+        numPayments = Donations[msg.sender].numPayments + 1;
         
-        Donations[msg.sender].totalBalance += int(msg.value);
+        Donations[msg.sender].totalBalance = Donations[msg.sender].totalBalance.add(int(msg.value));
         Donations[msg.sender].numPayments = numPayments;
         Donations[msg.sender].payments[numPayments].amount = msg.value;
         Donations[msg.sender].payments[numPayments].withdraw = false;
         Donations[msg.sender].payments[numPayments].timestamp = now;
+        totalBalance = totalBalance.add(msg.value);
         
         emit ReceiveDonation(msg.sender, msg.value, numPayments, Donations[msg.sender].payments[numPayments].timestamp);
     }
@@ -147,7 +159,7 @@ contract Faucet is OwnedContract {
         return Donations[_from].totalBalance;
     }
     
-        /**
+    /**
      * @dev Return Donations count from Address
      * @param  _from Address
      * @return number of donations
@@ -156,6 +168,19 @@ contract Faucet is OwnedContract {
         return Donations[_from].numPayments;
     }
 
+    /**
+     * @dev Return Donation details
+     * @param  _from Address
+     * @param  _nr index
+     * @return _amount
+     * @return _withdraw
+     * @return _timestamp
+     */
+    function getDonationDetails(address _from, uint32 _nr) public view returns (uint _amount, bool _withdraw, uint _timestamp) {
+        _amount = Donations[_from].payments[_nr].amount;
+        _withdraw = Donations[_from].payments[_nr].withdraw;
+        _timestamp = Donations[_from].payments[_nr].timestamp; 
+    }
     
 
     /**
@@ -163,17 +188,21 @@ contract Faucet is OwnedContract {
      * @param _to address to send money to
      * @param _amount Amount of money to send
      */
-    function withdrawMoney(address payable _to, uint _amount) public isOwner {
-        require(_amount <= address(this).balance, "not enough funds");
+    function withdrawDonation(address payable _to, uint _amount) public isOwner {
+        require(_to != address(0));
+        require(int(_amount) <= Donations[_to].totalBalance, "withdraw amount too high");
+        require(_amount <= address(this).balance, "not enough contract funds");
+        require(Donations[_to].numPayments + 1 > Donations[_to].numPayments, "uint32 overflow");
+        uint32 numPayments;
+        numPayments = Donations[_to].numPayments + 1;
         
-        totalBalance = totalBalance -_amount;
-        uint32 numPayments = Donations[_to].numPayments + 1;
-        
-        Donations[_to].totalBalance -= int(_amount);
+        Donations[_to].totalBalance = Donations[_to].totalBalance.sub(int(_amount));
         Donations[_to].numPayments = numPayments;
         Donations[_to].payments[numPayments].amount = _amount;
         Donations[_to].payments[numPayments].withdraw = true;
         Donations[_to].payments[numPayments].timestamp = now;
+        
+        totalBalance = totalBalance.sub(_amount);
         
         _to.transfer(_amount);
         emit WithdrawMoney(_to, _amount);
