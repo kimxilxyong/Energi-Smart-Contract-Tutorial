@@ -15,6 +15,6 @@
 #####################################################################
 
 
-./energi3 --testnet --verbosity 3 --rpccorsdomain "package://a7df6d3c223593f3550b35e90d7b0b1f.mod" --vmdebug --rpc --rpcport 39796 --rpcaddr "127.0.0.1" --rpcvhosts "localhost" --rpcapi admin,web3,eth,debug,personal,net,energi 
+./energi3 --testnet --verbosity 3 --rpccorsdomain "package://a7df6d3c223593f3550b35e90d7b0b1f.mod" --vmdebug --rpc --rpcport 39796 --rpcaddr "127.0.0.1" --rpcvhosts "localhost" --rpcapi admin,web3,eth,debug,personal,net,energi console
 
 

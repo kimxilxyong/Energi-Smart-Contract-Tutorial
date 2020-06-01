@@ -90,7 +90,7 @@ true
  * Activate plugins needed for solidity
   
    ![Plugins](https://i.ibb.co/C7N2x76/Remix-IDEPlugins.png)
-
+ * Optional install Remixd to load and store solidity files from the local filesystem and therefor have them managed by a git repository instead of only a simple gist: https://github.com/ethereum/remixd
 
 
 
