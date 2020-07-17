@@ -447,5 +447,4 @@ contract Faucet is OwnedContract {
     function requestGas(address payable _to) public isOwner {
         _to.transfer(300000);
     }
-
 }

@@ -10,6 +10,7 @@ import (
 	"math/big"
 	"net/http"
 	"os"
+	"strings"
 
 	ethereum "energi.world/core/gen3"
 	"energi.world/core/gen3/accounts"
@@ -28,22 +29,43 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 )
 
-func setContent(w http.ResponseWriter) {
+func setContentHTML(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	w.Header().Set("Content-Language", "en-US")
 }
+func setContentJS(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "text/javascript; charset=UTF-8")
+	w.Header().Set("Content-Language", "en-US")
+}
+func setContentImage(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "image/x-icon")
+	w.Header().Set("Content-Language", "en-US")
+}
 
-func viewHandler(w http.ResponseWriter, r *http.Request) {
+func generalHandler(w http.ResponseWriter, r *http.Request) {
+	var doc string
+	var accept string
 
+	accept = r.Header.Get("Accept")
+
+	if strings.HasPrefix(accept, "image") {
+		doc = "img/"
+		setContentImage(w)
+	} else if strings.HasPrefix(accept, "text/javascript") {
+		doc = "js/"
+		setContentJS(w)
+	} else {
+		doc = ""
+		setContentHTML(w)
+	}
 	filename := r.URL.Path[len("/"):]
-	body, err := ioutil.ReadFile(filename)
+	body, err := ioutil.ReadFile("www/" + doc + filename)
 	if err != nil {
 		log.Println(err)
 	} else {
 		fmt.Println("Start serving files in", filename)
 	}
 
-	setContent(w)
 	w.Write(body)
 }
 
@@ -61,7 +83,7 @@ func markdownHandler(w http.ResponseWriter, r *http.Request) {
 	//extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.Mmark | SuperSubscript
 	//parser := parser.NewWithExtensions(extensions)
 
-	setContent(w)
+	setContentHTML(w)
 	//html := markdown.ToHTML(md, parser, nil)
 	//html := blackfriday.Run(md)
 
@@ -95,6 +117,25 @@ func markdownHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(buf.Bytes())
 }
 
+func main() {
+
+	path, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	} else {
+		fmt.Println("Start serving files in", path)
+	}
+
+	http.HandleFunc("/", generalHandler)
+	http.HandleFunc("/md/", markdownHandler)
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
+
+	print("Exiting server")
+	os.Exit(0)
+}
+
+// Web3 Section ******************************************
 func toCallArg(msg ethereum.CallMsg) interface{} {
 	arg := map[string]interface{}{
 		"from": msg.From,
@@ -115,7 +156,7 @@ func toCallArg(msg ethereum.CallMsg) interface{} {
 	return arg
 }
 
-func main() {
+func mainWeb3() {
 	var adr common.Address
 	var f *Faucet
 	var err error
@@ -199,7 +240,7 @@ func main() {
 		fmt.Println("Start serving files in", path)
 	}
 
-	http.HandleFunc("/", viewHandler)
+	http.HandleFunc("/", generalHandler)
 	http.HandleFunc("/md/", markdownHandler)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))

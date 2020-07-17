@@ -3,5 +3,9 @@
 		{
 			"path": "."
 		}
-	]
+	],
+	"settings": {
+		"solidity-va.hover": false,
+		"solidity-va.deco.statevars": false
+	}
 }
