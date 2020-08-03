@@ -4,12 +4,14 @@ package main
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"math/big"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	ethereum "energi.world/core/gen3"
@@ -29,43 +31,142 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 )
 
-func setContentHTML(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	w.Header().Set("Content-Language", "en-US")
-}
-func setContentJS(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "text/javascript; charset=UTF-8")
-	w.Header().Set("Content-Language", "en-US")
-}
-func setContentImage(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "image/x-icon")
-	w.Header().Set("Content-Language", "en-US")
+/*
+	Returns the most probable filepath and mime type
+*/
+func getSemanticFile(basedir string, subdir string, filename string) (string, string, error) {
+	var fullfilepath string
+	var mime string
+	var mimedir string
+	var err error
+
+	ext := filepath.Ext(filename)
+	if ext[0] == '.' {
+		ext = ext[1:]
+	}
+
+	if ext == "css" {
+		mime = "text/css"
+	} else if ext == "js" {
+		mime = "application/javascript"
+	} else if ext == "htm" || ext == "html" {
+		mime = "text/html"
+	} else if ext == "png" {
+		mime = "image/png"
+	} else if ext == "jpg" || ext == "jpeg" || ext == "jpe" {
+		mime = "image/jpeg"
+	} else if ext == "gif" {
+		mime = "image/gif"
+	} else if ext == "ico" {
+		mime = "image/x-icon"
+	} else if ext == "svg" {
+		mime = "image/svg+xml"
+	} else if ext == "json" {
+		mime = "application/json"
+	} else if ext == "map" {
+		mime = "application/json"
+	} else {
+		mime = "message/http"
+		fmt.Println("Unknown file extension", filename)
+		err = errors.New("Unknown file extension " + ext)
+		return filename, mime, err
+	}
+
+	fullfilepath = filepath.Join(filename)
+	if _, err := os.Stat(fullfilepath); err == nil {
+		return fullfilepath, mime, nil
+	}
+	fullfilepath = filepath.Join(basedir, filename)
+	if _, err := os.Stat(fullfilepath); err == nil {
+		return fullfilepath, mime, nil
+	}
+	fullfilepath = filepath.Join(basedir, subdir, filename)
+	if _, err := os.Stat(fullfilepath); err == nil {
+		return fullfilepath, mime, nil
+	}
+
+	if strings.Split(mime, "/")[0] == "image" {
+		mimedir = "img"
+	} else if strings.Split(mime, "/")[1] == "css" {
+		mimedir = "css"
+	} else if strings.Split(mime, "/")[1] == "javascript" {
+		mimedir = "js"
+	} else if strings.Split(mime, "/")[1] == "html" {
+		mimedir = "html"
+	} else if strings.Split(mime, "/")[1] == "json" {
+		mimedir = "json"
+	}
+
+	fullfilepath = filepath.Join(basedir, subdir, mimedir, filename)
+	if _, err := os.Stat(fullfilepath); err == nil {
+		return fullfilepath, mime, nil
+	}
+	fullfilepath = filepath.Join(basedir, mimedir, filename)
+	if _, err := os.Stat(fullfilepath); err == nil {
+		return fullfilepath, mime, nil
+	}
+
+	fmt.Println("File not found ", filename)
+	err = errors.New("File not found " + mime + " " + filename)
+	return filename, mime, err
 }
 
 func generalHandler(w http.ResponseWriter, r *http.Request) {
-	var doc string
-	var accept string
+	var subdir string
+	var accept []string
+	var accepts []string
+	var atype string
+	var adetail string
 
-	accept = r.Header.Get("Accept")
-
-	if strings.HasPrefix(accept, "image") {
-		doc = "img/"
-		setContentImage(w)
-	} else if strings.HasPrefix(accept, "text/javascript") {
-		doc = "js/"
-		setContentJS(w)
-	} else {
-		doc = ""
-		setContentHTML(w)
+	accepts = strings.Split(r.Header.Get("Accept"), ",")
+	accept = strings.Split(accepts[0], "/")
+	if len(accept) > 1 {
+		atype = accept[0]
+		adetail = accept[1]
 	}
-	filename := r.URL.Path[len("/"):]
-	body, err := ioutil.ReadFile("www/" + doc + filename)
+
+	if atype == "image" {
+		subdir = "img"
+	} else if atype == "text" {
+		if adetail == "javascript" {
+			subdir = "js"
+		} else if adetail == "html" {
+			subdir = ""
+		} else if adetail == "css" {
+			subdir = "css"
+		}
+	} else {
+		subdir = ""
+	}
+
+	filename := strings.Split(r.URL.Path[len("/"):], "?")[0]
+	if filename == "" {
+		filename = "index.html"
+	}
+
+	filenamePath, mime, err := getSemanticFile("www", subdir, filename)
+	if err != nil {
+		filenamePath, mime, err = getSemanticFile("www", "build", filename)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusNotFound)
+			//http.Error(w, "Not Found: "+mime+" "+filenamePath, http.StatusNotFound)
+			return
+		}
+	}
+
+	body, err := ioutil.ReadFile(filenamePath)
 	if err != nil {
 		log.Println(err)
+		w.WriteHeader(http.StatusNotFound)
+		//http.Error(w, "Not Found", http.StatusNotFound)
+		return
 	} else {
-		fmt.Println("Start serving files in", filename)
+		fmt.Println("Serving file ", filenamePath)
 	}
 
+	w.Header().Set("Content-Type", mime+"; charset=UTF-8")
+	w.Header().Set("Content-Language", "en-US")
 	w.Write(body)
 }
 
@@ -73,17 +174,16 @@ func markdownHandler(w http.ResponseWriter, r *http.Request) {
 
 	filename := r.URL.Path[len("/md/"):]
 
-	md, err := ioutil.ReadFile(filename)
+	md, err := ioutil.ReadFile("md/" + filename)
 	if err != nil {
 		log.Println(err)
 	} else {
-		fmt.Println("Serving file", filename)
+		fmt.Println("Serving file md/", filename)
 	}
 
 	//extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.Mmark | SuperSubscript
 	//parser := parser.NewWithExtensions(extensions)
 
-	setContentHTML(w)
 	//html := markdown.ToHTML(md, parser, nil)
 	//html := blackfriday.Run(md)
 
@@ -114,6 +214,8 @@ func markdownHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
+	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
+	w.Header().Set("Content-Language", "en-US")
 	w.Write(buf.Bytes())
 }
 
@@ -123,7 +225,7 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	} else {
-		fmt.Println("Start serving files in", path)
+		fmt.Println("Start serving files in", filepath.Join(path, "www"))
 	}
 
 	http.HandleFunc("/", generalHandler)
