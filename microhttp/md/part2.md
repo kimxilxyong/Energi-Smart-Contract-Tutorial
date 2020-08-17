@@ -1,6 +1,6 @@
 # Writing smartcontract DApps on the Energi3 blockchain
 
-## Part 1 : Setting up the Go(lang) development Environment
+## Part 2 : Setting up the Go(lang) development Environment
 
 ### 1. Install the Go compiler
 

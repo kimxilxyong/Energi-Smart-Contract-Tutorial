@@ -41,14 +41,23 @@ func getSemanticFile(basedir string, subdir string, filename string) (string, st
 	var err error
 
 	ext := filepath.Ext(filename)
-	if ext[0] == '.' {
-		ext = ext[1:]
+	if ext != "" {
+		if ext[0] == '.' {
+			ext = ext[1:]
+		}
+	} else {
+		mime = ""
+		fmt.Println("Unknown request ", filename)
+		err = errors.New("Unknown request " + filename)
+		return filename, mime, err
 	}
 
 	if ext == "css" {
 		mime = "text/css"
 	} else if ext == "js" {
 		mime = "application/javascript"
+	} else if ext == "xml" {
+		mime = "application/xml"
 	} else if ext == "htm" || ext == "html" {
 		mime = "text/html"
 	} else if ext == "png" {
@@ -65,6 +74,14 @@ func getSemanticFile(basedir string, subdir string, filename string) (string, st
 		mime = "application/json"
 	} else if ext == "map" {
 		mime = "application/json"
+	} else if ext == "ttf" {
+		mime = "font/ttf"
+	} else if ext == "woff" {
+		mime = "font/woff"
+	} else if ext == "woff2" {
+		mime = "font/woff2"
+	} else if ext == "eot" {
+		mime = "application/vnd.ms-fontobject"
 	} else {
 		mime = "message/http"
 		fmt.Println("Unknown file extension", filename)
@@ -95,6 +112,10 @@ func getSemanticFile(basedir string, subdir string, filename string) (string, st
 		mimedir = "html"
 	} else if strings.Split(mime, "/")[1] == "json" {
 		mimedir = "json"
+	} else if strings.Split(mime, "/")[0] == "font" {
+		mimedir = "fonts"
+	} else if strings.Split(mime, "/")[1] == "vnd.ms-fontobject" {
+		mimedir = "fonts"
 	}
 
 	fullfilepath = filepath.Join(basedir, subdir, mimedir, filename)
@@ -117,6 +138,9 @@ func generalHandler(w http.ResponseWriter, r *http.Request) {
 	var accepts []string
 	var atype string
 	var adetail string
+
+	fmt.Println("Incoming request: ", r.URL.Path)
+	fmt.Println("Header: ", r.Header.Get("Accept"))
 
 	accepts = strings.Split(r.Header.Get("Accept"), ",")
 	accept = strings.Split(accepts[0], "/")
