@@ -8,6 +8,7 @@ import Framework7Svelte from 'framework7-svelte';
 import 'framework7/css/framework7.bundle.css';
 
 // Import Icons and App Custom Styles
+import '../css/fonts.css';
 import '../css/icons.css';
 import '../css/app.css';
 
@@ -15,7 +16,7 @@ import '../css/app.css';
 import App from '../components/app.svelte';
 
 // Init F7 Svelte Plugin
-Framework7.use(Framework7Svelte)
+Framework7.use(Framework7Svelte);
 
 // Mount Svelte App
 const app = new App({

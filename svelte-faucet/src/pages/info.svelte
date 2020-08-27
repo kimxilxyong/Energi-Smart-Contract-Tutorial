@@ -1,5 +1,12 @@
-<Page name="info">
-    <Navbar title="Information" backLink="Back" />
+<Page name="info" onPageBeforeIn={onShow} onPageBeforeOut={onHide}>
+    <Navbar backLink="Back">
+        <NavLeft>
+            <!--  <Link iconIos="f7:back" iconAurora="f7:back" iconMd="material:back" backLink="Back" /> -->
+            <Link iconIos="f7:menu" iconAurora="f7:menu" iconMd="material:menu" panelOpen="left" />
+        </NavLeft>
+        <NavTitle>Information</NavTitle>
+    </Navbar>
+
 
     <Card outline>
         <CardHeader>About this faucet</CardHeader>
@@ -23,15 +30,21 @@
 </Page>
 
   <script>
-    import { Page, Navbar, Card, CardHeader, CardContent } from 'framework7-svelte';
-    import { onMount } from 'svelte';
-
+    import { NavLeft, NavTitle, Link, Page, Navbar, Card, CardHeader, CardContent } from 'framework7-svelte';
     import { global } from '../js/stores.js';
 
-    onMount(() => {
+    function onShow() {
         global.update(() => {
             global.info = true;
+            global.web3 = false;
+            global.smartcontract = false;
             return global;
         });
-    });
+    }
+    function onHide()  {
+        global.update(() => {
+            global.info = false;
+            return global;
+        });
+    }
   </script>

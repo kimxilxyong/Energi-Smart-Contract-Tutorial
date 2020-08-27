@@ -1,5 +1,12 @@
 <Page>
-  <Navbar title="About" backLink="Back" />
+  <Navbar>
+    <NavLeft>
+      <Link iconIos="f7:back" iconAurora="f7:back" iconMd="material:back" backLink="Back" />
+      <Link iconIos="f7:menu" iconAurora="f7:menu" iconMd="material:menu" panelOpen="left" />
+    </NavLeft>
+    <NavTitle>About</NavTitle>
+  </Navbar>
+  NavLeft, NavTitle, Link,
   <BlockTitle>About My App</BlockTitle>
   <Block strong>
     <p>Fugiat perspiciatis excepturi, soluta quod non ullam deleniti. Nobis sint nemo consequuntur, fugiat. Eius perferendis animi autem incidunt vel quod tenetur nostrum, voluptate omnis quasi quidem illum consequuntur, a, quisquam.</p>
@@ -12,5 +19,5 @@
   </Block>
 </Page>
 <script>
-  import { Page, Navbar, Block, BlockTitle } from 'framework7-svelte';
+  import { Page, Navbar, NavLeft, NavTitle, Link, Block, BlockTitle } from 'framework7-svelte';
 </script>

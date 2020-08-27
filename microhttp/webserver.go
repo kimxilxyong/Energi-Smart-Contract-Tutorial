@@ -103,7 +103,7 @@ func getSemanticFile(basedir string, subdir string, filename string) (string, st
 	}
 
 	if strings.Split(mime, "/")[0] == "image" {
-		mimedir = "img"
+		mimedir = "images"
 	} else if strings.Split(mime, "/")[1] == "css" {
 		mimedir = "css"
 	} else if strings.Split(mime, "/")[1] == "javascript" {

@@ -1,43 +1,53 @@
+<!--
+<svelte:head>
+  <link href="https://fonts.googleapis.com/css?family=Open Sans" rel="stylesheet">
+</svelte:head>
+
+width="10"
+-->
+
 <App params={ f7params } themeDark>
 
   <!-- Left panel with cover effect when hidden -->
-  <Panel left cover themeDark visibleBreakpoint={960}>
+  <Panel left reveal themeDark visibleBreakpoint={960}>
     <View>
       <Page>
-        <Navbar title="Faucet" bgColor="green"/>
+        <div class="navbar theme-dark">
+          <div class="navbar-bg">
+           <img src="./images/EnergiLogo-Light.png" alt="Energi Logo" height="60%" width="60%" style="left:11px;top:12px;position:absolute;"/>
+          </div>
+        </div>
 
         <Card outline>
           <CardHeader style="{infoStyle}">Information</CardHeader>
           <CardContent>
             <List>
-              <ListItem link="/info/" view=".view-main" panelClose title="About"/>
+              <ListItem link="/info/" view=".view-main" panelClose title="About" style="{infoStyleLink}"/>
               <ListItem link="https://wallet.energi.network/generate/keystore" external target="_blank" panelClose title="Create a Wallet"/>
             </List>
           </CardContent>
         </Card>
         <br>
-
         <Card outline>
           <CardHeader style="{web3Style}">Connect</CardHeader>
           <CardContent>
             <List>
-              <ListItem link="/web3provider/" view=".view-main" panelClose title="Web3Provider"/>
+              <ListItem link="/web3provider/" view=".view-main" panelClose title="Web3Provider"  style="{web3StyleLink}"/>
             </List>
           </CardContent>
         </Card>
         <br>
-
         <Card outline>
           <CardHeader style="{scStyle}">Interact</CardHeader>
           <CardContent>
             <List>
-              <ListItem link="/smartcontract/" view=".view-main" panelClose title="SmartContract"/>
+              <ListItem link="/smartcontract/" view=".view-main" panelClose title="SmartContract" style="{scStyleLink}"/>
             </List>
           </CardContent>
         </Card>
         <br>
         <br>
-        <Card outline align=botton>
+        <Card outline>
           <CardHeader>Navigation</CardHeader>
           <CardContent>
             <List>
@@ -50,21 +60,8 @@
     </View>
   </Panel>
 
-
-  <!-- Right panel with reveal effect-->
-  <Panel right reveal themeDark>
-    <View>
-      <Page>
-        <Navbar title="Right Panel"/>
-        <Block>Right panel content goes here</Block>
-      </Page>
-    </View>
-  </Panel>
-
-
   <!-- Your main view, should have "view-main" class -->
-  <View main class="safe-areas" url="/" />
-
+    <View main class="safe-areas" url="/" />
 
   <!-- Popup -->
   <Popup id="my-popup">
@@ -119,6 +116,7 @@
     f7,
     f7ready,
     App,
+    Appbar,
     Panel,
     Card,
     CardHeader,
@@ -131,6 +129,7 @@
     Toolbar,
     NavRight,
     Link,
+    Icon,
     Block,
     BlockTitle,
     LoginScreen,
@@ -146,22 +145,31 @@
   import { global } from '../js/stores.js';
 
 
-  let infoStyle = ``;
-  //let web3Visited = false;
-  let web3Style = "";
-  //let scVisited = false;
-  let scStyle = ``;
+  let infoStyle = `color:var(--energi-color-text)`;
+  let web3Style = infoStyle;
+  let scStyle = infoStyle;
+
+  let infoStyleLink = `color:var(--energi-color-text)`;
+  let web3StyleLink = infoStyleLink;
+  let scStyleLink = infoStyleLink;
 
   const unsubscribe = global.subscribe(global => {
 
+  infoStyleLink = `color:var(--energi-color-text)`;
+  web3StyleLink = infoStyleLink;
+  scStyleLink = infoStyleLink;
+
     if (global.info) {
-      infoStyle = `color:green;`;
+      infoStyle = `color:var(--energi-color-green);`;
+      infoStyleLink = `color:var(--energi-color-green-secondary);`;
     }
     if (global.web3) {
-      web3Style = `color:green;`;
+      web3Style = `color:var(--energi-color-green);`;
+      web3StyleLink = `color:var(--energi-color-green-secondary);`;
     }
     if (global.smartcontract) {
-      scStyle = `color:green;`;
+      scStyle = `color:var(--energi-color-green);`;
+      scStyleLink = `color:var(--energi-color-green-secondary);`;
     }
   });
 

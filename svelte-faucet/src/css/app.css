@@ -1,4 +1,14 @@
-/* Invert navigation bars to fill style */
+
+a {
+  color: var(--energi-color-green);
+}
+b,
+strong {
+  font-family: 'Open Sans';
+  font-weight: 600;
+}
+
+/* Invert navigation bars to fill style #263238; */
 :root,
 :root.theme-dark,
 :root .theme-dark {
@@ -13,7 +23,19 @@
   --f7-tabbar-link-inactive-color: rgba(255,255,255,0.54);
   --f7-sheet-border-color: transparent;
   --f7-tabbar-link-active-border-color: #fff;
+
+  /*--f7-appbar-app-offset: 150px; */
+  --f7-appbar-height: 96px;
+
+  --f7-font-family: 'Open Sans', Roboto, Helvetica, FreeSans, sans-serif;
+  --f7-navbar-title-font-weight: 600;
+  --f7-card-header-font-weight: 600;
+
+  --energi-color-green: #00E676;
+  --energi-color-green-secondary: #69f0AE;
+  --energi-color-text: var(--f7-list-item-title-text-color);
 }
+
 .appbar,
 .navbar,
 .toolbar,
@@ -24,6 +46,7 @@
   --f7-link-highlight-color: var(--f7-link-highlight-white);
   --f7-button-text-color: #fff;
   --f7-button-pressed-bg-color: rgba(255,255,255,0.1);
+  --f7-font-family: 'Open Sans', Roboto, Helvetica, FreeSans, sans-serif;
 }
 .navbar-large-transparent,
 .navbar-large.navbar-transparent {
@@ -57,6 +80,11 @@
 }
 
 /* Hide navbar link which opens left panel when it is visible by breakpoint */
+.panel-left.panel-in-breakpoint ~ .appbar .panel-open[data-panel="left"] {
+  display: none;
+}
+
+/* Hide navbar link which opens left panel when it is visible by breakpoint */
 .panel-left.panel-in-breakpoint ~ .view .navbar .panel-open[data-panel="left"] {
   display: none;
 }
@@ -75,3 +103,4 @@
   content: '';
   z-index: 6000;
 }
+

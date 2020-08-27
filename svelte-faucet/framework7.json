@@ -1,0 +1,26 @@
+{
+  "cwd": "/home/moe/source/Energi-Smart-Contract-Tutorial/svelte-faucet",
+  "type": [
+    "pwa"
+  ],
+  "name": "Faucet",
+  "framework": "svelte",
+  "template": "split-view",
+  "bundler": "webpack",
+  "cssPreProcessor": false,
+  "theming": {
+    "customColor": false,
+    "color": "#00e676",
+    "darkTheme": true,
+    "iconFonts": true,
+    "fillBars": true
+  },
+  "customBuild": false,
+  "webpack": {
+    "developmentSourceMap": true,
+    "productionSourceMap": true,
+    "hashAssets": false,
+    "preserveAssetsPaths": false,
+    "inlineAssets": true
+  }
+}

@@ -1,19 +1,18 @@
 <Page name="home">
   <!-- Top Navbar -->
-  <Navbar large sliding={false}>
+  <Navbar sliding={true}>
     <NavLeft>
       <Link iconIos="f7:menu" iconAurora="f7:menu" iconMd="material:menu" panelOpen="left" />
     </NavLeft>
-    <NavTitle sliding>Faucet</NavTitle>
+    <NavTitle sliding>Testnet Faucet</NavTitle>
     <NavRight>
-      <Link iconIos="f7:menu" iconAurora="f7:menu" iconMd="material:menu" panelOpen="right" />
+
     </NavRight>
-    <NavTitleLarge>Faucet</NavTitleLarge>
   </Navbar>
-  <!-- Toolbar -->
+  <!-- Toolbar ->
   <Toolbar bottom>
-    <Link>Left Link</Link>
     <Link>Right Link</Link>
+    <Link iconIos="f7:menu" iconAurora="f7:menu" iconMd="material:menu" panelOpen="left" />
   </Toolbar>
   <!-- Page content -->
   <Block strong>

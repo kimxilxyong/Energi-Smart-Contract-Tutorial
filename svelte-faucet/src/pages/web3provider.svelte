@@ -1,5 +1,12 @@
-<Page>
-    <Navbar title="Connect to the Energi Testnet" backLink="Back" />
+<Page name="web3" onPageBeforeIn={onShow} onPageBeforeOut={onHide}>
+  <Navbar backLink="Back">
+    <NavLeft>
+       <!--  <Link iconIos="f7:back" iconAurora="f7:back" iconMd="material:back" backLink="Back" /> -->
+      <Link iconIos="f7:menu" iconAurora="f7:menu" iconMd="material:menu" panelOpen="left" />
+    </NavLeft>
+    <NavTitle>Connect to the Energi Testnet</NavTitle>
+  </Navbar>
+
     <Card outline>
       <CardHeader>About RPC Providers</CardHeader>
       <CardContent>
@@ -14,39 +21,52 @@
     <br>
     <br>
     <Card outline>
-      <CardHeader>Connect to an RPC Providers</CardHeader>
+      <CardHeader>Connection to the official Energi Testnet RPC Provider<br>
+      <strong>https://nodeapi.test3.energi.network</strong>
+      </CardHeader>
       <CardContent>
-        <List>
-          LIST
-          <ListItem>Item1
-            <Block>
-              <p>Popup content goes here.</p>
-            </Block>
-          </ListItem>
-          <ListItem>Item2
-            <Block>
-              <p>Popup content goes here.</p>
-            </Block>
-          </ListItem>
-        </List>
+      <List noHairlinesMd>
+        <ListInput
+          outline
+          label="URL"
+          floatingLabel
+          type="url"
+          placeholder="https://nodeapi.test3.energi.network"
+          clearButton
+          bind:value={urlRemote}
+        >
+        <i class="icon demo-list-icon" slot="media" />
+        </ListInput>
+       </List>List>
+      <Button class="col" fill raised onClick={onConnectRemote}color:var(--energi-color-text)>Connect</Button>
+
       </CardContent>
       <CardFooter><a href="https://www.google.com/search?q=web3+create+provider"  external target="_blank">More Information</a></CardFooter>
     </Card>
-
-
-
-
-
 </Page>
+
   <script>
-    import { Block, Card, CardHeader, CardContent, CardFooter, Page, Navbar, Link, List, ListItem } from 'framework7-svelte';
-    import { onMount } from 'svelte';
+    import { NavLeft, NavTitle, Link, Block, Card, CardHeader, CardContent, CardFooter, Page, Navbar, List, ListInput, Button } from 'framework7-svelte';
     import { global } from '../js/stores.js';
 
-    onMount(() => {
+    let urlRemote;
+
+    function onConnectRemote() {
+      console.log("onConnectRemote to " + urlRemote);
+    }
+
+    function onShow() {
         global.update(() => {
             global.web3 = true;
+            global.smartcontract = false;
+            global.info = false;
             return global;
         });
-    });
+    }
+    function onHide()  {
+        global.update(() => {
+            global.web3 = false;
+            return global;
+        });
+    }
   </script>
