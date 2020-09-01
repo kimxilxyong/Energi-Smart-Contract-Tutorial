@@ -1,4 +1,11 @@
 
+img.pngColorGreen {
+  filter: invert(83%) sepia(14%) saturate(5968%) hue-rotate(90deg) brightness(89%) contrast(103%);
+}
+img.pngColorNone {
+  filter: invert(0%);
+}
+
 a {
   color: var(--energi-color-green);
 }
@@ -33,7 +40,43 @@ strong {
 
   --energi-color-green: #00E676;
   --energi-color-green-secondary: #69f0AE;
-  --energi-color-text: var(--f7-list-item-title-text-color);
+  --energi-color-text: #efe;
+
+  --f7-theme-color-shade: #2cd048;
+  --f7-theme-color-tint: #6ee081;
+  --f7-input-focused-border-color: var(--energi-color-green);
+
+  /*--f7-label-focused-text-color*/
+}
+
+.item-input-outline.item-input-with-value,
+.item-input-outline.item-input-focused > .item-label.item-floating-label {
+  color: var(--energi-color-green);
+}
+.list .item-input-with-value .item-floating-label
+{
+  color: var(--energi-color-green);
+}
+/*
+.list .item-input-outline .item-floating-label {
+  color: var(--energi-color-green);
+}*/
+
+
+
+
+
+.button-fill
+{
+--f7-button-text-color: var(--energi-color-text);
+--f7-button-pressed-text-color: var(--f7-button-text-color, var(--f7-theme-color));
+/*--f7-button-pressed-bg-color: rgba(var(--f7-theme-color-rgb), .15);*/
+--f7-button-pressed-bg-color: var(--f7-button-fill-pressed-bg-color, var(--f7-theme-color-shade));
+--f7-button-border-color: var(--energi-color-green);
+--f7-button-fill-text-color: var(--energi-color-text);
+--f7-button-fill-bg-color: var(--energi-color-green);
+--f7-button-outline-border-color: var(--energi-color-green);
+--f7-button-fill-pressed-bg-color: var(--energi-color-green-secondary);
 }
 
 .appbar,
