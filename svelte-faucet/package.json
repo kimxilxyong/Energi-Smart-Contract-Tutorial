@@ -10,7 +10,8 @@
     "dev": "cross-env NODE_ENV=development webpack-dev-server --config ./build/webpack.config.js",
     "build-dev": "cross-env NODE_ENV=development node ./build/build.js",
     "build-prod": "cross-env NODE_ENV=production node ./build/build.js",
-    "postinstall": "cpy ./node_modules/framework7-icons/fonts/*.* ./src/fonts/"
+    "postinstall_old": "cpy ./node_modules/framework7-icons/fonts/*.* ./src/fonts/",
+    "postinstall": "node ./patch-scrypt.js"
   },
   "browserslist": [
     "Android >= 7",
@@ -26,10 +27,13 @@
     "framework7": "^5.7.10",
     "framework7-icons": "^3.0.1",
     "framework7-svelte": "^5.7.10",
+    "scrypt-kdf": "^2.0.1",
     "serialize-javascript": "^4.0.0",
     "svelte": "^3.24.0",
     "svelte-preprocess": "^4.0.10",
-    "template7": "^1.4.2"
+    "svelte-web3": "^0.1.4",
+    "template7": "^1.4.2",
+    "web3": "^1.2.11"
   },
   "devDependencies": {
     "@babel/core": "^7.11.0",

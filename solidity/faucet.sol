@@ -2,9 +2,9 @@ pragma solidity ^0.6.0;
 
 /**
  * SPDX-License-Identifier: MIT
- * Copyright (c) 2020 Kim Il Yong 
+ * Copyright (c) 2020 Kim Il Yong
  */
- 
+
 import "./safemath.sol";
 import "./signedsafemath.sol";
 import "./math.sol";
@@ -14,15 +14,15 @@ import "./math.sol";
  * @dev Set & change contract owner
  */
 contract OwnedContract {
-    
-    uint8 constant public version = 101;
+
+    uint8 constant public version = 102;
 
     // The creator of this contract
     address private owner;
 
     // event for EVM logging
     event OwnerSet(address indexed oldOwner, address indexed newOwner);
-    
+
     // modifier to check if caller is owner
     modifier isOwner() {
         // If the first argument of 'require' evaluates to 'false', execution terminates and all
@@ -33,7 +33,7 @@ contract OwnedContract {
         require(msg.sender == owner, "Caller is not owner");
         _;
     }
-    
+
     /**
      * @dev Set contract deployer as owner
      */
@@ -52,7 +52,7 @@ contract OwnedContract {
     }
 
     /**
-     * @dev Return owner address 
+     * @dev Return owner address
      * @return address of owner
      */
     function getOwner() external view returns (address) {
@@ -65,35 +65,37 @@ contract OwnedContract {
  * @dev Donate money to Developers in Need
  */
 contract Faucet is OwnedContract {
-    
+
     using SafeMath for uint;
+    using SafeMath for uint64;
     using SignedSafeMath for int;
-    
+
     event ReceiveDonation(address indexed donor, uint amount, uint donationnumber, uint timestamp);
     event GivenDonation(address indexed recipient, uint amount, uint donationnumber, uint timestamp);
     event WithdrawMoney(address indexed to, uint indexed amount);
-    
+
     struct Payment {
         uint amount;
         bool withdraw;
         uint timestamp;
     }
-    
+
     struct Balance {
         int totalBalance;
-        uint numPayments;
-        string name;
+        uint64 numPayments;
+        uint64 index;
+        byte[32] name;
         mapping(uint => Payment) payments;
     }
 
     uint private totalBalance;
-    
+
     address[] private Donors;
     address[] private Recipients;
-    
-    mapping(address => Balance) private Donations;    
+
+    mapping(address => Balance) private Donations;
     mapping(address => Balance) private Payments;
-    
+
     /**
      * @dev Set contract deployer as owner
      */
@@ -101,15 +103,15 @@ contract Faucet is OwnedContract {
         totalBalance = 0;
         //super;
     }
-    
+
     /**
      * @dev Store the address of a donor
      * @param _d address of donor
      * @return index of address
-     */
+
     function addDonor(address _d) internal returns (uint) {
         uint i;
-        for(i = 0; i < Donors.length; i++) {
+        for(i = 0; i < Donors.length && i < 100; i++) {
             if (Donors[i] == _d) {
                 return i;
             }
@@ -117,7 +119,7 @@ contract Faucet is OwnedContract {
         Donors.push(_d);
         return Donors.length - 1;
     }
-    
+    */
     /**
      * @dev Get the number of donors
      * @return amount of donors
@@ -125,7 +127,7 @@ contract Faucet is OwnedContract {
     function getDonorCount() public view returns (uint) {
         return Donors.length;
     }
-    
+
     /**
      * @dev Get the address of a donor
      * @return address of donor
@@ -143,31 +145,36 @@ contract Faucet is OwnedContract {
      * @return _numPayments
      * @return _name name of donor
      */
-    function getDonorByIndex(uint _i) public view returns (address _from, int _totalBalance, uint _numPayments, string memory _name) {
+    function getDonorByIndex(uint _i) public view returns (address _from, int _totalBalance, uint _numPayments, byte[32] memory _name) {
+        require(_i < 100, "Max Donor count is 100");
         require(_i < Donors.length, "Invalid Donor index");
-        
+        Balance memory balance;
+
         _from = Donors[_i];
-        _totalBalance = Donations[_from].totalBalance;
-        _numPayments = Donations[_from].numPayments;
-        _name = Donations[_from].name;
+        balance = Donations[_from];
+        _totalBalance = balance.totalBalance;
+        _numPayments = balance.numPayments;
+        _name = balance.name;
     }
 
     /**
      * @dev Store the address of a recipient
      * @param _r address of recipient
      * @return index of address
-     */
+
     function addRecipient(address _r) internal returns (uint) {
         uint i;
-        for(i = 0; i < Recipients.length; i++) {
+        for(i = 0; i < Recipients.length && i < 1000; i++) {
             if (Recipients[i] == _r) {
                 return i;
             }
         }
+        //Recipients.Delete;
         Recipients.push(_r);
         return Recipients.length - 1;
     }
-    
+    */
+
     /**
      * @dev Get the number of donors
      * @return amount of donors
@@ -175,7 +182,7 @@ contract Faucet is OwnedContract {
     function getRecipientsCount() public view returns (uint) {
         return Recipients.length;
     }
-    
+
     /**
      * @dev Get the address of a recipient
      * @return address of recipient
@@ -193,15 +200,15 @@ contract Faucet is OwnedContract {
      * @return _numPayments
      * @return _name name of recipient
      */
-    function getRecipientByIndex(uint _i) public view returns (address _recipient, int _totalBalance, uint _numPayments, string memory _name) {
+    function getRecipientByIndex(uint _i) public view returns (address _recipient, int _totalBalance, uint _numPayments, byte[32] memory _name) {
         require(_i < Recipients.length, "Invalid Recipient index");
-        
+
         _recipient = Recipients[_i];
         _totalBalance = Payments[_recipient].totalBalance;
         _numPayments = Payments[_recipient].numPayments;
         _name = Payments[_recipient].name;
     }
-    
+
     /**
      * @dev Return balance of contract
      * @return balance
@@ -209,7 +216,7 @@ contract Faucet is OwnedContract {
     function getBalance() public view returns (uint) {
         return address(this).balance;
     }
-    
+
     /**
      * @dev Return total calculated balance
      * @return uint balance
@@ -217,7 +224,7 @@ contract Faucet is OwnedContract {
     function getCalculatedBalance() public view returns (uint) {
         return totalBalance;
     }
-    
+
     /**
      * @dev Return Donations from Address
      * @param  _from Address
@@ -235,7 +242,7 @@ contract Faucet is OwnedContract {
     function getRecipientBalance(address _to) public view returns (int) {
         return Payments[_to].totalBalance;
     }
-    
+
     /**
      * @dev Return Donations count from Address
      * @param  _from Address
@@ -259,7 +266,7 @@ contract Faucet is OwnedContract {
      * @param  _from Address
      * @return name of donor
      */
-    function getDonorName(address _from) public view returns (string memory) {
+    function getDonorName(address _from) public view returns (byte[32] memory) {
         return Donations[_from].name;
     }
 
@@ -268,7 +275,7 @@ contract Faucet is OwnedContract {
      * @param  _to Address
      * @return name of recipient
      */
-    function getRecipientName(address _to) public view returns (string memory) {
+    function getRecipientName(address _to) public view returns (byte[32] memory) {
         return Payments[_to].name;
     }
 
@@ -276,7 +283,7 @@ contract Faucet is OwnedContract {
      * @dev Sets a donor name
      * @param  _name of donor
      */
-    function setDonorName(string memory _name) public {
+    function setDonorName(byte[32] memory _name) public {
         Donations[msg.sender].name = _name;
     }
 
@@ -284,7 +291,7 @@ contract Faucet is OwnedContract {
      * @dev Sets a recipients name
      * @param  _name of recipient
      */
-    function setRecipientName(string memory _name) public {
+    function setRecipientName(byte[32] memory _name) public {
         Payments[msg.sender].name = _name;
     }
 
@@ -298,7 +305,7 @@ contract Faucet is OwnedContract {
         _totalBalance = getDonorBalance(_from);
         _numPayments = getDonationCounts(_from);
     }
-    
+
     /**
      * @dev Return Recipient info
      * @param  _to Address
@@ -309,7 +316,7 @@ contract Faucet is OwnedContract {
         _totalBalance = getRecipientBalance(_to);
         _numPayments = getPaymentCounts(_to);
     }
-    
+
     /**
      * @dev Return Donation details
      * @param  _from Address
@@ -321,9 +328,9 @@ contract Faucet is OwnedContract {
     function getDonationDetails(address _from, uint32 _nr) public view returns (uint _amount, bool _withdraw, uint _timestamp) {
         _amount = Donations[_from].payments[_nr].amount;
         _withdraw = Donations[_from].payments[_nr].withdraw;
-        _timestamp = Donations[_from].payments[_nr].timestamp; 
+        _timestamp = Donations[_from].payments[_nr].timestamp;
     }
-    
+
     /**
      * @dev Return Payments details
      * @param  _to Address
@@ -335,9 +342,9 @@ contract Faucet is OwnedContract {
     function getPaymentDetails(address _to, uint32 _nr) public view returns (uint _amount, bool _withdraw, uint _timestamp) {
         _amount = Payments[_to].payments[_nr].amount;
         _withdraw = Payments[_to].payments[_nr].withdraw;
-        _timestamp = Payments[_to].payments[_nr].timestamp; 
+        _timestamp = Payments[_to].payments[_nr].timestamp;
     }
-    
+
     /**
      * @dev Delete the smart contract
      * @param _to address to send remaining money in the contract to
@@ -346,11 +353,11 @@ contract Faucet is OwnedContract {
         require(_to != address(0), "send to address is null");
         selfdestruct(_to);
     }
-    
+
     receive() external payable {
         Donation();
     }
-    
+
      /**
      * @dev called when contract receives funding
      */
@@ -358,22 +365,26 @@ contract Faucet is OwnedContract {
         require(msg.sender != address(0),  "address is null");
         require(msg.value > 0, "amount should be greater than 0");
         //require((Donations[msg.sender].numPayments + 1 > Donations[msg.sender].numPayments), "uint32 overflow");
-        
-        uint numPayments;
-        numPayments = Donations[msg.sender].numPayments.add(1);
-        
+
+        uint64 numPayments;
+        numPayments = Donations[msg.sender].numPayments.add64(uint64(1));
+        if (numPayments == 1) {
+            Donations[msg.sender].index = uint64(Donors.length);
+            Donors.push(msg.sender);
+        }
+
         Donations[msg.sender].totalBalance = Donations[msg.sender].totalBalance.add(int(msg.value));
         Donations[msg.sender].numPayments = numPayments;
         Donations[msg.sender].payments[numPayments].amount = msg.value;
         Donations[msg.sender].payments[numPayments].withdraw = false;
         Donations[msg.sender].payments[numPayments].timestamp = now;
-        
-        addDonor(msg.sender);
+
+        //addDonor(msg.sender);
         totalBalance = totalBalance.add(msg.value);
-        
+
         emit ReceiveDonation(msg.sender, msg.value, numPayments, now);
     }
-        
+
     /**
      * @dev Withdraw money from contract
      * @param _to address to send money to
@@ -384,57 +395,62 @@ contract Faucet is OwnedContract {
         require(int(_amount) <= Donations[_to].totalBalance, "withdraw amount higher than your Donations");
         require(_amount <= address(this).balance, "not enough contract funds");
         //require(Donations[_to].numPayments + 1 > Donations[_to].numPayments, "uint32 overflow");
-        uint numPayments;
-        numPayments = Donations[_to].numPayments.add(1);
-        
+        uint64 numPayments;
+        numPayments = Donations[_to].numPayments.add64(uint64(1));
+
         Donations[_to].totalBalance = Donations[_to].totalBalance.sub(int(_amount));
         Donations[_to].numPayments = numPayments;
         Donations[_to].payments[numPayments].amount = _amount;
         Donations[_to].payments[numPayments].withdraw = true;
         Donations[_to].payments[numPayments].timestamp = now;
-        
+
         totalBalance = totalBalance.sub(_amount);
-        
+
         _to.transfer(_amount);
         emit WithdrawMoney(_to, _amount);
     }
-    
+
     /**
      * @dev Request a donation from the faucet
      * @param _to address to send money to
      * @param _amount Amount of money to send
      */
     function requestDonation(address payable _to, uint _amount) public {
-        
+
         require(_to != address(0), "null address supplied");
         require(_amount <= address(this).balance, "not enough contract funds");
+        // allow only 1/10th of funds to pay out
+        require(_amount <= address(this).balance.div(10), "amount too high, maximum is one tenth of faucet funds");
 
         //bool AllowTransfer = true;
         uint timeLastTransfer = 0; // time of last request
-        
-        // check if the last payment is more than 24 hours ago
-        for(uint i = Payments[_to].numPayments; i > 0; i--) {
-            timeLastTransfer = Math.max(timeLastTransfer, Payments[_to].payments[i].timestamp);
-        }
-        if (timeLastTransfer > 0) {
+        uint64 numPayments;
+        numPayments = Payments[_to].numPayments.add64(1);
+        if (numPayments == 1) {
+
+            // new Recipient
+            Payments[_to].index = uint64(Recipients.length);
+            Recipients.push(_to);
+
+        } else {
+
+            // check if the last payment is more than 24 hours ago
+            for(uint i = Payments[_to].numPayments; i > 0; i--) {
+                timeLastTransfer = Math.max(timeLastTransfer, Payments[_to].payments[i].timestamp);
+            }
             if (timeLastTransfer > now.sub(60*60*24)) {
                 revert("Only one request per 24 hours is allowed");
             }
+
         }
-        
-        // allow only 1/10th of funds to pay out
-        require(_amount <= address(this).balance.div(10), "amount too high, maximum is one tenth of faucet funds");
-                
-        uint numPayments;
-        numPayments = Payments[_to].numPayments.add(1);
-        
+
         Payments[_to].totalBalance = Payments[_to].totalBalance.add(int(_amount));
         Payments[_to].numPayments = numPayments;
         Payments[_to].payments[numPayments].amount = _amount;
         Payments[_to].payments[numPayments].withdraw = true;
         Payments[_to].payments[numPayments].timestamp = now;
-        
-        addRecipient(_to);
+
+        //addRecipient(_to);
         totalBalance = totalBalance.sub(_amount);
         _to.transfer(_amount);
         emit GivenDonation(_to, _amount, numPayments, now);

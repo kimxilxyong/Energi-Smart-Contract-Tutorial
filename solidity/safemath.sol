@@ -32,6 +32,13 @@ library SafeMath {
         return c;
     }
 
+    function add64(uint64 a, uint64 b) internal pure returns (uint64) {
+        uint64 c = a + b;
+        require(c >= a, "SafeMath: addition overflow");
+
+        return c;
+    }
+
     /**
      * @dev Returns the subtraction of two unsigned integers, reverting on
      * overflow (when the result is negative).

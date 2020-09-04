@@ -157,9 +157,9 @@ width="10"
 
   const unsubscribe = global.subscribe(global => {
 
-  infoStyleLink = `color:var(--energi-color-text)`;
-  web3StyleLink = infoStyleLink;
-  scStyleLink = infoStyleLink;
+    infoStyleLink = `color:var(--energi-color-text)`;
+    web3StyleLink = infoStyleLink;
+    scStyleLink = infoStyleLink;
 
     if (global.info) {
       infoStyle = `color:var(--energi-color-green);`;

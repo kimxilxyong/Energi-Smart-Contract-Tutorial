@@ -6,6 +6,14 @@ img.pngColorNone {
   filter: invert(0%);
 }
 
+#logtextarea textarea
+{
+  color: var(--energi-color-yellow);
+  font-family: 'Ubuntu Mono';
+  font-weight: 400;
+  font-size: smaller;
+}
+
 a {
   color: var(--energi-color-green);
 }
@@ -39,6 +47,7 @@ strong {
   --f7-card-header-font-weight: 600;
 
   --energi-color-green: #00E676;
+  --energi-color-yellow: #acbb27;
   --energi-color-green-secondary: #69f0AE;
   --energi-color-text: #efe;
 
@@ -61,10 +70,6 @@ strong {
 .list .item-input-outline .item-floating-label {
   color: var(--energi-color-green);
 }*/
-
-
-
-
 
 .button-fill
 {
