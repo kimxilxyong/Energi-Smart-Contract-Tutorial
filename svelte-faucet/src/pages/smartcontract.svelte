@@ -22,21 +22,21 @@
 
 <script>
     import { NavLeft, NavTitle, Link, Page, Navbar, Card, CardHeader, CardContent, CardFooter } from 'framework7-svelte';
-    import { global } from '../js/stores.js';
+    import { visitedPages } from '../js/stores.js';
 
     function onShow() {
       console.log("OnShow smartcontract");
-      global.update(() => {
-        global.smartcontract = true;
-        global.web3 = false;
-        global.info = false;
-        return global;
+      visitedPages.update(() => {
+        visitedPages.smartcontract = true;
+        visitedPages.web3 = false;
+        visitedPages.info = false;
+        return visitedPages;
       });
     }
     function onHide() {
-        global.update(() => {
-            global.smartcontract = false;
-            return global;
+      visitedPages.update(() => {
+        visitedPages.smartcontract = false;
+            return visitedPages;
         });
     }
 </script>

@@ -7,28 +7,32 @@ let visitedSvelte = {
     smartcontract: false,
   };
 
-export const global = writable(visitedSvelte);
+export const visitedPages = writable(visitedSvelte);
+export const selectedAccount = writable("");
 
 
 export const getTime = () => {
-  let str = "";
 
-  let currentTime = new Date()
-  let hours = currentTime.getHours()
-  let minutes = currentTime.getMinutes()
-  let seconds = currentTime.getSeconds()
+  let currentTime = new Date();
+  let hours = currentTime.getHours();
+  let minutes = currentTime.getMinutes();
+  let seconds = currentTime.getSeconds();
 
   if (minutes < 10) {
-      minutes = "0" + minutes
+      minutes = "0" + minutes;
   }
   if (seconds < 10) {
-      seconds = "0" + seconds
+      seconds = "0" + seconds;
   }
-  str += hours + ":" + minutes + ":" + seconds + " ";
-  if(hours > 11){
-      str += "PM"
-  } else {
-      str += "AM"
-  }
-  return str;
-}
+  return hours + ":" + minutes + ":" + seconds;
+};
+
+export const scrollTo = (id) => {
+    //get the element to be scrolled
+    let sct = document.getElementById(id);
+    //make the parent to scroll into view, smoothly!
+    sct.scrollIntoView({block: "start", behavior: "smooth"});
+    console.log("Scroll ", id, sct);
+};
+
+

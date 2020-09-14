@@ -142,9 +142,14 @@ width="10"
     ListButton,
     BlockFooter
   } from 'framework7-svelte';
-
+  import Web3 from 'web3';
   import routes from '../js/routes';
-  import { global } from '../js/stores.js';
+  import { visitedPages } from '../js/stores.js';
+  import { setContext } from 'svelte';
+
+  // store the web3 object globally into a svelte context
+  const web3 = new Web3('http://localhost:8545');
+  setContext('web3', web3);
 
 
   let infoStyle = `color:var(--energi-color-text)`;
@@ -155,21 +160,21 @@ width="10"
   let web3StyleLink = infoStyleLink;
   let scStyleLink = infoStyleLink;
 
-  const unsubscribe = global.subscribe(global => {
+  const unsubscribe = visitedPages.subscribe(visitedPages => {
 
     infoStyleLink = `color:var(--energi-color-text)`;
     web3StyleLink = infoStyleLink;
     scStyleLink = infoStyleLink;
 
-    if (global.info) {
+    if (visitedPages.info) {
       infoStyle = `color:var(--energi-color-green);`;
       infoStyleLink = `color:var(--energi-color-green-secondary);`;
     }
-    if (global.web3) {
+    if (visitedPages.web3) {
       web3Style = `color:var(--energi-color-green);`;
       web3StyleLink = `color:var(--energi-color-green-secondary);`;
     }
-    if (global.smartcontract) {
+    if (visitedPages.smartcontract) {
       scStyle = `color:var(--energi-color-green);`;
       scStyleLink = `color:var(--energi-color-green-secondary);`;
     }

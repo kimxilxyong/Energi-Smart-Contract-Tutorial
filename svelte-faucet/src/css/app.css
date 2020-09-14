@@ -1,3 +1,6 @@
+.hidden {
+  display: none !important;
+}
 
 img.pngColorGreen {
   filter: invert(83%) sepia(14%) saturate(5968%) hue-rotate(90deg) brightness(89%) contrast(103%);
@@ -14,6 +17,25 @@ img.pngColorNone {
   font-size: smaller;
 }
 
+
+#yellow-mono-small textarea
+{
+  color: var(--energi-color-yellow);
+  font-family: 'Ubuntu Mono';
+  font-weight: 400;
+  font-size: smaller;
+}
+#yellow-mono-small div.item-inner
+{
+  color: var(--energi-color-yellow);
+  font-family: 'Ubuntu Mono';
+  font-weight: 400;
+  font-size: small;
+}
+
+
+
+
 a {
   color: var(--energi-color-green);
 }
@@ -22,6 +44,19 @@ strong {
   font-family: 'Open Sans';
   font-weight: 600;
 }
+
+
+/* Checked radio inner */
+.md label.item-radio input[type="radio"]:checked ~ .icon-radio:after, .md label.item-radio input[type="radio"]:checked ~ * .icon-radio:after, .md .radio input[type="radio"]:checked ~ .icon-radio:after
+{
+  background-color: var(--f7-radio-active-color, var(--energi-color-green));
+  transform: scale(1);
+}
+/* Checked radio outer , var(--f7-theme-color)); */
+.md label.item-radio input[type="radio"]:checked ~ .icon-radio, .md label.item-radio input[type="radio"]:checked ~ * .icon-radio, .md .radio input[type="radio"]:checked ~ .icon-radio {
+  border-color: var(--f7-radio-active-color);
+}
+
 
 /* Invert navigation bars to fill style #263238; */
 :root,
@@ -54,8 +89,11 @@ strong {
   --f7-theme-color-shade: #2cd048;
   --f7-theme-color-tint: #6ee081;
   --f7-input-focused-border-color: var(--energi-color-green);
+  /* Radio buttons local/remote*/
+  --f7-radio-extra-margin: 2px;
+  --f7-list-item-media-margin: 5px;
 
-  /*--f7-label-focused-text-color*/
+  /*--f7-label-focused-text-color: #2cd048; */
 }
 
 .item-input-outline.item-input-with-value,

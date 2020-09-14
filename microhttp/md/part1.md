@@ -10,16 +10,25 @@
 
  * Go into **EnergiHOME/bin**
 
+ * Alternativly the energi core node 3.0.6 is included in Energi-Smart-Contract-Tutorial/energi
+
  * Create a startup script or run directly: This will need several hours to download the testnet blockchain
+
 ``` bash
-  ./energi3 --testnet --verbosity 3 --rpccorsdomain "https://remix.ethereum.org" --vmdebug --rpc --rpcport 39796 --rpcaddr "127.0.0.1" --rpcvhosts "localhost" --rpcapi admin,web3,eth,debug,personal,net,energi
+  ./energi3 --testnet --verbosity 3 --rpccorsdomain "*" --rpcport 49796 --rpcaddr "127.0.0.1" --rpcvhosts "localhost" --rpc --rpcapi admin,web3,eth,debug,personal,net,energi
+  >_
 ```
+
 ### 2. Create account(s) using the Energi Wallet
+
 * [Download the Energi3 local App Wallet](https://docs.energi.software/en/downloads/myenergiwallet)
+
 * Change Network to **Testnet!**
+
 * Generate three Keystore files (3 Accounts)
 
 ![Wallet](https://i.ibb.co/yh2hRzq/Create-Wallet.png)
+
 
 * Copy the keystore files to ```~/.energicore3/testnet/keystore/```
 
@@ -68,6 +77,9 @@ at block: 145451 (Wed, 20 May 2020 15:46:44 CEST)
   eth.accounts[2]: 	0x17fa844a3f96f2a8ae55e49c0e8ccf1bc628f90c 	balance: 97.949481646 NRG
   Total balance: 998.8715276163999 NRG
 true
+```
+
+``` js
 > personal.unlockAccount("0x7757a1f517d4680dba5d0ae9c984d3d394cc4a30",null,0,false)
 Unlock account 0x7757a1f517d4680dba5d0ae9c984d3d394cc4a30
 Passphrase:
@@ -76,12 +88,14 @@ true
 >
 ```
 
-* The accounts should now be: <```status: "Unlocked"```>, you can later use them to deploy smart contracts.
+* The accounts should now be: <```status: "Unlocked"```>, you can later use them to deploy or interact with smart contracts.
 
 ### 4. Get some money!
 
-* Go to the faucet and beg for some tNRGs
-*
+* Go to the faucet and apply for some tNRGs
+
+[Energi3 Faucet](https://faucet.energi.software)
+
 
 ### 5. Setup an easy to use solidity IDE
  * Remix is available in two versions: As a Web App or a local desktop App. I suggest using the local Version, but both do work.

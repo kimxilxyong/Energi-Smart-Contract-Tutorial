@@ -31,20 +31,20 @@
 
   <script>
     import { NavLeft, NavTitle, Link, Page, Navbar, Card, CardHeader, CardContent } from 'framework7-svelte';
-    import { global } from '../js/stores.js';
+    import { visitedPages } from '../js/stores.js';
 
     function onShow() {
-        global.update(() => {
-            global.info = true;
-            global.web3 = false;
-            global.smartcontract = false;
-            return global;
+        visitedPages.update(() => {
+            visitedPages.info = true;
+            visitedPages.web3 = false;
+            visitedPages.smartcontract = false;
+            return visitedPages;
         });
     }
     function onHide()  {
-        global.update(() => {
-            global.info = false;
-            return global;
+        visitedPages.update(() => {
+            visitedPages.info = false;
+            return visitedPages;
         });
     }
   </script>
