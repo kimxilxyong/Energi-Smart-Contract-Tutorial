@@ -1,11 +1,54 @@
 let Web3 = require('web3');
-let web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:39796'));
+let web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:49796'));
+
+web3.eth.getBalance(acc.address).then((res) => console.log(web3.utils.fromWei(res, "ether")));
 
 
 web3.eth.getBalance("0x7757a1f517d4680dba5d0ae9c984d3d394cc4a30").then(console.log);
 
 web3.eth.sendTransaction({from: "0x771ddb07222a1f9442c91cf04f64f3164771bb62", to: "0x7757a1f517d4680dba5d0ae9c984d3d394cc4a30", value: web3.utils.toWei("1","ether")});
 
+
+
+
+function balance(index) {
+	let acc = web3.eth.accounts.wallet[index];
+	//web3.eth.getBalance(acc.address).then((res) => console.log(web3.utils.fromWei(res, "ether"))).catch(console.log);
+	//web3.eth.getBalance(acc.address).then((res) => console.log(web3.utils.fromWei(res, "ether"))).catch(console.log);
+	console.log(currentValue);
+	console.log(index);
+	console.log(arr);
+};
+
+const f10 = async function() {
+	for (let i = 0; i < web3.eth.accounts.wallet.length; i++) {
+
+		try {
+		   let acct = web3.eth.accounts.wallet[i];
+		   if (acct.privateKey != undefined) {
+				let bal = await web3.eth.getBalance(acct.address);
+				console.log("***************** Promise resolved:", i);
+				console.log(acct.privateKey);
+				console.log(acct.address);
+				console.log(bal);
+				console.log(web3.utils.fromWei(bal, "ether"));
+		   }
+		}
+		catch (err) {
+			console.log('getBalance', err);
+		};
+	};
+};
+
+async function logFetch(url) {
+	try {
+	  const response = await fetch(url);
+	  console.log(await response.text());
+	}
+	catch (err) {
+	  console.log('fetch failed', err);
+	}
+  }
 
 //call version
 web3.eth.call({from: '0x7757a1f517d4680dba5d0AE9C984d3D394cC4a30', to:'0x7A5c0AAAa0F92106a59EbE2F8D26af289b0ad104', data:'0x54fd4d50'}).then(console.log);

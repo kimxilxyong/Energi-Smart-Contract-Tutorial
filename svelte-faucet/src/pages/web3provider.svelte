@@ -57,14 +57,14 @@
               value={web3URL}
               onInputClear={ () => {web3URL = "";}}
               onBlur={ e => urlChanged(e)}
-              style="vertical-align: middle;margin-top:3%;"
+              style="vertical-align:top;margin-top:1vh;"
             >
             <!-- <i class="icon demo-list-icon" slot="media" />   margin-top:24px -->
             </ListInput>
           </List>
         </Col>
         <Col width="20">
-          <Button fill raised on:click={onConnectUrl} style="vertical-align: middle;margin-top:21%;bgcolor:var(--energi-color-green)">Connect</Button>
+          <Button fill raised on:click={ConnectUrl} style="vertical-align:top;margin-top:2.8vh;bgcolor:var(--energi-color-green)">Connect</Button>
         </Col>
       </Row>
       <Row noGap>
@@ -135,20 +135,39 @@
           </AccordionItem>
           </ListItem>
           <ListItem accordionItem title="Private Key" onClick={ () => {if (providerOpen) {providerOpen = false;}}}>
-            <AccordionItem opened={privateKeyOpen}>
+          <AccordionItem opened={privateKeyOpen}>
             <AccordionContent>
-              <ListInput
-              outline
-              label="Energi Privatekey"
-              floatingLabel
-              type="text"
-              clearButton
-              value={privateKey}
-              onInputClear={ () => {privateKey = "";}}
-              onBlur={ e => privateKeyChanged(e)}
-            >
-              <!-- <i class="icon demo-list-icon" slot="media" />   margin-top:24px -->
-            </ListInput>
+              <Row noGap style="display:flex;flex-direction: row;justify-content: flex-end;align-items:center;">
+                <Col width="85">
+                  <ListInput
+                    outline
+                    label="Energi Privatekey"
+                    floatingLabel
+                    type="text"
+                    placeholder="Enter private key"
+                    info="Hexnumber starting with 0x"
+                    errorMessage="Only hexnumbers starting with 0x please!"
+                    required
+                    validate
+                    pattern="0x?[a-f,0-9]*"
+                    clearButton
+                    value={privateKey}
+                    onInputClear={ () => {privateKey = "";}}
+                    onBlur={ e => onPrivateKeyChanged(e)}
+                    onValidate={(isValid) => checkPrivateKeyValid(isValid)}
+                    inputId="inputIDPrivateKey"
+                  >
+                    <!-- <i class="icon demo-list-icon" slot="media" />   margin-top:24px
+                    <i class="f7-icons size-28" slot="content-end">bag</i> -->
+                  </ListInput>
+                </Col>
+                <Col width="15">
+                  <Button fill raised on:click={ScanPrivateKey} style="display:flex;align:center;align-items:center;margin-bottom:10%;margin-right:15%;bgcolor:var(--energi-color-green)">
+                    <i class="f7-icons size-24" style="margin-right: 5%">barcode_viewfinder</i>
+                    Scan
+                  </Button>
+                </Col>
+              </Row>
             </AccordionContent>
           </AccordionItem>
           </ListItem>
@@ -172,20 +191,6 @@
                           ></ListItem>
                         {/each}
                       {/if}
-
-                      <ListInput
-                        outline
-                        label="Energi Account"
-                        floatingLabel
-                        type="text"
-                        clearButton
-                        value={$selectedAccount}
-                        onInputClear={ () => {$selectedAccount = "";}}
-                        onBlur={ e => accountSelectedChanged(e)}
-                      >
-                        <!-- <i class="icon demo-list-icon" slot="media" />   margin-top:24px -->
-                      </ListInput>
-
                   </List>
                 </Col>
               </Row>
@@ -193,8 +198,29 @@
             </AccordionContent>
           </AccordionItem>
           </ListItem>
-        </List>
 
+
+          <ListInput
+            outline
+            label="Energi Account"
+            floatingLabel
+            type="text"
+            clearButton
+            style="font-family: 'Ubuntu Mono';"
+            value={$selectedAccount}
+            onInputClear={ () => {$selectedAccount = "";}}
+            onBlur={ e => accountSelectedChanged(e)}
+            inputId="inputIDSelectedAddress"
+          >
+            <!-- <i class="icon demo-list-icon" slot="media" />   margin-top:24px -->
+          </ListInput>
+
+          <Button fill raised on:click={QueryAccountInfo} style="display:flex;align:center;align-items:center;margin-bottom:10%;margin-right:15%;bgcolor:var(--energi-color-green)">
+            <i class="f7-icons size-24" style="margin-right: 5%">cloud-download</i>
+            Query Info
+          </Button>
+
+        </List>
 
       </CardContent>
       <CardFooter><a href="https://www.google.com/search?q=web3+create+provider"  external target="_blank">More Information</a>
@@ -230,7 +256,7 @@
 </Page>
 
   <script>
-    import { f7, AccordionItem, AccordionContent, NavLeft, NavTitle, Link, Row, Col, Card, CardHeader, CardContent, CardFooter, Page, Navbar, ListItem, List, ListInput, Button } from 'framework7-svelte';
+    import { f7, AccordionItem, AccordionContent, NavLeft, NavTitle, Link, Row, Col, Card, CardHeader, CardContent, CardFooter, Page, Navbar, ListItem, List, Input, ListInput, Button } from 'framework7-svelte';
     import { visitedPages, selectedAccount, getTime, scrollTo } from '../js/stores.js';
     //let Web3 = require('web3');
     //import { ethereum, chainName, isListening, nativeCurrency, selectedAccount, whenReady } from 'svelte-web3';
@@ -254,6 +280,8 @@
     let privateKey;
     let files;
     let password;
+    let web3Error = '';
+
     $: {
         if (files && files[0]) {
             let keyfile = files[0];
@@ -319,10 +347,46 @@
       console.log("passwordChanged(e): ", e.target.value );
       password = e.target.value;
     }
-    function privateKeyChanged(e) {
-      console.log("privateKeyChanged(e): ", e.target.value );
-      privateKey = e.target.value;
+
+    function checkPrivateKeyValid(isValid) {
+      console.log("Valid?", isValid);
     }
+    function onPrivateKeyChanged(c) {
+      console.log("Key: ", c);
+      privateKey = c.target.value;
+    }
+
+    function ScanPrivateKey() {
+
+      f7.dialog.preloader('web3.eth.accounts.privateKeyToAccount (' + privateKey) + ')';
+
+      console.log("ConvertPrivateKey: ", privateKey );
+
+      try {
+        const account = web3.eth.accounts.privateKeyToAccount(privateKey, true);
+        web3.eth.accounts.wallet.add(account);
+        web3.eth.defaultAccount = account.address;
+        $selectedAccount = web3.eth.defaultAccount;
+        console.log("Address: ${account.address}");
+        console.log("Account: ", account);
+        logText = logText + '\n' + getTime() + ": Address " + account.address;
+        f7.dialog.close();
+      }
+      catch (e) {
+        f7.dialog.close();
+        web3Error = e;
+        console.log('catch:', e);
+        logText = logText + `\n${getTime()}: ${e}`;
+      }
+    }
+
+    function QueryAccountInfo() {
+
+      console.log(web3.eth.accounts.wallet);
+    }
+
+
+
 
     function unlockKeystore() {
       // open the wallet in web3
@@ -335,8 +399,7 @@
     }
 
 
-    function onConnectUrl() {
-      let web3Error = '';
+    function ConnectUrl() {
       let callsFinished = 0;
       let complete = 2;
 

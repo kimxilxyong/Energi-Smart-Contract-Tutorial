@@ -4,17 +4,18 @@
 
  
 #####################################################################
-# Description: This script is to start energi core in testmode as a web3 provider for remix desktop IDE
+# Description: This script is to start energi core in testmode as a provider for local browser Web3.js
 #
-# Download Remix
-# https://github.com/ethereum/remix-desktop/releases
+# Download Web3
+# npm install web3
 #
-# Attach Remix to the local energi3 testnode
-# DEPLOY & RUN TRANSACTIONS -> ENVIRONMENT -> Web3 Provider -> http://localhost:39796 -> OK
+#
+#  let p = web3.setProvider(new Web3.providers.HttpProvider("http://localhost:49796"));
+#  console.log('SetProvider: ', p);
 #
 #####################################################################
 
 
-./energi3 --testnet --verbosity 3 --rpccorsdomain "*" --vmdebug --rpc --rpcport 49796 --rpcaddr "127.0.0.1" --rpcvhosts "localhost" --rpcapi admin,web3,eth,debug,personal,net,energi console
+./energi3 --testnet --verbosity 3 --vmdebug --preload utils.js,peers.js --rpccorsdomain "*" --rpc --rpcaddr "127.0.0.1" --rpcvhosts "localhost" --rpcapi admin,web3,eth,debug,personal,net,energi console
 
 

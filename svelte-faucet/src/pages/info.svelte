@@ -21,16 +21,29 @@
     <Card outline>
         <CardHeader>What is needed ?</CardHeader>
         <CardContent>
-            <p>You need an Energi account inside a wallet to store NRGs into it. <b style="color:red;">ATTENTION:</b> Make sure you are on the <b style="color:red;">TESTNET</b> (setting upper right).</p>
-            <p><a href="https://wallet.energi.network/generate/keystore" external target="_blank">Create a Wallet</a></p>
+            <p>You need an Energi account inside a wallet to store NRGs into it. <b style="color:red;">ATTENTION:</b> Make sure you are on the <b style="color:red;">TESTNET</b> (setting inside the wallet at the upper right).</p>
+            <p>
+                <Link href="https://wallet.energi.network/generate/keystore" external target="_blank">Create a Wallet</Link>
+            </p>
             <p>There are several options to create a wallet, the best is a password encrypted keystore file.
-            From the wallet you get a public address (eg "0x165gue5dfiugnlkjsvfguhiwsdeft5676wegbuhj"), this address will receive and hold the NRGs. Its like your bank account number.</p>
+               From the wallet you get a public address (eg</p>
+            <p style="color:var(--energi-color-yellow);font-family:'Ubuntu Mono';">"0x771dDB07222A1f9442C91CF04f64F3164771BB62"</p>
+            <p> ), this address will receive and hold your NRGs. Its like your bank account number.</p>
         </CardContent>
+        <CardFooter>
+            <Link href="https://www.google.com/search?q=web3+create+provider" external target="_blank">More Information</Link>
+
+            <div style="display:flex;flex-direction: row;justify-content: flex-end;align-items:center;">
+              <Button fill raised href="/web3provider/" view=".view-main" panelClose style="display:flex;align:center;align-items:center;padding-left:15%;bgcolor:var(--energi-color-green)">Next
+                <i class="f7-icons size-20" style="margin-left: 3%">arrowtriangle_right</i>
+              </Button>
+            </div>
+        </CardFooter>
     </Card>
 </Page>
 
   <script>
-    import { NavLeft, NavTitle, Link, Page, Navbar, Card, CardHeader, CardContent } from 'framework7-svelte';
+    import { CardFooter, Button, NavLeft, NavTitle, Link, Page, Navbar, Card, CardHeader, CardContent } from 'framework7-svelte';
     import { visitedPages } from '../js/stores.js';
 
     function onShow() {

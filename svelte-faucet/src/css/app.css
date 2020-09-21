@@ -17,23 +17,39 @@ img.pngColorNone {
   font-size: smaller;
 }
 
+/* Choose account accordion title color green */
+li.accordion-item.accordion-item-opened div.item-title
+{
+  color: var(--energi-color-green);
+}
+li.accordion-item div.item-title
+{
+  color: var(--energi-color-green-secondary);
+}
 
 #yellow-mono-small textarea
 {
   color: var(--energi-color-yellow);
   font-family: 'Ubuntu Mono';
   font-weight: 400;
-  font-size: smaller;
+  font-size: small;
+  /*font-size: smaller;*/
 }
-#yellow-mono-small div.item-inner
+#yellow-mono-small .item-radio div.item-title
 {
   color: var(--energi-color-yellow);
   font-family: 'Ubuntu Mono';
   font-weight: 400;
-  font-size: small;
+  /*font-size: small;*/
 }
 
-
+#inputIDPrivateKey,
+#inputIDSelectedAddress
+{
+  font-family: 'Ubuntu Mono';
+  font-weight: 400;
+  font-size: small;
+}
 
 
 a {
