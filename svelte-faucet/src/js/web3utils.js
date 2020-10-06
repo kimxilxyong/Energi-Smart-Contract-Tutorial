@@ -1,27 +1,33 @@
-import Web3 from 'web3';
-import { getContext } from 'svelte';
-const web3 = getContext('web3');
+/* SPDX-License-Identifier: MIT
+   Copyright (c) 2020 Kim Il Yong */
 
-async function listWallets() {
-    try {
-        const result = await sendRPC_personal_listWallets();
-        return result;
-    } catch (e) {
-        return e;
-    }
-}
+//import Web3 from 'web3';
 
-function sendRPC_personal_listWallets() {
+export const listWallets = async (web3) => {
+  try {
+    const result = await sendRPC_personal_listWallets(web3);
+    return result;
+  } catch (e) {
+    return e;
+  }
+};
 
-    return new Promise((resolve, reject) => {
-
-        web3.currentProvider.send({ method: "personal_listWallets", params: [], jsonrpc: "2.0", id: new Date().getTime() },
-            function (error, result) { if (error) { reject(error); } else { resolve(result); } });
-    }
+function sendRPC_personal_listWallets(web3) {
+  return new Promise((resolve, reject) => {
+    web3.currentProvider.send(
+      {
+        method: "personal_listWallets",
+        params: [],
+        jsonrpc: "2.0",
+        id: new Date().getTime(),
+      },
+      function (error, result) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      }
     );
+  });
 }
-
-listWallets().then(console.log);
-
-
-

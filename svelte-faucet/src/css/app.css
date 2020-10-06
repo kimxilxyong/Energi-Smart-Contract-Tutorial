@@ -1,78 +1,148 @@
+/* SPDX-License-Identifier: MIT
+   Copyright (c) 2020 Kim Il Yong */
+
+/* Your app custom styles here */
+
+.div-flex-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.div-flex-item-dynamic {
+  flex: 1 1 100%;
+}
+.div-flex-item-fixed {
+  flex: 0 0 0%;
+}
+.button-small {
+  min-width: 30px;
+  max-width: 35px;
+}
+.button-normal {
+  min-width: 150px;
+  max-width: 155px;
+}
+.mt5 {
+  margin-top: 5px;
+}
+.mb5 {
+  margin-bottom: 5px;
+}
+.mb10 {
+  margin-bottom: 10px;
+}
+.pl10 {
+  padding-left: 10px;
+}
+.pr10 {
+  padding-right: 10px;
+}
+
 .hidden {
   display: none !important;
+}
+
+#REMOVEDINPUT {
+  width: 0;
+  height: 0;
 }
 
 img.pngColorGreen {
   filter: invert(83%) sepia(14%) saturate(5968%) hue-rotate(90deg) brightness(89%) contrast(103%);
 }
+
+img.pngColorRed {
+  filter: invert(30%) sepia(39%) saturate(6725%) hue-rotate(344deg) brightness(96%) contrast(119%);
+}
 img.pngColorNone {
   filter: invert(0%);
 }
 
-#logtextarea textarea
-{
+#logtextarea textarea {
   color: var(--energi-color-yellow);
-  font-family: 'Ubuntu Mono';
+  font-family: "Ubuntu Mono";
   font-weight: 400;
   font-size: smaller;
 }
 
-/* Choose account accordion title color green */
-li.accordion-item.accordion-item-opened div.item-title
-{
-  color: var(--energi-color-green);
-}
-li.accordion-item div.item-title
-{
-  color: var(--energi-color-green-secondary);
-}
-
-#yellow-mono-small textarea
-{
+#yellow-mono-small textarea {
   color: var(--energi-color-yellow);
-  font-family: 'Ubuntu Mono';
+  font-family: "Ubuntu Mono";
   font-weight: 400;
   font-size: small;
   /*font-size: smaller;*/
 }
-#yellow-mono-small .item-radio div.item-title
-{
+#yellow-mono-small .item-radio div.item-title {
   color: var(--energi-color-yellow);
-  font-family: 'Ubuntu Mono';
-  font-weight: 400;
-  /*font-size: small;*/
-}
-
-#inputIDPrivateKey,
-#inputIDSelectedAddress
-{
-  font-family: 'Ubuntu Mono';
+  font-family: "Ubuntu Mono";
   font-weight: 400;
   font-size: small;
 }
 
+#grey-mono-small .item-radio div.item-title {
+  color: var(--energi-color-grey);
+  font-family: "Ubuntu Mono";
+  font-weight: 400;
+  font-size: small;
+}
+
+#inputIDPrivateKey,
+#inputIDSelectedAddress {
+  font-family: "Ubuntu Mono";
+  font-weight: 400;
+  font-size: normal;
+}
 
 a {
   color: var(--energi-color-green);
 }
 b,
 strong {
-  font-family: 'Open Sans';
+  font-family: "Open Sans";
   font-weight: 600;
 }
 
-
 /* Checked radio inner */
-.md label.item-radio input[type="radio"]:checked ~ .icon-radio:after, .md label.item-radio input[type="radio"]:checked ~ * .icon-radio:after, .md .radio input[type="radio"]:checked ~ .icon-radio:after
-{
+.md label.item-radio input[type="radio"]:checked ~ .icon-radio:after,
+.md label.item-radio input[type="radio"]:checked ~ * .icon-radio:after,
+.md .radio input[type="radio"]:checked ~ .icon-radio:after {
   background-color: var(--f7-radio-active-color, var(--energi-color-green));
   transform: scale(1);
 }
 /* Checked radio outer , var(--f7-theme-color)); */
-.md label.item-radio input[type="radio"]:checked ~ .icon-radio, .md label.item-radio input[type="radio"]:checked ~ * .icon-radio, .md .radio input[type="radio"]:checked ~ .icon-radio {
+.md label.item-radio input[type="radio"]:checked ~ .icon-radio,
+.md label.item-radio input[type="radio"]:checked ~ * .icon-radio,
+.md .radio input[type="radio"]:checked ~ .icon-radio {
   border-color: var(--f7-radio-active-color);
 }
 
+/* Choose account accordion title color green */
+li.accordion-item.accordion-item-opened > a.item-link div.item-title {
+  color: var(--energi-color-green);
+}
+li.accordion-item > a.item-link div.item-title {
+  color: var(--energi-color-green-secondary);
+}
+
+.item-input-outline.item-input-with-value,
+.item-input-outline.item-input-focused .item-label.item-floating-label {
+  color: var(--energi-color-green);
+}
+
+/*
+.item-input-with-value .item-floating-label {
+  color: var(--energi-color-green);
+}
+*/
+
+.item-input-outline.item-input-focused .item-input-wrap:after {
+  border-color: var(
+    --f7-input-outline-focused-border-color,
+    var(--energi-color-green)
+  );
+}
 
 /* Invert navigation bars to fill style #263238; */
 :root,
@@ -81,25 +151,26 @@ strong {
   --f7-bars-bg-color: var(--f7-theme-color);
   --f7-bars-bg-color-rgb: var(--f7-theme-color-rgb);
   --f7-bars-translucent-opacity: 0.9;
-  --f7-bars-text-color: #fff;
-  --f7-bars-link-color: #fff;
-  --f7-navbar-subtitle-text-color: rgba(255,255,255,0.85);
+  --f7-bars-text-color: var(--energi-color-text);
+  --f7-bars-link-color: var(--energi-color-text);
+  --f7-navbar-subtitle-text-color: rgba(255, 255, 255, 0.85);
   --f7-bars-border-color: transparent;
-  --f7-tabbar-link-active-color: #fff;
-  --f7-tabbar-link-inactive-color: rgba(255,255,255,0.54);
+  --f7-tabbar-link-active-color: var(--energi-color-text);
+  --f7-tabbar-link-inactive-color: rgba(255, 255, 255, 0.54);
   --f7-sheet-border-color: transparent;
-  --f7-tabbar-link-active-border-color: #fff;
+  --f7-tabbar-link-active-border-color: var(--energi-color-text);
 
   /*--f7-appbar-app-offset: 150px; */
   --f7-appbar-height: 96px;
 
-  --f7-font-family: 'Open Sans', Roboto, Helvetica, FreeSans, sans-serif;
+  --f7-font-family: "Open Sans", Roboto, Helvetica, FreeSans, sans-serif;
   --f7-navbar-title-font-weight: 600;
   --f7-card-header-font-weight: 600;
 
-  --energi-color-green: #00E676;
+  --energi-color-green: #00e676;
   --energi-color-yellow: #acbb27;
-  --energi-color-green-secondary: #69f0AE;
+  --energi-color-green-secondary: #69f0ae;
+  --energi-color-grey: #939093;
   --energi-color-text: #efe;
 
   --f7-theme-color-shade: #2cd048;
@@ -112,30 +183,22 @@ strong {
   /*--f7-label-focused-text-color: #2cd048; */
 }
 
-.item-input-outline.item-input-with-value,
-.item-input-outline.item-input-focused > .item-label.item-floating-label {
-  color: var(--energi-color-green);
-}
-.list .item-input-with-value .item-floating-label
-{
-  color: var(--energi-color-green);
-}
-/*
-.list .item-input-outline .item-floating-label {
-  color: var(--energi-color-green);
-}*/
-
-.button-fill
-{
---f7-button-text-color: var(--energi-color-text);
---f7-button-pressed-text-color: var(--f7-button-text-color, var(--f7-theme-color));
-/*--f7-button-pressed-bg-color: rgba(var(--f7-theme-color-rgb), .15);*/
---f7-button-pressed-bg-color: var(--f7-button-fill-pressed-bg-color, var(--f7-theme-color-shade));
---f7-button-border-color: var(--energi-color-green);
---f7-button-fill-text-color: var(--energi-color-text);
---f7-button-fill-bg-color: var(--energi-color-green);
---f7-button-outline-border-color: var(--energi-color-green);
---f7-button-fill-pressed-bg-color: var(--energi-color-green-secondary);
+.button-fill {
+  --f7-button-text-color: var(--energi-color-text);
+  --f7-button-pressed-text-color: var(
+    --f7-button-text-color,
+    var(--f7-theme-color)
+  );
+  /*--f7-button-pressed-bg-color: rgba(var(--f7-theme-color-rgb), .15);*/
+  --f7-button-pressed-bg-color: var(
+    --f7-button-fill-pressed-bg-color,
+    var(--f7-theme-color-shade)
+  );
+  --f7-button-border-color: var(--energi-color-green);
+  --f7-button-fill-text-color: var(--energi-color-text);
+  --f7-button-fill-bg-color: var(--energi-color-green);
+  --f7-button-outline-border-color: var(--energi-color-green);
+  --f7-button-fill-pressed-bg-color: var(--energi-color-green-secondary);
 }
 
 .appbar,
@@ -147,8 +210,8 @@ strong {
   --f7-touch-ripple-color: var(--f7-touch-ripple-white);
   --f7-link-highlight-color: var(--f7-link-highlight-white);
   --f7-button-text-color: #fff;
-  --f7-button-pressed-bg-color: rgba(255,255,255,0.1);
-  --f7-font-family: 'Open Sans', Roboto, Helvetica, FreeSans, sans-serif;
+  --f7-button-pressed-bg-color: rgba(255, 255, 255, 0.1);
+  --f7-font-family: "Open Sans", Roboto, Helvetica, FreeSans, sans-serif;
 }
 .navbar-large-transparent,
 .navbar-large.navbar-transparent {
@@ -176,8 +239,8 @@ strong {
   top: 0;
   height: 100%;
   width: 1px;
-  background: rgba(0,0,0,0.1);
-  content: '';
+  background: rgba(0, 0, 0, 0.1);
+  content: "";
   z-index: 6000;
 }
 
@@ -201,8 +264,7 @@ strong {
   top: 0;
   height: 100%;
   width: 1px;
-  background: rgba(0,0,0,0.1);
-  content: '';
+  background: rgba(0, 0, 0, 0.1);
+  content: "";
   z-index: 6000;
 }
-

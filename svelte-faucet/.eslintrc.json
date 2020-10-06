@@ -1,34 +1,65 @@
 {
-    "env": {
-        "browser": true,
-        "es2017": true
-    },
-    "parserOptions": {
-        "ecmaVersion": 2017,
-        "sourceType": "module"
-    },
-    "extends": [
-        "eslint:recommended"
-    ],
-    "plugins": [
-        "svelte3"
-    ],
-    "overrides": [
-        {
-            "files": [
-                "**/*.svelte"
-            ],
-            "processor": "svelte3/svelte3"
-        }
-    ],
-    "ignorePatterns": ["build/"],
-    "rules": {
-        "no-var": "error",
-        "semi": "error",
-        "max-params": [
-            "error",
-            4
-        ],
-        "eqeqeq": "error"
+  "env": {
+    "browser": true,
+    "es2020": true
+  },
+  "parserOptions": {
+    "severity": 1,
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "extends": [
+    "eslint:recommended"
+  ],
+  "plugins": [
+    "svelte3",
+    "prettier"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "**/*.svelte",
+        "**/*.js"
+      ],
+      "processor": "svelte3/svelte3"
     }
+  ],
+  "ignorePatterns": ["build/"],
+  "rules": {
+    "no-var": "error",
+    "semi": "error",
+    "max-params": [
+      "error",
+      4
+    ],
+    "eqeqeq": "error",
+    "prefer-spread": 1,
+    "template-curly-spacing": [
+      "error",
+      "never"
+    ],
+    "padded-blocks": [
+      "error",
+      {
+        "blocks": "never"
+      }
+    ],
+    "max-len": [
+      "error",
+      {
+        "code": 250,
+        "tabWidth": 4,
+        "ignoreTrailingComments": true,
+        "comments": 200
+      }
+    ],
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
+    "implicit-arrow-linebreak": [
+      "error",
+      "beside"
+    ]
+  }
 }

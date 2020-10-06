@@ -35,7 +35,7 @@
 
             <div style="display:flex;flex-direction: row;justify-content: flex-end;align-items:center;">
               <Button fill raised href="/web3provider/" view=".view-main" panelClose style="display:flex;align:center;align-items:center;padding-left:15%;bgcolor:var(--energi-color-green)">Next
-                <i class="f7-icons size-20" style="margin-left: 3%">arrowtriangle_right</i>
+                <i class="f7-icons size-20" style="margin-left: 5px">arrowtriangle_right</i>
               </Button>
             </div>
         </CardFooter>
