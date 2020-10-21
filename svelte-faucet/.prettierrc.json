@@ -1,8 +1,16 @@
 {
-  "svelteSortOrder" : "markup-scripts-styles",
+  "svelteSortOrder": "scripts-styles-markup",
   "svelteStrictMode": true,
   "svelteBracketNewLine": true,
-  "svelteAllowShorthand": false,
-  "printWidth": 260,
+  "svelteAllowShorthand": true,
+  "svelteIndentScriptAndStyle": true,
+  "printWidth": 160,
   "tabWidth": 4,
+  "quoteProps": "consistent",
+  "bracketSpacing": false,
+  "jsxBracketSameLine": true,
+  "arrowParens": "avoid",
+  "insertPragma": true,
+  "proseWrap": "never",
+  "embeddedLanguageFormatting": "off"
 }

@@ -24,8 +24,21 @@
   min-width: 150px;
   max-width: 155px;
 }
+.button-larger {
+  min-width: 190px;
+  max-width: 205px;
+}
 .mt5 {
   margin-top: 5px;
+}
+.mt10 {
+  margin-top: 10px;
+}
+.mt18 {
+  margin-top: 18px;
+}
+.mt20 {
+  margin-top: 20px;
 }
 .mb5 {
   margin-bottom: 5px;
@@ -89,10 +102,19 @@ img.pngColorNone {
 }
 
 #inputIDPrivateKey,
-#inputIDSelectedAddress {
+#inputIDSelectedAddress,
+#mono-small,
+.mono-small {
   font-family: "Ubuntu Mono";
   font-weight: 400;
-  font-size: normal;
+  font-size: small;
+}
+
+.list #small .item-title ,
+.list .small .item-title {
+  font-family: "Open Sans";
+  font-weight: 400;
+  font-size: small;
 }
 
 a {
@@ -102,6 +124,31 @@ b,
 strong {
   font-family: "Open Sans";
   font-weight: 600;
+}
+
+/* Error Popup*/
+@media (min-height: 630px) and (min-width: 630px) {
+  #ErrorPopup:not(.popup-tablet-fullscreen).modal-in {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (min-height: 630px) and (min-width: 630px) {
+  #ErrorPopup:not(.popup-tablet-fullscreen) {
+    --f7-safe-area-top: 0px;
+    --f7-safe-area-bottom: 0px;
+    --f7-popup-tablet-width: 400px;
+    --f7-popup-tablet-height: 200px;
+    width: --f7-popup-tablet-width;
+    height: --f7-popup-tablet-height;
+    left: 50%;
+    top: 50%;
+    margin-left: calc(-1 * var(--f7-popup-tablet-width) / 2);
+    margin-top: calc(-1 * var(--f7-popup-tablet-height) / 2);
+    transform: translate3d(0, 100vh, 0);
+    box-shadow: var(--f7-popup-box-shadow);
+    border-radius: var(--f7-popup-tablet-border-radius, var(--f7-popup-border-radius));
+  }
 }
 
 /* Checked radio inner */
@@ -183,7 +230,7 @@ li.accordion-item > a.item-link div.item-title {
   /*--f7-label-focused-text-color: #2cd048; */
 }
 
-.button-fill {
+.button-fill:not(.disabled) {
   --f7-button-text-color: var(--energi-color-text);
   --f7-button-pressed-text-color: var(
     --f7-button-text-color,
@@ -199,6 +246,23 @@ li.accordion-item > a.item-link div.item-title {
   --f7-button-fill-bg-color: var(--energi-color-green);
   --f7-button-outline-border-color: var(--energi-color-green);
   --f7-button-fill-pressed-bg-color: var(--energi-color-green-secondary);
+}
+.button-fill.disabled {
+  --f7-button-text-color: var(--energi-color-text);
+  --f7-button-pressed-text-color: var(
+    --f7-button-text-color,
+    var(--f7-theme-color)
+  );
+  /*--f7-button-pressed-bg-color: rgba(var(--f7-theme-color-rgb), .15);*/
+  --f7-button-pressed-bg-color: var(
+    --f7-button-fill-pressed-bg-color,
+    var(--f7-theme-color-shade)
+  );
+  --f7-button-border-color: var(--f7-button-border-color);
+  --f7-button-fill-text-color: var(--energi-color-text);
+  --f7-button-fill-bg-color: var(--f7-theme-color);
+  --f7-button-outline-border-color: var(--f7-button-border-color);
+  --f7-button-fill-pressed-bg-color: var(--f7-theme-color-shade);
 }
 
 .appbar,

@@ -33,11 +33,11 @@
                 >
             {/if}
           </div>
-          <div style="max-width:2em;margin-right:3px;flex: 0 0 5%;display:flex;justify-content:center;align-items:center;z-index:2;cursor:pointer;">
+          <div style="max-width:2.5em;min-width:2em;margin-right:6px;flex: 0 0 5%;display:flex;justify-content:center;align-items:center;z-index:12;cursor:pointer;">
             <div class="f7-icons password-eye-button" on:click="{() => togglePasswordHidden()}">{eyeStyle}</div>
           </div>
           {#if clearButtonVisible}
-            <div style="width:1.5em;flex: 0 0 5%;justify-content:center;align-items:center;">
+            <div style="max-width:1.7em;min-width:1.6em;flex: 0 0 5%;justify-content:center;align-items:center;">
             </div>
           {/if}
       </div>
@@ -46,7 +46,7 @@
 <style>
     .password-eye-button
     {
-        z-index: 1;
+        z-index: 11;
         color: var(--f7-input-clear-button-color);
         font-size: 22px;
         transition-duration: 100ms;
@@ -78,18 +78,18 @@
 
     let thisInput;
     let passwordType = "password";
-    let eyeStyle = "eye_slash";
+    let eyeStyle = "eye";
 
     /* eslint-ignore next line */
     async function togglePasswordHidden() {
       if (passwordVisible) {
         passwordType = "password";
         passwordVisible = false;
-        eyeStyle = "eye_slash";
+        eyeStyle = "eye";
       } else {
         passwordType = "text";
         passwordVisible = true;
-        eyeStyle = "eye";
+        eyeStyle = "eye_slash";
       }
       await tick();
       thisInput.focus();

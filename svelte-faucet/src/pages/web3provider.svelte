@@ -59,6 +59,7 @@
               title="Local"
               value="http://localhost:49796"
               name="radio-url"
+              id="small"
               onChange="{(e) => radioProviderChanged(e)}"
             />
             <ListItem
@@ -67,6 +68,7 @@
               title="Remote"
               value="https://nodeapi.test3.energi.network"
               name="radio-url"
+              id="small"
               onChange="{(e) => radioProviderChanged(e)}"
             />
           </List>
@@ -86,6 +88,7 @@
               onBlur="{(e) => urlChanged(e)}"
               style="vertical-align:top;margin-top:1vh;"
               spellcheck="false"
+              id="mono-small"
             >
               <!-- <i class="icon demo-list-icon" slot="media" />   margin-top:24px -->
             </ListInput>
@@ -127,14 +130,14 @@
               type="textarea"
               clearButton
               resizable
-              value="{logText}"
+              value="{logConnect}"
               onInputClear="{() => {
-                logText = '';
+                logConnect = '';
               }}"
               id="yellow-mono-small"
               spellcheck="false"
             />
-          </List>
+      </List>
         </Col>
       </Row>
     </CardContent>
@@ -154,16 +157,14 @@
 
   <Card outline>
     <CardHeader>Choose an account to use</CardHeader>
-
     <CardContent>
       <List accordionList accordionOpposite>
-        <ListItem accordionItem title="Keystore File" id="AccordiumItem1">
+        <ListItem accordionItem title="From Keystore File" id="AccordiumItem1">
           <AccordionItem>
             <AccordionContent>
               <Block>
                 <div class="div-flex-row">
-                  <div
-                    class="div-flex-item-fixed button-small mt5 pl10">
+                  <div class="div-flex-item-fixed button-normal">
                     <input
                       type="file"
                       id="fileinput"
@@ -178,24 +179,23 @@
                       raised
                       style="bgcolor:var(--energi-color-green)"
                     >
-                      <i
-                        class="f7-icons"
-                        style="font-size:18px;margin-right:5px"
-                      >doc_text_search</i>
-                      Open File
+                      <i class="f7-icons" style="font-size:18px;margin-right:5px;margin-top:10px">doc_text_search</i>
+                      Choose File
                     </Button>
                   </div>
 
                   <div class="div-flex-item-dynamic">
                     <ListInputPassword
-                      label="Keystore File Password"
+                      label="Keystore Password"
+                      id="mono-small"
+                      inputId="PasswordField"
                       clearButton="{true}"
                       bind:password
                     />
                   </div>
 
                   <div
-                    class="div-flex-item-fixed button-normal mt5">
+                    class="div-flex-item-fixed button-normal">
                     <Button
                       onClick="{() => unlockKeystore()}"
                       fill
@@ -204,10 +204,10 @@
                     >
                       <i
                         class="f7-icons"
-                        style="font-size:18px;margin-right:5px"
+                        style="font-size:18px;margin-right:5px;margin-top:10px"
                       >lock_open</i>
                       Unlock
-                    </Button>
+                </Button>
                   </div>
                 </div>
               </Block>
@@ -215,7 +215,7 @@
           </AccordionItem>
         </ListItem>
 
-        <ListItem accordionItem title="Private Key" id="AccordiumItem2">
+        <ListItem accordionItem title="From Private Key" id="AccordiumItem2">
           <AccordionItem>
             <AccordionContent>
               <Block>
@@ -242,8 +242,6 @@
                     inputId="inputIDPrivateKey"
                     spellcheck="false"
                   >
-                    <!-- <i class="icon demo-list-icon" slot="media" />   margin-top:24px
-                    <i class="f7-icons size-28" slot="content-end">bag</i> -->
                   </ListInput>
                 </div>
                 <div class="div-flex-item-fixed button-normal mb10">
@@ -314,88 +312,122 @@
             </AccordionContent>
           </AccordionItem>
         </ListItem>
+      </List>
+    </CardContent>
+    <CardFooter>
+      <a href="https://www.google.com/search?q=web3+create+provider" external target="_blank">More Information</a>
+      <p>Address: {selectedAddress}</p>
+    </CardFooter>
+  </Card>
+  <i id="scrolltarget1">&nbsp;</i>
+  <Card outline>
+    <CardHeader>Verify account address</CardHeader>
+    <CardContent>
+      <Block>
 
-        <Block>
-        <div class="div-flex-row">
-          <div class="div-flex-item-dynamic">
+        <Row noGap>
+          <Col width="75" style="align-items:stretch">
+            <List>
             <ListInput
               outline
-              label="Energi Account"
+              label="Energi Address"
               floatingLabel
               type="text"
               clearButton
               info="Hexnumber starting with 0x"
               errorMessage="Only hexnumbers starting with 0x please!"
-
               validate
               pattern="^0x[a-fA-F0-9]*"
-
-              style="font-family: 'Ubuntu Mono';"
-              value="{$selectedAccount}"
+              id="mono-small"
+              value="{selectedAddress}"
               onInputClear="{() => {
-                $selectedAccount = '';
+                selectedAddress = '';
               }}"
-              onBlur="{(e) => accountSelectedChanged(e)}"
+              onBlur="{(e) => addressSelectedChanged(e)}"
               inputId="inputIDSelectedAddress"
               spellcheck="false"
             >
-              <!-- <i class="icon demo-list-icon" slot="media" />   margin-top:24px -->
+
             </ListInput>
-          </div>
-          <div class="div-flex-item-fixed button-normal mt5">
+            </List>
+          </Col>
+          <Col width="25" class="button-larger mt18">
             <Button
               fill
               raised
-              on:click="{QueryAccountInfo}"
+              on:click="{TestAccount}"
               style="bgcolor:var(--energi-color-green)"
             >
-              <i class="f7-icons size-20" style="margin-right: 5px">cloud-download</i>
-              Query Info
-            </Button>
-         </div>
-        </div>
+              <i class="f7-icons size-20" style="margin-right: 5px;margin-top:5px">search</i>
+              Verify Address
+          </Button>
+          </Col>
+        </Row>
+        <Row noGap style="align-items:stretch">
+        <Col width="5">
+          <Block style="top:1.6em;">
+            <i class="f7-icons" style="align:center; font-size:24px; color: {creditcardColor};">creditcard</i>
+          </Block>
+        </Col>
+        <Col width="95">
+          <List noHairlinesMd>
+            <ListInput
+              outline
+              disabled
+              floatingLabel
+              label="Log"
+              type="textarea"
+              clearButton
+              resizable
+              value="{logAccount}"
+              onInputClear="{() => {
+                logAccount = '';
+              }}"
+              id="yellow-mono-small"
+              spellcheck="false"
+            />
+          </List>
+        </Col>
+      </Row>
       </Block>
-      </List>
+
+      <Block>
+
+        <List>
+          <ListItem></ListItem>
+          <ListItem header="Balance" title={balanceTitle}>
+            <i slot="media" class="f7-icons size-20" style="color:{plusminusColor};">plus_slash_minus</i>
+          </ListItem>
+          <ListItem header="Sign a message" title={signedTitle}>
+            <i slot="media" class="f7-icons size-20" style="color:{pawColor};">paw</i>
+          </ListItem>
+          <ListItem header="Choosen Account Address" title="{$ethAccount.address}" footer="{ choosenAddressIsValid ? 'Is validated' : 'Is not validated'}" after="Next">
+            <i slot="media" class="f7-icons size-20" style="color:{thumbsupColor};">hand_thumbsup</i>
+          </ListItem>
+          <ListItem header="Private Key" title="{$ethAccount.privateKey}" footer="IMPORTANT, don't loose it !!!" after="Copy">
+            <i slot="media" class="f7-icons size-20" style="color:{privatekeyColor};">umbrella envelope_open</i>
+          <!--  <i slot="after-start" class="f7-icons size-20">calendar_badge_plus</i> -->
+            <i on:click={CopyToClipboard($ethAccount.privateKey, true)}  slot="after-start" class="f7-icons size-20" style="margin-right:5px">tray_arrow_down</i>
+          </ListItem>
+        </List>
+      </Block>
     </CardContent>
     <CardFooter>
       <a
-        href="https://www.google.com/search?q=web3+create+provider"
+        href="https://www.google.com/search?q=ethereum+address+account+privatekey"
         external
         target="_blank"
       >More Information</a>
-      <p>Account: {$selectedAccount}</p>
+      <p>Balance: {selectedAddressBalance}</p>
       <div style="display:flex;flex-direction: row;justify-content: flex-end;align-items:center;">
-        <Button fill raised href="/smartcontract/" view=".view-main" panelClose style="display:flex;align:center;align-items:center;padding-left:15%;bgcolor:var(--energi-color-green)">Next
+        <Button disabled={!nextButtonEnabled} fill raised href="/smartcontract/" view=".view-main" panelClose style="display:flex;align:center;align-items:center;padding-left:15%;bgcolor:{nextButtonEnabled ? 'var(--energi-color-green)' : 'var(--energi-color-grey)'}">Next
           <i class="f7-icons size-20" style="margin-left: 5px">arrowtriangle_right</i>
         </Button>
       </div>
-
     </CardFooter>
   </Card>
-  <p id="scrolltarget1">&nbsp;</p>
+  <i id="scrolltarget2">&nbsp;</i>
 
-  <!--
-    <h1>Hello {name}!</h1>
-
-    <p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
-
-    <p>Visit the <a href="https://web3js.readthedocs.io/en/">Web3.js documentation</a> to learn how to use Web3.js library.</p>
-
-    <p>This svelte example app to the window provider (eg Metamask) : {$selectedAccount} </p>
-
-    {#if $isListening}
-    <p>
-      Selected account: {$selectedAccount || 'not defined'}
-    </p>
-    {#if $chainName}
-    <p>
-      Balance on {$chainName}:
-      {#await balance}<span>waiting...</span>{:then value}<span>{value}</span>{/await} {$nativeCurrency.symbol}
-    </p>
-
-    {/if}
-    {/if}
--->
 </Page>
 
 <script>
@@ -417,21 +449,23 @@
     ListItem,
     List,
     Block,
+    BlockHeader,
     ListInput,
     Button,
+    Preloader,
   } from "framework7-svelte";
+  import Web3 from "web3";
+  import { tick, getContext } from "svelte";
   import {
     visitedPages,
-    selectedAccount,
+    isUnlocked,
+    ethAccount,
     getTime,
     scrollTo,
   } from "../js/stores.js";
   import { listWallets } from "../js/web3utils.js";
-  import ListInputPassword from "../components/input-password.svelte";
-  //let Web3 = require('web3');
-  //import { ethereum, chainName, isListening, nativeCurrency, selectedAccount, whenReady } from 'svelte-web3';
-  import Web3 from "web3";
-  import { tick, getContext } from "svelte";
+  import ListInputPassword, { setFocus } from "../components/input-password.svelte";
+
 
   const options = {
     defaultAccount: "0x0",
@@ -445,15 +479,31 @@
   };
 
   let browseInput; // the input to open the file browse dialog
-  let passwordType = "password";
-  let accordionItem2;
   let keystoreJson;
-  let privateKey;
   let files;
   let password;
   let web3Error = "";
   let accountDetails = [];
-  let listAccountPromise;
+  let web3URL = "";
+  let connectedWeb3 = false;
+  let logConnect = "";
+  let logAccount = "";
+  let accounts = [];
+
+  let selectedAddress;
+  let privateKey;
+
+  let creditcardColor = "var(--energi-color-grey)";
+  let pawColor = "var(--energi-color-grey)";
+  let plusminusColor = "var(--energi-color-grey)";
+  let thumbsupColor = "var(--energi-color-grey)";
+  let privatekeyColor = "var(--energi-color-grey)";
+  let selectedAddressBalance = 0;
+  let balanceTitle = "N/A";
+  let signedTitle = "N/A";
+  let choosenAddressIsValid = false;
+  let nextButtonEnabled = false;
+
 
   $: {
     if (files && files[0]) {
@@ -461,6 +511,12 @@
       let reader = new FileReader();
       reader.onload = function (evt) {
         keystoreJson = evt.target.result;
+        document.getElementById("PasswordField").focus();
+      };
+      reader.onerror = function (e) {
+        console.log(e);
+        createErrorPopup("Error " + e.target.error.name, e.target.error.message);
+        keystoreJson = "";
       };
       reader.readAsText(keyfile);
     }
@@ -484,10 +540,6 @@
   const web3 = getContext("web3");
   console.log("Get web3 from context: ", web3);
 
-  let web3URL = "";
-  let connectedWeb3 = false;
-  let logText = "";
-  let accounts = [];
 
   //const enable = () => ethereum.setBrowserProvider()
   //const enable = () => ethereum.setProvider('http://localhost:49796');
@@ -514,15 +566,15 @@
   }
   function radioAccountsChanged(e) {
     console.log("radioAccountsChanged(e): ", e.target.value);
-    $selectedAccount = e.target.value;
+    selectedAddress = e.target.value;
   }
   function urlChanged(e) {
     console.log("urlChanged(e): " + e.target.value);
     web3URL = e.target.value;
   }
-  function accountSelectedChanged(e) {
+  function addressSelectedChanged(e) {
     console.log("accountSelected(e): ", e.target.value);
-    $selectedAccount = e.target.value;
+    selectedAddress = e.target.value;
   }
   function passwordChanged(e) {
     console.log("passwordChanged(e): ", e.target.value);
@@ -561,6 +613,7 @@
   }
 
   function ScanPrivateKey() {
+    ResetValidEthAccount();
     f7.dialog.preloader(
       "web3.eth.accounts.privateKeyToAccount (" + privateKey
     ) + ")";
@@ -571,32 +624,183 @@
       const account = web3.eth.accounts.privateKeyToAccount(privateKey, true);
       web3.eth.accounts.wallet.add(account);
       web3.eth.defaultAccount = account.address;
-      $selectedAccount = web3.eth.defaultAccount;
+      selectedAddress = web3.eth.defaultAccount;
       console.log("Address: ${account.address}");
       console.log("Account: ", account);
-      logText = logText + "\n" + getTime() + ": Address " + account.address;
+      logAccount = logAccount + "\n" + getTime() + ": Address " + account.address;
+
+      // store account object for later
+      $ethAccount = account;
+
       f7.dialog.close();
     } catch (e) {
       f7.dialog.close();
       web3Error = e;
       console.log("catch:", e);
-      logText = logText + `\n${getTime()}: ${e}`;
+      logAccount = logAccount + `\n${getTime()}: ${web3Error}`;
+      createErrorPopup("Error converting Private Key", web3Error);
     }
   }
 
-  function QueryAccountInfo() {
-    console.log(web3.eth.accounts.wallet);
+  async function unlockKeystore() {
+    // open the wallet in web3
+    f7.dialog.preloader("Unlocking Keystore");
+    console.log("unlockKeystore: " + keystoreJson);
+
+    setTimeout(() => {
+      try {
+        const decryptedAccount = web3.eth.accounts.decrypt(keystoreJson, password);
+
+        if (decryptedAccount) {
+          selectedAddress = decryptedAccount.address;
+          privateKey = decryptedAccount.privateKey;
+
+          web3.eth.accounts.wallet.add(decryptedAccount);
+          web3.eth.defaultAccount = decryptedAccount.address;
+
+          // store account object for later
+          $ethAccount = decryptedAccount;
+          $isUnlocked = true;
+
+          logAccount += "\n" + getTime() + ": decryptedAccount **********************";
+          logAccount += "\n" + JSON.stringify(decryptedAccount, undefined, 4);
+          logAccount += "\n" + getTime() + ": ***************************************";
+          logAccount = logAccount.trim();
+
+          console.log(decryptedAccount);
+
+          //make the parent to scroll into view, smoothly!
+          scrollTo("scrolltarget2");
+          f7.dialog.close();
+        }
+        } catch(e) {
+            f7.dialog.close();
+            createErrorPopup("Unlocking failed", e);
+            creditcardColor = "var(--energi-color-red)";
+        }
+      }, 300);
+
+    await tick();
   }
 
-  function unlockKeystore() {
-    // open the wallet in web3
-    console.log("unlockKeystore: " + keystoreJson);
-    console.log(accordionItem2);
-    console.log(accordionItem2.opened);
-    accordionItem2.opened = true;
-    console.log(accordionItem2.opened);
-    accordionItem2 = accordionItem2;
+ function ResetValidEthAccount() {
+    creditcardColor = "var(--energi-color-grey)";
+    pawColor = "var(--energi-color-grey)";
+    plusminusColor = "var(--energi-color-grey)";
+    thumbsupColor = $ethAccount.address ? "var(--energi-color-red)" : "var(--energi-color-grey)";
+    privatekeyColor = $ethAccount.privateKey ? "var(--energi-color-red)" : "var(--energi-color-grey)";
+    balanceTitle = "N/A";
+    signedTitle = "N/A";
+    selectedAddressBalance = 0;
+    choosenAddressIsValid = false;
+    nextButtonEnabled = false;
+ }
+
+ function TestAccount() {
+    f7.dialog.preloader("Testing Account");
+
+    if (selectedAddress !== $ethAccount.address) {
+      $ethAccount.address = selectedAddress;
+    }
+
+    ResetValidEthAccount();
+
+    getBalance($ethAccount.address);
   }
+
+  function getBalance(address) {
+    if (address) {
+      let checksumAddress;
+      try {
+        checksumAddress = Web3.utils.toChecksumAddress(address);
+      } catch (error) {
+        f7.dialog.close();
+        creditcardColor = "var(--energi-color-red)";
+        createErrorPopup("Error occured", error);
+        return null;
+      }
+
+      if (checksumAddress !== address) {
+        f7.dialog.close();
+        creditcardColor = "var(--energi-color-red)";
+        logAccount = logAccount + "\n" + getTime() + ": Invalid address checksum";
+        logAccount = logAccount.trim();
+        createErrorPopup("Error occured", "Invalid address checksum");
+      } else {
+              try {
+                web3.eth.getBalance(address).then((b) => {
+                  selectedAddressBalance = web3.utils.fromWei( b );
+                  balanceTitle = selectedAddressBalance  + " NRG";
+                  plusminusColor = "var(--energi-color-green)";
+
+                  logAccount = logAccount + "\n" + getTime() + ": Balance for '" + address + "' is '" + selectedAddressBalance + "'";
+                  logAccount = logAccount.trim();
+                  console.log("Start sign");
+                  const message = "Energi Faucet Test message to be signed";
+                  const signatureObject = SignMessage(message);
+                  console.log("After sign", signatureObject);
+                  if (signatureObject) {
+                    console.log("Start recover");
+                    const signator = web3.eth.accounts.recover(signatureObject);
+                    console.log("After recover");
+                    if (signator === $ethAccount.address) {
+                      signedTitle = 'Signator "' + signator + '" is VALID';
+                      creditcardColor = "var(--energi-color-green)";
+                      pawColor = "var(--energi-color-green)";
+                      thumbsupColor = "var(--energi-color-green)";
+                      privatekeyColor = "var(--energi-color-yellow)";
+                      choosenAddressIsValid = true;
+                    } else {
+                      signedTitle = 'Signator "' + signator + '" is INVALID';
+                      createErrorPopup("Error occured", "web3.eth.accounts.recover(signature) did not return the correct address");
+                      creditcardColor = "var(--energi-color-red)";
+                      pawColor = "var(--energi-color-red)";
+                      privatekeyColor = "var(--energi-color-red)";
+                    }
+                  } else {
+                    creditcardColor = "var(--energi-color-red)";
+                    createErrorPopup("Error occured", "web3.eth.accounts.sign(message, privateKey) failed");
+                  }
+                  f7.dialog.close();
+                }).catch((e) => {
+                  f7.dialog.close();
+                  creditcardColor = "var(--energi-color-red)";
+                  plusminusColor = "var(--energi-color-red)";
+                  createErrorPopup("Error occured", e);
+                  console.log(e);
+                });
+              } catch (error) {
+                f7.dialog.close();
+                creditcardColor = "var(--energi-color-red)";
+                createErrorPopup("Error occured", error);
+              }
+            }
+    } else {
+        creditcardColor = "var(--energi-color-red)";
+        logAccount = logAccount + "\n" + getTime() + ": Address is not set";
+        logAccount = logAccount.trim();
+        f7.dialog.close();
+    }
+  }
+
+  function SignMessage(msg) {
+    try {
+      const signature = web3.eth.accounts.sign(msg, $ethAccount.privateKey);
+      logAccount += "\n" + getTime() + ": Signature: ****************************";
+      logAccount += "\n" + JSON.stringify(signature, undefined, 4);
+      logAccount += "\n" + getTime() + ": ***************************************";
+      logAccount = logAccount.trim();
+      return signature;
+    } catch(e) {
+      creditcardColor = "var(--energi-color-red)";
+      logAccount = logAccount + "\n" + getTime() + ": Signing failed: " + e;
+      logAccount = logAccount.trim();
+      signedTitle = "Signing failed: " + e;
+      createErrorPopup("Signing failed", e);
+    }
+    return null;
+  }
+
 
   function getAccountStatus(a) {
     return new Promise((resolve, reject) => {
@@ -606,7 +810,7 @@
       function getBalanceForAll() {
         if (accountDetails.length > 0) {
           for (let i = 0; i < accountDetails.length; i++) {
-            if (Web3.utils.toChecksumAddress(accountDetails[i].address) == a) {
+            if (Web3.utils.toChecksumAddress(accountDetails[i].address) === a) {
               try {
                 web3.eth.getBalance(a).then((b) => {
                   clearInterval(iv);
@@ -636,9 +840,8 @@
     accounts = [];
     accountDetails = [];
     connectedWeb3 = false;
-    listAccountPromise = null;
 
-    logText = getTime() + ": Try connect to " + web3URL;
+    logConnect = getTime() + ": Try connect to " + web3URL;
 
     f7.dialog.preloader("Connecting to " + web3URL);
 
@@ -653,8 +856,7 @@
         //.on('error', function(error){ console.log(error); })
         .then((protocolVersion) => {
           callsFinished++;
-          logText =
-            logText + "\n" + getTime() + ": Protocol Version " + protocolVersion;
+          logConnect = logConnect + "\n" + getTime() + ": Protocol Version " + protocolVersion;
           if (callsFinished > complete) {
             connectedWeb3 = true;
             f7.dialog.close();
@@ -667,7 +869,7 @@
           }
           web3Error = error;
           console.log("catch:", error);
-          logText = logText + `\n${getTime()}: ${error}`;
+          logConnect = logConnect + `\n${getTime()}: ${error}`;
         });
     }
     catch (error) {
@@ -677,18 +879,13 @@
       }
       web3Error = error;
       console.log("catch:", error);
-      logText = logText + `\n${getTime()}: ${error}`;
+      logConnect = logConnect + `\n${getTime()}: ${error}`;
     }
 
     try {
-    web3.eth.getGasPrice()
-      .then((gasPrice) => {
+    web3.eth.getGasPrice().then((gasPrice) => {
         callsFinished++;
-        logText =
-          logText +
-          `\n${getTime()}: Gas Price: ${gasPrice} wei, ${web3.utils.fromWei(
-            gasPrice
-          )} NRG`;
+        logConnect = logConnect + `\n${getTime()}: Gas Price: ${gasPrice} wei, ${web3.utils.fromWei( gasPrice )} NRG`;
         if (callsFinished > complete) {
           connectedWeb3 = true;
           f7.dialog.close();
@@ -699,7 +896,7 @@
         if (callsFinished > complete) f7.dialog.close();
         web3Error = error;
         console.log(error);
-        logText = logText + `\n${getTime()}: ${error}`;
+        logConnect = logConnect + `\n${getTime()}: ${error}`;
       });
     }
     catch (error) {
@@ -709,7 +906,7 @@
         }
         web3Error = error;
         console.log("catch:", error);
-        logText = logText + `\n${getTime()}: ${error}`;
+        logConnect = logConnect + `\n${getTime()}: ${error}`;
     }
 
     try {
@@ -717,7 +914,7 @@
       .then((a) => {
         callsFinished++;
         accounts = a;
-        logText = logText + `\n${getTime()}: Accounts: ${accounts}`;
+        logConnect = logConnect + `\n${getTime()}: Accounts: ${accounts}`;
         if (callsFinished > complete) {
           connectedWeb3 = true;
           f7.dialog.close();
@@ -741,7 +938,7 @@
             }
           })
           .catch((e) => {
-            logText = logText + `\n${getTime()}: listWallets: ${e}`;
+            logConnect = logConnect + `\n${getTime()}: listWallets: ${e}`;
             accountDetails.push({
               status: "-1",
               address: e,
@@ -757,7 +954,7 @@
         }
         web3Error = error;
         console.log(error);
-        logText = logText + `\n${getTime()}: ${error}`;
+        logConnect = logConnect + `\n${getTime()}: ${error}`;
         if (!accounts[0]) {
           toggleAccordionItem(1, true);
         }
@@ -772,14 +969,13 @@
       }
       web3Error = error;
       console.log("catch:", error);
-      logText = logText + `\n${getTime()}: ${error}`;
+      logConnect = logConnect + `\n${getTime()}: ${error}`;
     }
-
   }
 
   function sleepFor(sleepDuration) {
     let now = new Date().getTime();
-    while (new Date().getTime() < now + sleepDuration) {}
+    while (new Date().getTime() < now + sleepDuration) { tick(); }
   }
 
   function onShow() {
@@ -795,5 +991,57 @@
       visitedPages.web3 = false;
       return visitedPages;
     });
+  }
+
+  function CopyToClipboard(text, isPrivateKey) {
+    if (choosenAddressIsValid || !isPrivateKey) {
+      navigator.clipboard.writeText(text).then(
+        function() {
+          /* clipboard successfully set */
+          if (isPrivateKey) {
+            privatekeyColor = "var(--energi-color-green)";
+            choosenAddressIsValid = true;
+            nextButtonEnabled = true;
+          }
+        }, function() {
+          /* clipboard write failed */
+          createErrorPopup("Copy to Clipboard", "Failed to copy '" + text + "'");
+        }
+      );
+    } else {
+      createErrorPopup("Copy Privatekey", "Please verify your address before you continue.");
+    }
+  }
+
+  let popup;
+  function createErrorPopup(title, error) {
+    // Create popup
+    if (popup) {
+      f7.popup.destroy(popup);
+    }
+
+    popup = f7.popup.create({
+      content: `
+        <div class="popup" id="ErrorPopup">
+          <div class="page">
+            <div class="navbar">
+            <div class="navbar-bg" style="background-color: red"></div>
+              <div class="navbar-inner">
+                <div class="title">${title}</div>
+                <div class="right"><a href="#" class="link popup-close">Close</a></div>
+              </div>
+            </div>
+            <div class="page-content">
+              <div class="block">
+                <p class="mono-small">${error}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `.trim(),
+    });
+
+    // Open it
+    popup.open();
   }
 </script>
