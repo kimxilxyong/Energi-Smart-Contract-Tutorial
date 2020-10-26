@@ -5,7 +5,7 @@
 
 width="10"
 -->
-
+<i class="f7-icons size-20" style="color:var(--energi-color-red);">paw</i>
 <App params={ f7params } themeDark>
 
   <!-- Left panel with cover effect when hidden -->

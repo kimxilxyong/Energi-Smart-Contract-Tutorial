@@ -6,7 +6,17 @@
 	],
 	"settings": {
 		"solidity-va.hover": false,
-		"solidity-va.deco.statevars": false
+		"solidity-va.deco.statevars": false,
+		"files.watcherExclude": {
+			"**/energi.world/**": true,
+			"**/github.com/**": true,
+			"**/gopkg.in/**": true,
+			"**/node_modules/**": true,
+			"**/.git/objects/**": true,
+			"**/.git/subtree-cache/**": true,
+			"**/node_modules/*/**": true
+		},
+		
 	},
 
 }

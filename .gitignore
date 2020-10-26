@@ -20,3 +20,4 @@
 microhttp/energi.world/
 microhttp/github.com/
 microhttp/gopkg.in/
+**/node_modules/**

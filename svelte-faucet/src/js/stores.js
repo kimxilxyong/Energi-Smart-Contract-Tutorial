@@ -16,6 +16,8 @@ const ethAccountObject = {
   privateKey: "",
   sign: {},
   signTransaction: {},
+  isManagedOnNode: false,
+  isUnlocked: false,
 };
 
 export const visitedPages = writable(visitedSvelte);

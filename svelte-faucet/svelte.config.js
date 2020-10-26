@@ -3,10 +3,7 @@
 const sveltePreprocess = require('svelte-preprocess');
 
 const preprocessOptions = {
-    sourceMap: true, // "you would always want sourcemaps for the IDE" – dummdidumm
-    defaults: {
-        script: 'javascript', // <-- now you can just write <script>let typingsAllowed: string;</script>
-    },
+    sourceMap: false, // "you would always want sourcemaps for the IDE" – dummdidumm
 };
 
 module.exports = {

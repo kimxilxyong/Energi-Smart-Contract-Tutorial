@@ -47,7 +47,7 @@
     .password-eye-button
     {
         z-index: 11;
-        color: var(--f7-input-clear-button-color);
+        color: grey;
         font-size: 22px;
         transition-duration: 100ms;
         pointer-events: visible;

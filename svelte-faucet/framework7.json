@@ -7,7 +7,7 @@
   "framework": "svelte",
   "template": "split-view",
   "bundler": "webpack",
-  "cssPreProcessor": false,
+  "cssPreProcessor": true,
   "theming": {
     "customColor": false,
     "color": "#00e676",
