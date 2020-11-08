@@ -3,7 +3,7 @@
 const sveltePreprocess = require('svelte-preprocess');
 
 const preprocessOptions = {
-    sourceMap: false, // "you would always want sourcemaps for the IDE" – dummdidumm
+    sourceMap: true, // "you would always want sourcemaps for the IDE" – dummdidumm
 };
 
 module.exports = {

@@ -11,6 +11,8 @@ import 'framework7/css/framework7.bundle.css';
 import '../css/fonts.css';
 import '../css/icons.css';
 import '../css/app.css';
+import '../css/animate.css';
+//import '../css/material-design-iconic-font.css';
 
 // Import App Component
 import App from '../components/app.svelte';

@@ -1,0 +1,16 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "build-dev",
+			"path": "svelte-faucet/",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"label": "npm: build - svelte-faucet",
+			"detail": "webpack"
+		}
+	]
+}

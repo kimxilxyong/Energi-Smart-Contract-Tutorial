@@ -1,28 +1,37 @@
 // Utility functions to list and remove old version peers
 
-var currentVersion = "3.0.6";
+var currentVersion = "3.0.7";
 var clearWatch;
 
 function checkPeersByVersion(latestVersion, removePeer, showAll) {
     var invalidCount = 0;
     var wasRemoved = false;
-    for (var i in admin.peers) {
-        if (admin.peers[i] === undefined)
+    for (var i = 0; i < admin.peers.length; i++) {
+    //for (var i in admin.peers) {
+        if (admin.peers[i] === undefined || admin.peers[i] == undefined || !admin.peers[i]) {
+           //console.log("Undefined detected: i=",i,", '",admin.peers[i],"'");
            continue;
+           console.log("DEBUG after continue?!?!? i=",i,", '",admin.peers[i],"'");
+        }
+        //console.log("After undefined: i=",i,", '",admin.peers[i],"'");
+                
         var name = String(admin.peers[i].name);
         var version = name.substring(9,14);
         if ((version != latestVersion) || showAll) {
             var enode = admin.peers[i].enode;
-            invalidCount++;
+            
             if (version != latestVersion) {
                 console.log("**** OLD Peer " + i + " name " + name + " version " + version);
+                console.log(enode);
+                invalidCount++;
             } else {
-                console.log("Peer " + i + " name " + name + " version " + version); 
-            }
-            console.log(enode); 
+                if (showAll == true) {
+                    console.log("Peer " + i + " name " + name + " version " + version); 
+                }
+            }             
             if (removePeer == true) {
                 admin.removePeer(enode);
-                wasRemoved = true;
+                wasRemoved = true;       
                 i--;
             }
         }

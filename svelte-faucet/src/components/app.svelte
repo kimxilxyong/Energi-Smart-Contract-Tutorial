@@ -1,11 +1,9 @@
-<!--
+
 <svelte:head>
   <link href="https://fonts.googleapis.com/css?family=Open Sans" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
 </svelte:head>
 
-width="10"
--->
-<i class="f7-icons size-20" style="color:var(--energi-color-red);">paw</i>
 <App params={ f7params } themeDark>
 
   <!-- Left panel with cover effect when hidden -->

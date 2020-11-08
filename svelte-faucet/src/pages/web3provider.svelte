@@ -50,8 +50,8 @@
   <Card outline>
     <CardHeader>Connect to an Energi Testnet RPC Provider</CardHeader>
     <CardContent>
-      <Row noGap>
-        <Col width="20">
+      <Row noGap class="flex-row">
+        <Col width="20" class="flex-col fixed">
           <List noHairlinesMd>
             <ListItem
               radio
@@ -73,7 +73,7 @@
             />
           </List>
         </Col>
-        <Col width="60">
+      <Col width="60" class="flex-col dynamic top5">
           <List noHairlinesMd>
             <ListInput
               outline
@@ -82,11 +82,9 @@
               type="text"
               clearButton
               value="{web3URL}"
-              onInputClear="{() => {
-                web3URL = '';
-              }}"
+              onInputClear="{() => { web3URL = ''; }}"
               onBlur="{(e) => urlChanged(e)}"
-              style="vertical-align:top;margin-top:1vh;"
+              style="vertical-align:top;"
               spellcheck="false"
               id="mono-small"
             >
@@ -94,20 +92,19 @@
             </ListInput>
           </List>
         </Col>
-        <Col width="20">
+        <Col width="20" class="flex-col fixed top2">
           <Button
             fill
             raised
             on:click="{ConnectToRPCProviderUrl}"
-            style="vertical-align:top;margin-top:2.8vh;bgcolor:var(--energi-color-green)"
           >
-            <i class="f7-icons size-14" style="margin-right: 5%">link</i>
+            <i class="f7-icons button-icon">link</i>
             Connect
           </Button>
         </Col>
       </Row>
-      <Row noGap>
-        <Col width="100">
+      <Row noGap class="flex-row">
+        <Col width="100" class="flex-col dynamic">
         <List noHairlinesMd>
 
           <ListInput
@@ -124,10 +121,12 @@
               }}"
               id="yellow-mono-small"
               spellcheck="false">
-                    <i slot="media" class="f7-icons size-20 bold" style="color:{connectedColor};">power</i>
+                    <!-- <i slot="media" class="nf-icons nf-hc-fw animate__animated animate__pulse animate__infinite" style="color:{connectedColor};">&#xf817;</i> -->
+                    <i slot="media" class="nf-icons nf-hc-fw {connectedAnimate}" style="color:{connectedColor};">&#xf817;</i>
+
             </ListInput>
           </List>
-        </Col>
+    </Col>
       </Row>
     </CardContent>
     <CardFooter>
@@ -145,15 +144,20 @@
   </Card>
 
   <Card outline>
+
     <CardHeader>Choose an account to use</CardHeader>
+
     <CardContent>
       <List accordionList accordionOpposite>
+
         <ListItem accordionItem title="From Keystore File" id="AccordiumItem1">
+
           <AccordionItem>
             <AccordionContent>
-              <Block>
-                <div class="div-flex-row">
-                  <div class="div-flex-item-fixed button-large">
+            <Block>
+
+                <Row noGap class="flex-row">
+                  <Col class="flex-col fixed top1">       <!-- align-items:stretch;resize:none;flex: 0 0 0%;"> -->
                     <input
                       type="file"
                       id="fileinput"
@@ -166,36 +170,34 @@
                       onClick="{() => browseInput.click()}"
                       fill
                       raised
-                      style="bgcolor:var(--energi-color-green)"
+                      style=""
                     >
-                      <i class="f7-icons" style="font-size:18px;margin-right:5px;margin-top:10px">doc_text_search</i>
+                      <i class="f7-icons button-icon">doc_text_search</i>
                       Choose File
                     </Button>
-                  </div>
-
-                  <div class="div-flex-item-dynamic">
+                  </Col>
+                  <Col width="70" class="flex-col dynamic top4">     <!-- "align-items:stretch;resize:horizontal;flex: 1 1 100%;"> -->
                     <ListInputPassword
                       label="Keystore Password"
                       id="mono-small"
                       inputId="PasswordField"
+                      style="position:relative;top:-0.5rem;"
                       clearButton="{true}"
                       bind:password
                     />
-                  </div>
-
-                  <div class="div-flex-item-fixed button-normal">
+                  </Col>
+                  <Col width="15" class="flex-col fixed top1">       <!-- "align-items:stretch;resize:none;flex: 0 0 0%;"> -->
                     <Button
                       onClick="{() => unlockKeystore()}"
                       fill
                       raised
-                      style="bgcolor:var(--energi-color-green)"
                     >
-                      <i class="f7-icons" style="font-size:18px;margin-right:5px;margin-top:10px"
-                      >lock_open</i>
+                      <i class="f7-icons button-icon">lock_open</i>
                       Unlock
-                </Button>
-                  </div>
-                </div>
+                    </Button>
+                  </Col>
+                </Row>
+
               </Block>
             </AccordionContent>
           </AccordionItem>
@@ -205,48 +207,44 @@
           <AccordionItem>
             <AccordionContent>
               <Block>
-              <div class="div-flex-row">
-                <div class="div-flex-item-dynamic">
-                  <ListInput
-                    outline
-                    label="Energi Privatekey"
-                    floatingLabel
-                    type="text"
-                    placeholder="Enter private key"
-                    info="Hexnumber starting with 0x"
-                    errorMessage="Only hexnumbers starting with 0x please!"
-                    required
-                    validate
-                    pattern="^0x[a-fA-F0-9]*"
-                    clearButton
-                    value="{privateKey}"
-                    onInputClear="{() => {
-                      privateKey = '';
-                    }}"
-                    onBlur="{(e) => onPrivateKeyChanged(e)}"
-                    onValidate="{(isValid) => checkPrivateKeyValid(isValid)}"
-                    inputId="inputIDPrivateKey"
-                    spellcheck="false"
-                  >
-                  </ListInput>
-                </div>
-                <div class="div-flex-item-fixed button-normal mb10">
-                  <Button fill raised on:click="{ScanPrivateKey}" style="bgcolor:var(--energi-color-green)">
-                    <i class="f7-icons" style="font-size:18px;margin-right: 5px">barcode_viewfinder</i>
+                <Row noGap class="flex-row">
+                  <Col width="90" class="flex-col dynamic top62">
+                    <ListInput
+                      outline
+                      label="Energi Privatekey"
+                      floatingLabel
+                      type="text"
+                      placeholder="Enter private key"
+                      info="Hexnumber starting with 0x"
+                      errorMessage="Only hexnumbers starting with 0x please!"
+                      required
+                      validate
+                      pattern="^0x[a-fA-F0-9]*"
+                      clearButton
+                      value="{privateKey}"
+                      onInputClear="{() => {
+                        privateKey = '';
+                      }}"
+                      onBlur="{(e) => onPrivateKeyChanged(e)}"
+                      onValidate="{(isValid) => checkPrivateKeyValid(isValid)}"
+                      inputId="inputIDPrivateKey"
+                      spellcheck="false"
+                    >
+                    </ListInput>
+                  </Col>
+                  <Col class="flex-col fixed top9">       <!-- align-items:stretch;resize:none;flex: 0 0 0%;"> -->
+                    <Button fill raised on:click="{ScanPrivateKey}">
+                      <i class="f7-icons button-icon">barcode_viewfinder</i>
                     Scan
-                  </Button>
-                </div>
-              </div>
+                    </Button>
+                  </Col>
+                </Row>
             </Block>
             </AccordionContent>
           </AccordionItem>
         </ListItem>
 
-        <ListItem
-          accordionItem
-          title="Accounts active on the provider"
-          id="AccordiumItem3"
-          onAccordionOpened="{() => { scrollTo('scrolltarget1'); }}">
+        <ListItem accordionItem title="Accounts active on the provider" id="AccordiumItem3" onAccordionOpened="{() => { scrollTo('scrolltarget1'); }}">
           <AccordionItem>
             <AccordionContent>
               <Row noGap>
@@ -300,14 +298,17 @@
       <p>Address: {selectedAddress}</p>
     </CardFooter>
   </Card>
+
   <i id="scrolltarget1">&nbsp;</i>
+
   <Card outline>
+
     <CardHeader>Verify account address</CardHeader>
+
     <CardContent>
       <Block>
-
-        <Row noGap>
-          <Col width="75" style="align-items:stretch">
+        <Row noGap class="flex-row">
+          <Col width="90" class="flex-col dynamic">
             <List>
             <ListInput
               outline
@@ -332,44 +333,43 @@
             </ListInput>
             </List>
           </Col>
-          <Col width="25" class="button-larger mt18">
-            <Button
+          <Col class="flex-col fixed top3">
+          <Button
               fill
               raised
               on:click="{TestAccount}"
-              style="bgcolor:var(--energi-color-green)"
             >
               <i class="f7-icons size-20" style="margin-right: 5px;margin-top:5px">search</i>
               Verify Address
-          </Button>
+            </Button>
           </Col>
         </Row>
-        <Row noGap style="align-items:stretch">
-        <Col width="5">
-          <Block style="top:1.6em;">
-            <i class="f7-icons" style="align:center; font-size:24px; color: {creditcardColor};">creditcard</i>
-          </Block>
-        </Col>
-        <Col width="95">
-          <List noHairlinesMd>
-            <ListInput
-              outline
-              disabled
-              floatingLabel
-              label="Log"
-              type="textarea"
-              clearButton
-              resizable
-              value="{logAccount}"
-              onInputClear="{() => {
-                logAccount = '';
-              }}"
-              id="yellow-mono-small"
-              spellcheck="false"
-            />
-          </List>
-        </Col>
-      </Row>
+        <Row noGap class="flex-row">
+          <Col class="flex-col fixed">
+            <Block style="top:1.6em;">
+              <i class="f7-icons" style="align:center; font-size:24px; color: {creditcardColor};">creditcard</i>
+            </Block>
+          </Col>
+          <Col width="100" class="flex-col dynamic">
+            <List noHairlinesMd>
+              <ListInput
+                outline
+                disabled
+                floatingLabel
+                label="Log"
+                type="textarea"
+                clearButton
+                resizable
+                value="{logAccount}"
+                onInputClear="{() => {
+                  logAccount = '';
+                }}"
+                id="yellow-mono-small"
+                spellcheck="false"
+              />
+            </List>
+          </Col>
+        </Row>
       </Block>
 
       <Block>
@@ -412,9 +412,9 @@
         target="_blank"
       >More Information</a>
       <p>Balance: {selectedAddressBalance}</p>
-      <div style="display:flex;flex-direction: row;justify-content: flex-end;align-items:center;">
-        <Button disabled={!nextButtonEnabled} fill raised href="/smartcontract/" view=".view-main" panelClose style="display:flex;align:center;align-items:center;padding-left:15%;bgcolor:{nextButtonEnabled ? 'var(--energi-color-green)' : 'var(--energi-color-grey)'}">Next
-          <i class="f7-icons size-20" style="margin-left: 5px">arrowtriangle_right</i>
+    <div style="display:flex;flex-direction: row;justify-content: flex-end;align-items:center;">
+        <Button disabled={!nextButtonEnabled} fill raised href="/smartcontract/" view=".view-main" panelClose class={nextButtonEnabled ? "" : "disablebar"} style="display:flex;align:center;align-items:center;padding-left:15%;bgcolor:{nextButtonEnabled ? 'var(--energi-color-green)' : 'var(--energi-color-grey)'}">Next
+          <i class="f7-icons size-20" style="margin-left:0.2rem;margin-top:0.3rem">arrowtriangle_right</i>
         </Button>
       </div>
     </CardFooter>
@@ -478,16 +478,22 @@
   let web3Error = "";
   let accountDetails = [];
   let web3URL = "";
-  let connectedWeb3 = false;
+  let connectedWeb3 = false;  // true if connection to remote or local node is established
+  let isLocalNode = false;
+
   let logConnect = "";
   let logAccount = "";
   let accounts = [];
 
   let selectedAddress;
   let privateKey;
+  let gotBalance;
+  let isSigned;
+  let isVerified;
 
   let connectedColor = "var(--energi-color-red)";
-  let creditcardColor = "var(--energi-color-red)";
+  let connectedAnimate = "animate__animated animate__pulse animate__infinite";
+  let creditcardColor = "var(--energi-color-grey)";
   let pawColor = "var(--energi-color-grey)";
   let plusminusColor = "var(--energi-color-grey)";
   let thumbsupColor = "var(--energi-color-grey)";
@@ -500,6 +506,14 @@
   let nextButtonEnabled = false;
   let isManagedOnNode = false;
 
+
+  setInterval(() => {
+
+    // check connection
+    if (connectedWeb3) {
+      connectedAnimate = "";
+    }
+  }, 1000);
 
   $: {
     if (files && files[0]) {
@@ -620,7 +634,7 @@
     }
   }
 
-   function ConnectToRPCProviderUrl() {
+  async function ConnectToRPCProviderUrl() {
     let callsFinished = 0;
     let complete = 2;
 
@@ -629,6 +643,20 @@
     accountDetails = [];
     connectedWeb3 = false;
     connectedColor = "var(--energi-color-red)";
+    connectedAnimate = "animate__animated animate__pulse animate__infinite";
+
+    // Reset connection details
+    isLocalNode = false;
+    if (web3URL.includes("localhost") || web3URL.includes("127.0.0.1")) {
+      isLocalNode = true;
+    } else {
+      isManagedOnNode = false;
+    }
+
+    // Reset verification details
+    gotBalance = false;
+    isSigned = false;
+    isVerified = false;
 
     logConnect = getTime() + ": Try connect to " + web3URL;
 
@@ -719,7 +747,7 @@
 
         // fetch account status
         listWallets(web3)
-          .then((r) => {
+          .then( async (r) => {
             console.log("listWallets:", r.result.length);
             for (let i = 0; i < r.result.length; i++) {
               accountDetails.push({
@@ -729,15 +757,30 @@
               });
             };
             connectedColor = "var(--energi-color-green)";
-          })
+
+            await tick();
+            scrollTo("scrolltarget1");
+          });
+          /*
           .catch((e) => {
-            logConnect = logConnect + `\n${getTime()}: listWallets: ${e}`;
+            logConnect += `\n${getTime()}: listWallets: ${e}`;
+            logConnect += `\n${getTime()}: NOTE: Make sure personal is loaded in your node`;
+            logConnect += `\n${getTime()}: {@html "Example: ./energi --rpcapi admin,web3,eth,debug,<strong>personal</strong>,net,energi"}`;
+
             accountDetails.push({
               status: "-1",
               address: e,
               balance: "-1",
             });
-          });
+            if (web3URL.includes("localhost")) {
+              console.log("web3URL.contains(localhost)");
+              console.log(web3URL);
+              connectedColor = "var(--energi-color-red)";
+            } else {
+              console.log("NOT web3URL.contains(localhost)");
+              connectedColor = "var(--energi-color-green)";
+            }
+          }); */
       })
       .catch((error) => {
         callsFinished++;
@@ -747,7 +790,19 @@
         }
         web3Error = error;
         console.log(error);
-        logConnect = logConnect + `\n${getTime()}: ${error}`;
+        logConnect += `\n${getTime()}: ${error}`;
+        accountDetails.push({
+          status: "-1",
+          address: error,
+          balance: "-1",
+        });
+        if (isLocalNode) {
+          logConnect += `\n${getTime()}: NOTE: Make sure personal is loaded in your node`;
+          logConnect += `\n${getTime()}: "Example: ./energi --rpcapi admin,web3,eth,debug,personal,net,energi"`;
+          connectedColor = "var(--energi-color-red)";
+        } else {
+          connectedColor = "var(--energi-color-green)";
+        }
         if (!accounts[0]) {
           toggleAccordionItem(1, true);
         }
@@ -788,12 +843,14 @@
       $ethAccount = account;
 
       f7.dialog.close();
+      creditcardColor = "var(--energi-color-yellow)";
     } catch (e) {
       f7.dialog.close();
       web3Error = e;
       console.log("catch:", e);
       logAccount = logAccount + `\n${getTime()}: ${web3Error}`;
       createErrorPopup("Error converting Private Key", web3Error);
+      creditcardColor = "var(--energi-color-red)";
     }
   }
 
@@ -852,7 +909,7 @@
     nextButtonEnabled = false;
  }
 
-function setValidatedColor(gotBalance, isSigned, isVerified) {
+function setValidatedColor() {
   creditcardColor = "var(--energi-color-red)";
   thumbsupColor = "var(--energi-color-red)";
   rocketColor = "var(--energi-color-red)";
@@ -901,14 +958,14 @@ function setValidatedColor(gotBalance, isSigned, isVerified) {
         checksumAddress = Web3.utils.toChecksumAddress(address);
       } catch (error) {
         f7.dialog.close();
-        setValidatedColor(false, false, false);
+        setValidatedColor();
         createErrorPopup("Error occured", error);
         return null;
       }
 
       if (checksumAddress !== address) {
         f7.dialog.close();
-        setValidatedColor(false, false, false);
+        setValidatedColor();
         logAccount = logAccount + "\n" + getTime() + ": Invalid address checksum";
         logAccount = logAccount.trim();
         createErrorPopup("Error occured", "Invalid address checksum");
@@ -918,46 +975,49 @@ function setValidatedColor(gotBalance, isSigned, isVerified) {
                   selectedAddressBalance = web3.utils.fromWei( b );
                   balanceTitle = selectedAddressBalance  + " NRG";
                   //plusminusColor = "var(--energi-color-green)";
-                  setValidatedColor(true, false, false);
+
+                  gotBalance = true;
+                  setValidatedColor();
 
                   logAccount = logAccount + "\n" + getTime() + ": Balance for '" + address + "' is '" + selectedAddressBalance + "'";
                   logAccount = logAccount.trim();
                   console.log("Start sign");
                   const message = "Energi Faucet Test message to be signed";
                   const signatureObject = SignMessage(message);
-                  setValidatedColor(true, true, false);
                   console.log("After sign", signatureObject);
                   if (signatureObject) {
                     console.log("Start recover");
+                    isSigned = true;
                     const signator = web3.eth.accounts.recover(signatureObject);
                     console.log("After recover");
                     if (signator === $ethAccount.address) {
                       signedTitle = 'Signator "' + signator + '" is VALID';
-                      setValidatedColor(true, true, true);
+                      isVerified = true;
                       choosenAddressIsValid = true;
                     } else {
                       signedTitle = 'Signator "' + signator + '" is INVALID';
-                      setValidatedColor(true, false, false);
+                      isVerified = false;
                     }
                   } else {
-                    setValidatedColor(true, false, false);
+                    isSigned = false;
                     createErrorPopup("Error occured", "web3.eth.accounts.sign(message, privateKey) failed");
                   }
+                  setValidatedColor();
                   f7.dialog.close();
                 }).catch((e) => {
                   f7.dialog.close();
-                  setValidatedColor(false, false, false);
+                  setValidatedColor();
                   createErrorPopup("Error occured", e);
                   console.log(e);
                 });
               } catch (error) {
                 f7.dialog.close();
-                setValidatedColor(false, false, false);
+                setValidatedColor();
                 createErrorPopup("Error occured", error);
               }
             }
     } else {
-        setValidatedColor(false, false, false);
+        setValidatedColor();
         logAccount = logAccount + "\n" + getTime() + ": Address is not set";
         logAccount = logAccount.trim();
         f7.dialog.close();
@@ -1039,6 +1099,7 @@ function setValidatedColor(gotBalance, isSigned, isVerified) {
       navigator.clipboard.writeText(text).then(
         function() {
           /* clipboard successfully set */
+          console.log("CopyToClipboard PK: ", isPrivateKey);
           if (isPrivateKey) {
             privatekeyColor = "var(--energi-color-green)";
           } else {
@@ -1046,7 +1107,7 @@ function setValidatedColor(gotBalance, isSigned, isVerified) {
           }
           choosenAddressIsValid = true;
           nextButtonEnabled = true;
-          setValidatedColor(true, true, true);
+
         }, function() {
           /* clipboard write failed */
           createErrorPopup("Copy to Clipboard", "Failed to copy '" + text + "'");

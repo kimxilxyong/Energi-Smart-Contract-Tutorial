@@ -19,6 +19,9 @@
   font-family: var(--f7-font-family);
   font-size:14px;
   font-weight:400;
+  --energi-button-height:2.5rem;
+  --energi-button-font-size:0.8rem;
+
 
   --f7-navbar-title-font-size:2rem;
   --f7-navbar-title-font-weight:800;
@@ -46,33 +49,63 @@
   display: none !important;
 }
 
-.div-flex-row {
+div .flex-row,
+div.flex-row
+ {
   display: flex;
   flex-direction: row;
+  flex-wrap: inherit;
   justify-content: center;
   align-items: center;
 }
 
-.div-flex-item-dynamic {
+div .flex-col.dynamic,
+div.flex-col.dynamic {
   flex: 1 1 100%;
+  position: relative;
 }
-.div-flex-item-fixed {
+div .flex-col.fixed,
+div.flex-col.fixed {
   flex: 0 0 0%;
+  position: relative;
 }
-.button-small {
-  min-width: 3rem;
-  max-width: 3rem;
+div.flex-col.top2 {
+  top: -0.2rem;
 }
-.button-normal {
-  min-width: 8rem;
-  max-width: 8rem;
+div.flex-col.top3 {
+    top: -0.3rem;
 }
-.button-large {
-  min-width: 12rem;
-  max-width: 12rem;
+div.flex-col.top4 {
+  top: -0.4rem;
+}
+div.flex-col.top5 {
+    top: -0.5rem;
+}
+div.flex-col.top62 {
+    top: -0.62rem;
+}
+div.flex-col.top9 {
+    top: -0.9rem;
+}
+
+.button {
+  max-height: 2.5rem;
+  height: 2.5rem;
+  min-height: 2.5rem;
+}
+.button.disablebar {
+  background-color: var(--energi-color-grey);
+}
+.button:not(.disablebar) {
+  background-color: var(--energi-color-green);
+}
+
+.button-icon {
+  font-size:0.8rem;
+  margin-right: 0.3rem;
 }
 .bold {
-  font-weight:800;
+  font-weight:1000;
 }
 .mt5 {
   margin-top: 0.1rem;
