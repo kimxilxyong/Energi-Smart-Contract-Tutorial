@@ -2,8 +2,6 @@
 
 const { argv } = require('process');
 const { ethers } = require("ethers");
-const { SSL_OP_EPHEMERAL_RSA } = require('constants');
-const { throws } = require('assert');
 
 /*
 function getBalanceHistory
@@ -11,7 +9,6 @@ param provider:
 param address:
 param changesNumber: the number of coin balance history changes */
 async function getBalanceHistory(provider, address, changesNumber) {
-    const crawlerBlocks = 100;
 
     if (!ethers.utils.isAddress(address)) {
         throw ("Invalid address " + address);
@@ -21,35 +18,50 @@ async function getBalanceHistory(provider, address, changesNumber) {
     let arrayHistory = [];
     let tempArray = [{},];
     try {
-        let latest = await provider.getBlockNumber();
+        const latest = await provider.getBlockNumber();
+        const balance = await provider.getBalance(address);
+        // balance is zero, return
+        if (balance && balance.eq(ethers.constants.Zero)) {
+            return [{
+                utc: new Date().toUTCString(),
+                balance: 0,
+                diff: 0,
+                blockNr: latest,
+            }];
+        }
         let iteration = 0;
         let start;
         let end;
-        while (changesNumber > arrayHistory.length && tempArray.length > 0) {
+        while (changesNumber > arrayHistory.length && (start > 0 || iteration === 0)) {
 
             // iteration == 0: go from latest-100 to latest
             // iteration > 0: go from latest-(100*iteration+1) to latest-(100*iteration)
             start = latest - (crawlerBlocks * (iteration + 1));
             end = start + crawlerBlocks;
 
-            tempArray = await getBalanceHistoryCrawler(provider, address, start, end);
-            // add results on front
-/*             if (  !(arrayHistory.length + tempArray.length >= changesNumber)  ) {
-                tempArray.shift();
-                console.log("tempArray.shift()", tempArray);
+            if (start < 0) {
+                start = 0;
             }
- */
+
+            tempArray = await getBalanceHistoryCrawler(provider, address, start, end);
+
             if (tempArray.length > 1) {
                 tempArray.shift();
                 arrayHistory.unshift(tempArray);
                 arrayHistory = arrayHistory.flat();
             }
-        iteration++;
+            iteration++;
         }
+        while (arrayHistory.length > changesNumber) {
+            arrayHistory.shift();
+        }
+
+        console.log("Return history: iterations", iteration, "from block", start, "to", latest);
 
         return arrayHistory;
 
     } catch (error) {
+        console.error("Top level catch:", error);
         throw (error);
     }
 }
@@ -58,14 +70,12 @@ async function getBalanceHistory(provider, address, changesNumber) {
 function getBalanceHistoryBackCrawler
 param provider
 param address
-param iteration how far to start back
-param blocks number of eth blocks to scan from start */
-async function getBalanceHistoryBackCrawler(provider, address, iteration, blocks) {
+param blocks number of eth blocks to scan from ent-blocks to latest */
+async function getBalanceHistoryBackCrawler(provider, address, blocks) {
 
     try {
-        let end = await provider.getBlockNumber();
-        end = end - (iteration * blocks);
-        let start = end - blocks;
+        const end = await provider.getBlockNumber();
+        const start = end - blocks;
         return (await getBalanceHistoryCrawler(provider, address, start, end));
 
     } catch (e) {
@@ -84,8 +94,8 @@ param end eth end block */
 async function getBalanceHistoryCrawler(provider, address, start, end) {
     const errorLen = 280; // max error output length
 
-    console.log("Using startBlockNumber: ", start);
-    console.log("Using endBlockNumber: ", end);
+    //console.log("Using startBlockNumber: ", start);
+    //console.log("Using endBlockNumber: ", end);
 
     const arrayBalances = [];
     // fetch all block balances async
@@ -95,7 +105,10 @@ async function getBalanceHistoryCrawler(provider, address, start, end) {
                 balancePromise: provider.getBalance(address, i).catch((e) => {
                     // check for missing trie node
                     if (e.toString().includes("missing trie node")) {
-                        console.error("🐞 https://github.com/ethereum/go-ethereum/issues/17133", i);
+                        if (trieMessageCount % trieMessageShowEveryXMessage === 0) {
+                            console.error("🐞 https://github.com/ethereum/go-ethereum/issues/17133", i);
+                        }
+                        trieMessageCount++;
                         //throw ("🐞 missing trie node https://github.com/ethereum/go-ethereum/issues/17133");
                         //return undefined;
                     } else {
@@ -116,13 +129,13 @@ async function getBalanceHistoryCrawler(provider, address, start, end) {
             }
         }
     }
-    console.log("DEBUG - 1 arrayBalances.length", arrayBalances.length);
+    //console.log("DEBUG - 1 arrayBalances.length", arrayBalances.length);
 
     const arrayChanges = [];
     let item;
     let lastBalance = ethers.constants.Zero;
     let balance = ethers.constants.Zero;
-    console.log("DEBUG - 1x", balance);
+    //console.log("DEBUG - 1x", balance);
 
     // loop over promises and collect balance changes
     for (let i = 0; i < arrayBalances.length; i++) {
@@ -141,9 +154,10 @@ async function getBalanceHistoryCrawler(provider, address, start, end) {
             }
             if (balance) {
                 if (!balance.eq(lastBalance)) {
-                    console.log("Balance change at block", item.blockNr);
+/*                     console.log("Balance change at block", item.blockNr);
                     console.log("Balance change old", lastBalance);
                     console.log("Balance change new", balance);
+ */
                     lastBalance = balance;
                     arrayChanges.push(
                         {
@@ -152,7 +166,10 @@ async function getBalanceHistoryCrawler(provider, address, start, end) {
                             block: provider.getBlockWithTransactions(item.blockNr).catch((e) => {
                                 // check for missing trie node
                                 if (e.toString().includes("missing trie node")) {
-                                    console.error("🐞 https://github.com/ethereum/go-ethereum/issues/17133", i);
+                                    if (trieMessageCount % trieMessageShowEveryXMessage === 0) {
+                                        console.error("🐞 https://github.com/ethereum/go-ethereum/issues/17133", i);
+                                    }
+                                    trieMessageCount++;
                                     //throw ("🐞 missing trie node https://github.com/ethereum/go-ethereum/issues/17133");
                                 } else {
                                     console.error(".Catch getBlock:", e.toString().slice(0, errorLen));
@@ -172,14 +189,13 @@ async function getBalanceHistoryCrawler(provider, address, start, end) {
             }
         }
     }
-    console.log("DEBUG - 1xx");
-    console.log("DEBUG - 2 arrayBalances.length:", arrayBalances.length);
+    //console.log("DEBUG - 1xx");
+    //console.log("DEBUG - 2 arrayBalances.length:", arrayBalances.length);
     // garbage collection
     arrayBalances.length = 0;
-    console.log("DEBUG - 2 arrayBalances.length:", arrayBalances.length);
-    console.log("DEBUG - 3 arrayChanges.length:", arrayChanges.length);
+    //console.log("DEBUG - 2 arrayBalances.length:", arrayBalances.length);
+    //console.log("DEBUG - 3 arrayChanges.length:", arrayChanges.length);
 
-    let promiseBlock = "TODO provider.getBlockWithTransactions(b.blockNr)";
     const arrayBlocks = [];
     let found = false;
     let to = ethers.constants.AddressZero;
@@ -209,6 +225,7 @@ async function getBalanceHistoryCrawler(provider, address, start, end) {
 
                 if (blockFull.number !== b.blockNr) {
                     // Bailout, this can not happen (or can it 🇨🇳 🤑 🇺🇸?)
+                    console.log.error("CRITICAL FAILURE: 🐞 Invalid block number from getBlockWithTransactions(" + b.blockNr + "): " + blockFull.number + " !== " + b.blockNr + ", ABORTING");
                     throw ("CRITICAL FAILURE: 🐞 Invalid block number from getBlockWithTransactions(" + b.blockNr + "): " + blockFull.number + " !== " + b.blockNr + ", ABORTING");
                 }
                 timestamp = new Date(blockFull.timestamp * 1000);
@@ -274,7 +291,7 @@ async function getBalanceHistoryCrawler(provider, address, start, end) {
     }
     arrayChanges.length = 0;
 
-    console.log("Collection finished: ", arrayBlocks.length, " Blocks");
+    console.log("Collected: ", arrayBlocks.length, "Blocks in range", start, end);
 
     return (arrayBlocks);
 }
@@ -302,25 +319,28 @@ const provider = new ethers.providers.Web3Provider(window.ethereum)
 // my local Energi3 testnet node
 const provider = new ethers.providers.JsonRpcProvider('http://localhost:49796');
 const address = argv[2] || "0x771dDB07222A1f9442C91CF04f64F3164771BB62";
-const blocks = 300;  //300000;
-const transactions = 20;
+const transactions = 2000;
+
+// How many blocks to scan in one iteration (bigger number means more memory)
+// After an iteration the blocks are deleted and only blocks with effective balance changes are kept
+// Also in one iteration each block is fetched asynchronly (at nearly the same time the fetches are fired)
+const crawlerBlocks = 4500;
 
 /* if you get eth.getBalance('account', 'block-no') returns 'Error: missing trie node' #17133 */
 /* add  😜--syncmode=full --gcmode=archive😝  to your node server startup */
 /* https://github.com/ethereum/go-ethereum/issues/17133 */
+let trieMessageCount = 0;
+const trieMessageShowEveryXMessage = (crawlerBlocks * 20); // show only each X's message, because if you get one, you will get thousands
+
 
 /* These consts make sure we don't overload the server (hopefully 😇)*/
-const scanBlock = 25;
+const scanBlock = 100;
 const scanBlockSleep = 9; // milliseconds
 
 
-/* crawl back number of blocks to scan for balance changes */
-/* console.log("Starting collection for address", address, "from the last", blocks, "blocks"); */
-/* getBalanceHistoryBackCrawler(provider, address, blocks).catch(() => { }).then((h) => { console.log("History", h); }); */
-
 const startTime = Date.now();
-// get balance changes history for the last transactions count
-getBalanceHistory(provider, address, transactions).catch((e) => { console.log(e); }).then((h) => {
+// Get balance changes history for the last transactions count
+getBalanceHistory(provider, address, transactions).catch((e) => { console.error(e); }).then((h) => {
     console.log('***************************************');
     console.log(h);
     console.log('***************************************');
@@ -328,5 +348,18 @@ getBalanceHistory(provider, address, transactions).catch((e) => { console.log(e)
     console.log("Elapsed:", Date.now() - startTime, "ms");
     console.log('***************************************');
 });
+
+/*
+const blocks = 300;  //300000;
+getBalanceHistoryBackCrawler(provider, address, blocks).catch((e) => { console.log(e); }).then((h) => {
+    console.log('***************************************');
+    console.log(h);
+    console.log('***************************************');
+    console.log("History", h.length, "transactions");
+    console.log("Elapsed:", Date.now() - startTime, "ms");
+    console.log('***************************************');
+}); */
+
+
 
 return (0);

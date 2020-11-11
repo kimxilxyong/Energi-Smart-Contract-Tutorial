@@ -16,6 +16,4 @@
 #####################################################################
 
 
-./energi3 --testnet --verbosity 3 --vmdebug --preload utils.js,peers.js --rpccorsdomain "*" --rpc --rpcaddr "127.0.0.1" --rpcvhosts "localhost" --rpcapi admin,web3,eth,debug,personal,net,energi console
-
-
+./energi3 --testnet --verbosity 3 --vmdebug --gcmode=archive --syncmode=full --preload utils.js,peers.js --rpccorsdomain "*" --rpc --rpcaddr "127.0.0.1" --rpcvhosts "localhost" --rpcapi admin,web3,eth,debug,personal,net,energi console
