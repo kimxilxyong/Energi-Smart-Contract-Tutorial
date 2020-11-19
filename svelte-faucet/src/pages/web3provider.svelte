@@ -379,6 +379,23 @@
           <ListItem header="Balance" title={balanceTitle}>
             <i slot="media" class="f7-icons size-20" style="color:{plusminusColor};">plus_slash_minus</i>
           </ListItem>
+
+          {#if balanceHistory && balanceHistory.length > 0}
+            <ListItem title="Balance History">
+               <i slot="media">🪙</i>
+            </ListItem>
+
+            {#each balanceHistory as bhItem, i}
+              <ListItem header={"Block " + bhItem.blockNr + ", " + timeDifference(new Date(), bhItem.timestamp)} title={bhItem.diff + " NRG"} footer={bhItem.balance + " NRG"}>
+                <i slot="media" class="f7-icons size-20" style="color:{(bhItem.diff > 0) ? 'var(--energi-color-green)' : 'var(--energi-color-red)'};">{(bhItem.diff > 0) ? 'arrowtriangle_up_fill' : 'arrowtriangle_down_fill'}</i>
+              </ListItem>
+            {/each}
+          {:else}
+            <ListItem title="No Balance History found">
+               <i slot="media">🐣</i>
+            </ListItem>
+          {/if}
+
           <ListItem header="Sign a message" title={signedTitle}>
             <i slot="media" class="f7-icons size-20" style="color:{pawColor};">paw</i>
           </ListItem>
@@ -448,6 +465,7 @@
     Preloader,
   } from "framework7-svelte";
   import Web3 from "web3";
+  import ethers from "ethers";
   import { tick, getContext } from "svelte";
   import {
     visitedPages,
@@ -456,7 +474,7 @@
     getTime,
     scrollTo,
   } from "../js/stores.js";
-  import { listWallets } from "../js/web3utils.js";
+  import { listWallets, getBalanceHistory, timeDifference } from "../js/web3utils.js";
   import ListInputPassword, { setFocus } from "../components/input-password.svelte";
 
 
@@ -484,6 +502,7 @@
   let logConnect = "";
   let logAccount = "";
   let accounts = [];
+let balanceHistory = [];
 
   let selectedAddress;
   let privateKey;
@@ -660,7 +679,7 @@
 
     logConnect = getTime() + ": Try connect to " + web3URL;
 
-    f7.dialog.preloader("Connecting to " + web3URL);
+  f7.dialog.preloader("Connecting to " + web3URL);
 
     let p = web3.setProvider(new Web3.providers.HttpProvider(web3URL));
     console.log("SetProvider: ", p);
@@ -823,7 +842,7 @@
 
 
   function ScanPrivateKey() {
-    ResetValidEthAccount();
+    resetValidEthAccount();
     f7.dialog.preloader(
       "web3.eth.accounts.privateKeyToAccount (" + privateKey
     ) + ")";
@@ -895,7 +914,7 @@
     await tick();
   }
 
- function ResetValidEthAccount() {
+ function resetValidEthAccount() {
     creditcardColor = "var(--energi-color-grey)";
     pawColor = "var(--energi-color-grey)";
     plusminusColor = "var(--energi-color-grey)";
@@ -907,6 +926,7 @@
     selectedAddressBalance = 0;
     choosenAddressIsValid = false;
     nextButtonEnabled = false;
+    balanceHistory.length = 0;
  }
 
 function setValidatedColor() {
@@ -939,94 +959,152 @@ function setValidatedColor() {
   console.log("setValidatedColor", gotBalance, isSigned, isVerified);
 }
 
- function TestAccount() {
+ async function TestAccount() {
     f7.dialog.preloader("Testing Account");
+    let errorMessageForPopup;
 
     if (selectedAddress !== $ethAccount.address) {
       $ethAccount.address = selectedAddress;
     }
 
-    ResetValidEthAccount();
+    resetValidEthAccount();
 
-    getBalance($ethAccount.address);
+    try {
+      const balance = await getBalance($ethAccount.address);
+      if (balance) {
+        balanceTitle = ethers.utils.formatEther(balance) + " NRG";
+      } else {
+        balanceTitle = "Failed to get the balance of " + $ethAccount.address;
+      }
+
+      const wasSigned = await testSignMessage($ethAccount.address, $ethAccount.privateKey);
+      if (wasSigned) {
+        signedTitle = "Successfully signed a message with " + ($ethAccount.privateKey ? $ethAccount.privateKey : $ethAccount.address);
+      } else {
+        signedTitle = "Failed to sign a message with " + ($ethAccount.privateKey ? $ethAccount.privateKey : $ethAccount.address);
+      }
+
+      const provider = new ethers.providers.JsonRpcProvider(web3URL);
+      if (provider) {
+        const transactions = 5;
+        const startTime = Date.now();
+        const bh = await getBalanceHistory(provider, $ethAccount.address, transactions).catch((e) => { console.error(e); errorMessageForPopup = e;});
+
+        if (bh && bh.length > 0) {
+          for (let i = 0; i < bh.length; i++ ) {
+              console.log('***************************************');
+            console.log("typeof bh.diff", typeof bh[i].diff);
+            console.log("typeof bh.balance", typeof bh[i].balance);
+            balanceHistory.push(bh[i]);
+          }
+        }
+
+        console.log('***************************************');
+        console.log(balanceHistory);
+        console.log('***************************************');
+        console.log("History", balanceHistory.length, "transactions");
+        console.log("Elapsed:", Date.now() - startTime, "ms");
+        console.log('***************************************');
+
+        if (balanceHistory.length > 0) {
+          balanceHistory = balanceHistory;
+    }
+      }
+
+    } catch (error) {
+      f7.dialog.close();
+      createErrorPopup("Error occured", error);
+    }
+    f7.dialog.close();
+    setValidatedColor();
+
+    if (errorMessageForPopup && errorMessageForPopup !== "") {
+      createErrorPopup("Error occured", errorMessageForPopup);
+    }
   }
 
-  function getBalance(address) {
+  async function getBalance(address) {
+    let balance = null;
     if (address) {
       let checksumAddress;
       try {
         checksumAddress = Web3.utils.toChecksumAddress(address);
-      } catch (error) {
-        f7.dialog.close();
-        setValidatedColor();
-        createErrorPopup("Error occured", error);
-        return null;
+
+        if (checksumAddress !== address) {
+          //TODO REMOVE f7.dialog.close();
+          //TODO REMOVE setValidatedColor();
+          logAccount = logAccount + "\n" + getTime() + ": Invalid address checksum";
+          logAccount = logAccount.trim();
+          //TODO REMOVE createErrorPopup("Error occured", "Invalid address checksum");
+        } else {
+          try {
+            balance = await web3.eth.getBalance(address).catch((e) => {
+                                                                        //TODO REMOVE f7.dialog.close();
+                                                                        //TODO REMOVE setValidatedColor();
+                                                                        //TODO REMOVE createErrorPopup("Error occured", e);
+                                                                        console.log(e);
+                                                                      });
+          } catch (e) {
+            console.log(e);
+            //TODO REMOVE f7.dialog.close();
+            //TODO REMOVE setValidatedColor();
+            //TODO REMOVE createErrorPopup("Error occured", error);
+          }
+        }
+
+      } catch (e) {
+        console.log(e);
+        //TODO REMOVE f7.dialog.close();
+        //TODO REMOVE setValidatedColor();
+        //TODO REMOVE createErrorPopup("Error occured", error);
       }
 
-      if (checksumAddress !== address) {
-        f7.dialog.close();
-        setValidatedColor();
-        logAccount = logAccount + "\n" + getTime() + ": Invalid address checksum";
-        logAccount = logAccount.trim();
-        createErrorPopup("Error occured", "Invalid address checksum");
-      } else {
-              try {
-                web3.eth.getBalance(address).then((b) => {
-                  selectedAddressBalance = web3.utils.fromWei( b );
-                  balanceTitle = selectedAddressBalance  + " NRG";
-                  //plusminusColor = "var(--energi-color-green)";
-
-                  gotBalance = true;
-                  setValidatedColor();
-
-                  logAccount = logAccount + "\n" + getTime() + ": Balance for '" + address + "' is '" + selectedAddressBalance + "'";
-                  logAccount = logAccount.trim();
-                  console.log("Start sign");
-                  const message = "Energi Faucet Test message to be signed";
-                  const signatureObject = SignMessage(message);
-                  console.log("After sign", signatureObject);
-                  if (signatureObject) {
-                    console.log("Start recover");
-                    isSigned = true;
-                    const signator = web3.eth.accounts.recover(signatureObject);
-                    console.log("After recover");
-                    if (signator === $ethAccount.address) {
-                      signedTitle = 'Signator "' + signator + '" is VALID';
-                      isVerified = true;
-                      choosenAddressIsValid = true;
-                    } else {
-                      signedTitle = 'Signator "' + signator + '" is INVALID';
-                      isVerified = false;
-                    }
-                  } else {
-                    isSigned = false;
-                    createErrorPopup("Error occured", "web3.eth.accounts.sign(message, privateKey) failed");
-                  }
-                  setValidatedColor();
-                  f7.dialog.close();
-                }).catch((e) => {
-                  f7.dialog.close();
-                  setValidatedColor();
-                  createErrorPopup("Error occured", e);
-                  console.log(e);
-                });
-              } catch (error) {
-                f7.dialog.close();
-                setValidatedColor();
-                createErrorPopup("Error occured", error);
-              }
-            }
     } else {
-        setValidatedColor();
+        //TODO REMOVE setValidatedColor();
         logAccount = logAccount + "\n" + getTime() + ": Address is not set";
         logAccount = logAccount.trim();
-        f7.dialog.close();
+        //TODO REMOVE f7.dialog.close();
     }
+    return balance;
   }
 
-  function SignMessage(msg) {
+  async function testSignMessage(adr, privateKey) {
+    const msg = "Energi Faucet Test message to be signed";
+
     try {
-      const signature = web3.eth.accounts.sign(msg, $ethAccount.privateKey);
+      let signator;
+      // check how to sign: with private key or letting the node do it
+      if (privateKey && privateKey !== "") {
+        const signatureObject = web3.eth.accounts.sign(msg, privateKey);
+        signator = web3.eth.accounts.recover(signatureObject);
+      } else {
+        const signature = await web3.eth.sign(msg, adr).catch((e) => {logAccount = (logAccount + "\n" + getTime() + ": web3.eth.sign failed for " + adr + ": " + e).trim();});
+        signator = await web3.eth.personal.ecRecover(msg, signature).catch((e) => {logAccount = (logAccount + "\n" + getTime() + ": web3.eth.personal.ecRecover failed: " + e).trim();});
+      }
+
+      if (signator == adr) {
+        signedTitle = 'Address ' + adr + '" is VALID';
+        isSigned = true;
+        //choosenAddressIsValid = true; TODO REMOVE FROM HERE
+      } else {
+        if (signator === undefined) {
+          signator = 'undefined';
+        }
+        signedTitle = 'Signator "' + signator + '" is INVALID';
+        isSigned = false;
+      }
+
+    } catch (e) {
+      logAccount = (logAccount + "\n" + getTime() + ": web3.eth.sign failed for " + adr + ": " + e).trim();
+      isSigned = false;
+    }
+
+    return isSigned;
+  }
+
+  function getSignatureFromPrivateKey(msg, privateKey) {
+    try {
+      const signature = web3.eth.accounts.sign(msg, privateKey);
       logAccount += "\n" + getTime() + ": Signature: ****************************";
       logAccount += "\n" + JSON.stringify(signature, undefined, 4);
       logAccount += "\n" + getTime() + ": ***************************************";

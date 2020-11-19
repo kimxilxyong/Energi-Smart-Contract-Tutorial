@@ -5,7 +5,7 @@
   font-weight: 400;
   src: local('UbuntuMono Nerd Font'),
        local('Ubuntu Mono Nerd Font Complete');
-  src: url('../fonts/Ubuntu Mono Nerd Font Complete.ttf') format('truetype');
+  src: url('../fonts/UbuntuMono Nerd Font/Ubuntu Mono Nerd Font Complete.ttf') format('truetype');
 }
 .nf-icons {
   font-family: 'Ubuntu Mono Nerd Font Icons';

@@ -109,8 +109,7 @@ async function getBalanceHistoryCrawler(provider, address, start, end) {
                             console.error("🐞 https://github.com/ethereum/go-ethereum/issues/17133", i);
                         }
                         trieMessageCount++;
-                        //throw ("🐞 missing trie node https://github.com/ethereum/go-ethereum/issues/17133");
-                        //return undefined;
+                    //throw ("🐞 missing trie node https://github.com/ethereum/go-ethereum/issues/17133");
                     } else {
                         console.error(".Catch:", e.toString().slice(0, errorLen));
                     }
@@ -129,20 +128,16 @@ async function getBalanceHistoryCrawler(provider, address, start, end) {
             }
         }
     }
-    //console.log("DEBUG - 1 arrayBalances.length", arrayBalances.length);
 
     const arrayChanges = [];
     let item;
     let lastBalance = ethers.constants.Zero;
     let balance = ethers.constants.Zero;
-    //console.log("DEBUG - 1x", balance);
 
     // loop over promises and collect balance changes
     for (let i = 0; i < arrayBalances.length; i++) {
-    //while (arrayBalancePromises.length > 0) {
         try {
 
-            //balance = await arrayBalances.shift();
             item = arrayBalances[i];
             try {
                 //console.log("item.balancePromise", item.balancePromise);
@@ -154,10 +149,6 @@ async function getBalanceHistoryCrawler(provider, address, start, end) {
             }
             if (balance) {
                 if (!balance.eq(lastBalance)) {
-/*                     console.log("Balance change at block", item.blockNr);
-                    console.log("Balance change old", lastBalance);
-                    console.log("Balance change new", balance);
- */
                     lastBalance = balance;
                     arrayChanges.push(
                         {
@@ -189,12 +180,8 @@ async function getBalanceHistoryCrawler(provider, address, start, end) {
             }
         }
     }
-    //console.log("DEBUG - 1xx");
-    //console.log("DEBUG - 2 arrayBalances.length:", arrayBalances.length);
     // garbage collection
     arrayBalances.length = 0;
-    //console.log("DEBUG - 2 arrayBalances.length:", arrayBalances.length);
-    //console.log("DEBUG - 3 arrayChanges.length:", arrayChanges.length);
 
     const arrayBlocks = [];
     let found = false;
@@ -268,7 +255,7 @@ async function getBalanceHistoryCrawler(provider, address, start, end) {
                     value = ethers.constants.Zero;
                 }
             }
-            //console.log("DEBUG timestamp", timestamp);
+
             arrayBlocks.push({
                 utc: timestamp.toUTCString(),
                 balance: parseFloat( ethers.utils.formatEther(b.balance) ),
