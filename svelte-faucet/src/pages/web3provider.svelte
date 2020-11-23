@@ -381,7 +381,7 @@
           </ListItem>
 
           {#if balanceHistory && balanceHistory.length > 0}
-            <ListItem title="Balance History">
+            <ListItem header={"Balance History till " + timeDifference(new Date(), balanceHistory[balanceHistory.length-1].timestamp)} title={"From block " + balanceHistory[balanceHistory.length-1].blockNr + " to " + balanceHistory[0].blockNr} footer={balanceHistory.length + " Transactions"}>
                <i slot="media">🪙</i>
             </ListItem>
 
@@ -393,6 +393,11 @@
           {:else}
             <ListItem title="No Balance History found">
                <i slot="media">🐣</i>
+               <span slot="after">
+                <Stepper name="Nr of TXs" value={numberOfTransactionsToFetchForBalanceHistory}
+                         onStepperChange={(v) => {numberOfTransactionsToFetchForBalanceHistory = v}}
+                         small wraps autorepeat autorepeatDynamic inputReadonly/>
+              </span>
             </ListItem>
           {/if}
 
@@ -462,6 +467,7 @@
     BlockHeader,
     ListInput,
     Button,
+    Stepper,
     Preloader,
   } from "framework7-svelte";
   import Web3 from "web3";
@@ -502,7 +508,8 @@
   let logConnect = "";
   let logAccount = "";
   let accounts = [];
-let balanceHistory = [];
+  let balanceHistory = [];
+  let numberOfTransactionsToFetchForBalanceHistory = 5;
 
   let selectedAddress;
   let privateKey;
@@ -608,6 +615,11 @@ let balanceHistory = [];
         $ethAccount.isUnlocked = true;
       }
     }
+
+    const checksumAddress = Web3.utils.toChecksumAddress($ethAccount.address);
+    if (checksumAddress === $ethAccount.address) {
+      scrollTo("scrolltarget2");
+    }
   }
   function urlChanged(e) {
     console.log("urlChanged(e): " + e.target.value);
@@ -676,10 +688,11 @@ let balanceHistory = [];
     gotBalance = false;
     isSigned = false;
     isVerified = false;
+    resetValidEthAccount();
 
     logConnect = getTime() + ": Try connect to " + web3URL;
 
-  f7.dialog.preloader("Connecting to " + web3URL);
+    f7.dialog.preloader("Connecting to " + web3URL);
 
     let p = web3.setProvider(new Web3.providers.HttpProvider(web3URL));
     console.log("SetProvider: ", p);
@@ -923,9 +936,13 @@ let balanceHistory = [];
     privatekeyColor = $ethAccount.privateKey ? "var(--energi-color-red)" : "var(--energi-color-grey)";
     balanceTitle = "N/A";
     signedTitle = "N/A";
+
     selectedAddressBalance = 0;
+
     choosenAddressIsValid = false;
     nextButtonEnabled = false;
+    gotBalance = false;
+
     balanceHistory.length = 0;
  }
 
@@ -946,6 +963,7 @@ function setValidatedColor() {
   } else {
     pawColor = "var(--energi-color-red)";
   }
+
   if (isVerified) {
     creditcardColor = "var(--energi-color-green)";
     thumbsupColor = "var(--energi-color-green)";
@@ -973,6 +991,7 @@ function setValidatedColor() {
       const balance = await getBalance($ethAccount.address);
       if (balance) {
         balanceTitle = ethers.utils.formatEther(balance) + " NRG";
+        gotBalance = true;
       } else {
         balanceTitle = "Failed to get the balance of " + $ethAccount.address;
       }
@@ -986,7 +1005,8 @@ function setValidatedColor() {
 
       const provider = new ethers.providers.JsonRpcProvider(web3URL);
       if (provider) {
-        const transactions = 5;
+        console.log("getBalanceHistory", numberOfTransactionsToFetchForBalanceHistory);
+        const transactions = numberOfTransactionsToFetchForBalanceHistory;
         const startTime = Date.now();
         const bh = await getBalanceHistory(provider, $ethAccount.address, transactions).catch((e) => { console.error(e); errorMessageForPopup = e;});
 
@@ -995,7 +1015,7 @@ function setValidatedColor() {
               console.log('***************************************');
             console.log("typeof bh.diff", typeof bh[i].diff);
             console.log("typeof bh.balance", typeof bh[i].balance);
-            balanceHistory.push(bh[i]);
+            balanceHistory.unshift(bh[i]);
           }
         }
 
@@ -1008,7 +1028,7 @@ function setValidatedColor() {
 
         if (balanceHistory.length > 0) {
           balanceHistory = balanceHistory;
-    }
+        }
       }
 
     } catch (error) {
@@ -1080,17 +1100,19 @@ function setValidatedColor() {
       } else {
         const signature = await web3.eth.sign(msg, adr).catch((e) => {logAccount = (logAccount + "\n" + getTime() + ": web3.eth.sign failed for " + adr + ": " + e).trim();});
         signator = await web3.eth.personal.ecRecover(msg, signature).catch((e) => {logAccount = (logAccount + "\n" + getTime() + ": web3.eth.personal.ecRecover failed: " + e).trim();});
+        signator = Web3.utils.toChecksumAddress(signator);
+        console.log("signator", signator);
       }
 
       if (signator == adr) {
-        signedTitle = 'Address ' + adr + '" is VALID';
+        //TODO REMOVE signedTitle = 'Address ' + adr + '" is VALID';
         isSigned = true;
         //choosenAddressIsValid = true; TODO REMOVE FROM HERE
       } else {
         if (signator === undefined) {
           signator = 'undefined';
         }
-        signedTitle = 'Signator "' + signator + '" is INVALID';
+        //TODO REMOVE signedTitle = 'Signator "' + signator + '" is INVALID';
         isSigned = false;
       }
 
