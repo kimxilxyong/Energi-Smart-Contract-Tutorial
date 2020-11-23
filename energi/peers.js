@@ -9,6 +9,8 @@ function checkPeersByVersion(latestVersion, removePeer, showAll) {
     for (var i = 0; i < admin.peers.length; i++) {
     //for (var i in admin.peers) {
         if (admin.peers[i] === undefined || admin.peers[i] == undefined || !admin.peers[i]) {
+            // there seems to be a bug somewhere under energi 3.0.6, sometimes i get an undefined peer
+            // happens only very rarely and has probably to do with removing peers in a loop over peers
             //console.log("Undefined detected: i=",i,", '",admin.peers[i],"'");
             continue;
             console.log("DEBUG after continue? 🤮 i=",i);

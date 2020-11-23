@@ -15,9 +15,10 @@ import "./math.sol";
  */
 contract OwnedContract {
 
-    // published to '0x4b7c29e9c7e5132B140884A9dAc98427dcF97AbF'
+    // 104 published to '0x4b7c29e9c7e5132B140884A9dAc98427dcF97AbF'
+    // 105 published to '0xfC79349137862639A035c71C36fD4d71B2a5D668'
     // http://localhost:49796
-    uint16 constant public version = 104;
+    uint16 constant public version = 105;
 
     // The creator of this contract
     address payable private owner;
@@ -94,7 +95,7 @@ contract Faucet is OwnedContract {
         uint totalBalance;
         uint64 numPayments;
         uint64 index;
-        bytes32 name;
+        string name;
         mapping(uint => Payment) payments;
     }
 
@@ -123,7 +124,7 @@ contract Faucet is OwnedContract {
     }
 
     receive() external payable {
-        bytes32 name = "Anonymous Donor";
+        string memory name = "Anonymous Donor";
         Donation(name);
     }
 
@@ -176,7 +177,7 @@ contract Faucet is OwnedContract {
      * @return _numPayments
      * @return _name name of donor
      */
-    function getDonorByIndex(uint _i) public view returns (address _from, uint _totalBalance, uint _numPayments, bytes32 _name) {
+    function getDonorByIndex(uint _i) public view returns (address _from, uint _totalBalance, uint _numPayments, string memory _name) {
         require(_i < 100, "Max Donor count is 100");
         require(_i < Donors.length, "Invalid Donor index");
 
@@ -211,7 +212,7 @@ contract Faucet is OwnedContract {
      * @return _numPayments
      * @return _name name of recipient
      */
-    function getRecipientByIndex(uint _i) public view returns (address _recipient, uint _totalBalance, uint _numPayments, bytes32 _name) {
+    function getRecipientByIndex(uint _i) public view returns (address _recipient, uint _totalBalance, uint _numPayments, string memory _name) {
         require(_i < Recipients.length, "Invalid Recipient index");
 
         _recipient = Recipients[_i];
@@ -261,7 +262,7 @@ contract Faucet is OwnedContract {
      * @param  _from Address
      * @return name of donor
      */
-    function getDonorName(address _from) public view returns (bytes32) {
+    function getDonorName(address _from) public view returns (string memory) {
         return Donations[_from].name;
     }
 
@@ -270,7 +271,7 @@ contract Faucet is OwnedContract {
      * @param  _to Address
      * @return name of recipient
      */
-    function getRecipientName(address _to) public view returns (bytes32) {
+    function getRecipientName(address _to) public view returns (string memory) {
         return Payments[_to].name;
     }
 
@@ -278,7 +279,7 @@ contract Faucet is OwnedContract {
      * @dev Sets a donor name
      * @param  _name of donor
      */
-    function setDonorName(bytes32 _name) public {
+    function setDonorName(string calldata _name) public {
         Donations[msg.sender].name = _name;
     }
 
@@ -286,7 +287,7 @@ contract Faucet is OwnedContract {
      * @dev Sets a recipients name
      * @param  _name of recipient
      */
-    function setRecipientName(bytes32 _name) public {
+    function setRecipientName(string calldata  _name) public {
         Payments[msg.sender].name = _name;
     }
 
@@ -343,7 +344,7 @@ contract Faucet is OwnedContract {
      /**
      * @dev called when contract receives funding
      */
-    function Donation(bytes32 _name) public payable {
+    function Donation(string memory _name) public payable {
         require(msg.sender != address(0),  "address is null");
         require(msg.value > 0, "amount should be greater than 0");
         //require((Donations[msg.sender].numPayments + 1 > Donations[msg.sender].numPayments), "uint32 overflow");
@@ -354,11 +355,6 @@ contract Faucet is OwnedContract {
             Donations[msg.sender].index = uint64(Donors.length);
             Donations[msg.sender].name = _name;
             Donors.push(msg.sender);
-        }
-
-        // let the donor overwrite his name
-        if (Donations[msg.sender].name != _name) {
-            Donations[msg.sender].name = _name;
         }
 
         Donations[msg.sender].totalBalance = Donations[msg.sender].totalBalance.add(msg.value);
@@ -437,7 +433,6 @@ contract Faucet is OwnedContract {
         Payments[_to].payments[numPayments].withdraw = true;
         Payments[_to].payments[numPayments].timestamp = block.timestamp;
 
-        //addRecipient(_to);
         totalBalance = totalBalance.sub(_amount);
         _to.transfer(_amount);
         emit GivenDonation(_to, _amount, numPayments, block.timestamp);
