@@ -1510,6 +1510,7 @@
             "resolved": "https://registry.npmjs.org/next-tick/-/next-tick-1.0.0.tgz",
             "version": "1.0.0"
         },
+        "node-fetch": "^2.6.1",
         "normalize-url": {
             "integrity": "sha512-2s47yzUxdexf1OhyRi4Em83iQk0aPvwTddtFz4hnSSw9dCEsLEGf6SwIO8ss/19S9iBb5sJaOuTvTGDeZI00BQ==",
             "resolved": "https://registry.npmjs.org/normalize-url/-/normalize-url-4.5.0.tgz",

@@ -15,7 +15,9 @@ import "./math.sol";
  */
 contract OwnedContract {
 
+    // 104 name interface is bytes32
     // 104 published to '0x4b7c29e9c7e5132B140884A9dAc98427dcF97AbF'
+    // 105 name interface is string
     // 105 published to '0xfC79349137862639A035c71C36fD4d71B2a5D668'
     // http://localhost:49796
     uint16 constant public version = 105;

@@ -2,8 +2,6 @@
 
 const Web3 = require('web3');
 const ethers = require('ethers');
-const abi = require('./faucet104.abi.json');
-const { result } = require('underscore');
 
 const testPrivateKey = (pk) => {
     try {
@@ -64,8 +62,7 @@ const sendTransaction = async (web3, signedTx) => {
         return sentTx;
 
     } catch (e) {
-        console.log(e);
-        return false;
+        throw (e);
     }
 
 /*     sentTx.on("receipt", receipt => {
@@ -96,12 +93,10 @@ const getContractVersionSigned = async (web3, contract, fromAddress, privateKey)
 const callPureContractMethod = async (contract, method) => {
     try {
         const result = await contract.methods[method]().call();
-        if (result) {
-            return result;
-        }
+        return result;
     } catch (e) {
-        console.log(e);
-        return e;
+        throw (e);
+        //return e;
     }
 }
 
@@ -112,29 +107,49 @@ const sendDonation = async (contract, donorName, wei) => {
         const ta = contract.methods.Donation(donorName).send(options);
         ta.on('transactionHash', (hash) => { console.log("TransactionHash:", hash); })
             .on('confirmation', (confirmationNumber, receipt) => { console.log("Confirmation Nr:", confirmationNumber); })
-            .on('error', console.error)
+            .on('error', (e) => { lastErrorObject = e; })
             .on('receipt', (receipt) => { console.log("Receipt:", receipt); })
-            .catch((e) => { console.log("Send Promise:", e); });
+            .catch((e) => { return e;});  //console.log("Send Promise:", e); });
 
         result = await ta;
 
     } catch (e) {
-        result = e;
+        throw (e);
+        //result = e;
     }
     return result;
 }
 
 
-const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:49796'));
 
-const contractAddr = "0x4b7c29e9c7e5132B140884A9dAc98427dcF97AbF";
+// 104 name interface is bytes32
+// 104 published to '0x4b7c29e9c7e5132B140884A9dAc98427dcF97AbF'
+// 104 name interface is string
+// 105 published to '0xfC79349137862639A035c71C36fD4d71B2a5D668'
+//const contractAddr = "0x4b7c29e9c7e5132B140884A9dAc98427dcF97AbF";
+const contractAddr = "0xfC79349137862639A035c71C36fD4d71B2a5D668";
+const fromAddress = "0x7757a1f517d4680dba5d0ae9c984d3d394cc4a30";
+//const fromAddress = "0x771ddb07222a1f9442c91cf04f64f3164771bb62";
 //const fromAddress = "0x17fa844a3f96f2a8ae55e49c0e8ccf1bc628f90c";
-const fromAddress = "0x03fb09251ec05ee9ca36c98644070b89111d4b3f";
+//const fromAddress = "0x03fb09251ec05ee9ca36c98644070b89111d4b3f";
+
+//const name = "Алекс из Новосибирска 🇷🇺 🥶";
+//const name = "Anton aus Tirol 🇦🇹 🎿";
+//const name = "🇹🇼台湾 is not 💩🇨🇳中国💩";
+const name = "免费西藏你中国混蛋 🤬"; // free tibet
+//web3.utils.utf8ToHex(name)
+
+const txConfirmationCount = 5;
+
 let privateKey;
+let lastErrorObject;
 
+const abi = require('./faucet105.abi.json');
+const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:49796'));
 const faucet = new web3.eth.Contract(abi, contractAddr);
-faucet.defaultAddress = fromAddress;
 
+faucet.defaultAddress = fromAddress;
+faucet.transactionConfirmationBlocks = txConfirmationCount;
 
 callPureContractMethod(faucet, "getVersion()").catch((e) => { console.log("getVersion failed:", e); }).then((r) => { console.log("Version:", r); });
 callPureContractMethod(faucet, "getOwner()").catch((e) => { console.log("getOwner failed:", e); }).then((r) => { console.log("Owner:", r); });
@@ -143,5 +158,37 @@ callPureContractMethod(faucet, "getCalculatedBalance()").catch((e) => { console.
 //getContractVersion(web3, faucet, fromAddress, privateKey).catch((e) => { console.log("getVersion failed:", e); }).then((r) => { console.log("Version:", r); });
 
 console.log("Donating 1 NRG");
-sendDonation(faucet, web3.utils.utf8ToHex("Kim from 🇦🇹"), web3.utils.toWei("1")).catch((e) => { console.log("sendDonation failed:", e); }).then((r) => { console.log("sendDonation:", r); });
+sendDonation(faucet, name, web3.utils.toWei("1"))
+    .catch((e) => {
+        if (e.toString().includes("authentication needed")) {
+            console.log("***********************************************************************************************");
+            if (e.toString().includes("only staking")) {
+                console.log("Your account is in staking only mode, you need to unlock it in the nodes console.");
+            } else {
+                console.log("Your account is locked, you need to unlock it in the nodes console.");
+            }
+            console.log("personal.unlockAccount('" + fromAddress + "',null,secondsToUnlock,false)");
+            console.log("***********************************************************************************************");
+        }
+        console.log("**************************");
+        console.log("**** Donation failed with:", e);
+        console.log("**************************");
+    })
+    .then((r) => {
+        if (r) {
+            if (r.status) {
+                console.log("Donation succesfull 🤑");
+                console.log("Transaction Hash", r.transactionHash);
+                console.log("Gas used", r.gasUsed);
+                console.log("Status", r.status);
+                console.log("Block Number", r.blockNumber);
+                console.log("****************************************");
+                console.log("🧐 Waiting for " + faucet.transactionConfirmationBlocks + " more confirmations 🏁");
+
+            } else {
+                console.log("Donation returned status false");
+                console.log(r);
+            }
+        }
+    });
 console.log("waiting for result");

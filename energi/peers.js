@@ -1,4 +1,9 @@
+// SPDX - License - Identifier: MIT
+// Copyright(c) 2020 Kim Il Yong
 // Utility functions to list and remove old version peers
+// start with startPeerWatch()
+// stop with stopPeerWatch()
+// see who is connected: listAllPeers()
 
 var currentVersion = "3.0.7";
 var clearWatch;

@@ -15,12 +15,12 @@ import "./math.sol";
  */
 contract OwnedContract {
 
-    // published to '0x2a2215Ab0B0ccFcaFF01dD7eB6E5808BD8D50C51' testnet
+    // published to '0x4b7c29e9c7e5132B140884A9dAc98427dcF97AbF'
     // http://localhost:49796
-    uint16 constant public version = 103;
+    uint16 constant public version = 104;
 
     // The creator of this contract
-    address private owner;
+    address payable private owner;
 
     // event for EVM logging
     event OwnerSet(address indexed oldOwner, address indexed newOwner);
@@ -48,7 +48,7 @@ contract OwnedContract {
      * @dev Change owner
      * @param newOwner address of new owner
      */
-    function changeOwner(address newOwner) public isOwner {
+    function changeOwner(address payable newOwner) public isOwner {
         emit OwnerSet(owner, newOwner);
         owner = newOwner;
     }
@@ -57,7 +57,7 @@ contract OwnedContract {
      * @dev Return owner address
      * @return address of owner
      */
-    function getOwner() external view returns (address) {
+    function getOwner() public view returns (address payable) {
         return owner;
     }
 
@@ -65,7 +65,7 @@ contract OwnedContract {
      * @dev Return owner address
      * @return address of owner
      */
-    function getVersion() external pure returns (uint16) {
+    function getVersion() public pure returns (uint16) {
         return version;
     }
 }
@@ -91,7 +91,7 @@ contract Faucet is OwnedContract {
     }
 
     struct Balance {
-        int totalBalance;
+        uint totalBalance;
         uint64 numPayments;
         uint64 index;
         bytes32 name;
@@ -112,6 +112,43 @@ contract Faucet is OwnedContract {
     constructor() {
         totalBalance = 0;
         //super;
+    }
+
+    /**
+     * @dev Delete the smart contract
+     */
+    function destroySmartContract() public isOwner {
+        //selfdestruct(super.getOwner());
+        selfdestruct(super.getOwner());
+    }
+
+    receive() external payable {
+        bytes32 name = "Anonymous Donor";
+        Donation(name);
+    }
+
+    /**
+     * @dev Return the address of the contract
+     * @return address
+     */
+    function getAddress() public view returns (address) {
+        return address(this);
+    }
+
+    /**
+     * @dev Return balance of contract
+     * @return balance
+     */
+    function getBalance() public view returns (uint) {
+        return (payable(address(this))).balance;
+    }
+
+    /**
+     * @dev Return total calculated balance
+     * @return uint balance
+     */
+    function getCalculatedBalance() public view returns (uint) {
+        return totalBalance;
     }
 
     /**
@@ -139,7 +176,7 @@ contract Faucet is OwnedContract {
      * @return _numPayments
      * @return _name name of donor
      */
-    function getDonorByIndex(uint _i) public view returns (address _from, int _totalBalance, uint _numPayments, bytes32 _name) {
+    function getDonorByIndex(uint _i) public view returns (address _from, uint _totalBalance, uint _numPayments, bytes32 _name) {
         require(_i < 100, "Max Donor count is 100");
         require(_i < Donors.length, "Invalid Donor index");
 
@@ -174,7 +211,7 @@ contract Faucet is OwnedContract {
      * @return _numPayments
      * @return _name name of recipient
      */
-function getRecipientByIndex(uint _i) public view returns (address _recipient, int _totalBalance, uint _numPayments, bytes32 _name) {
+    function getRecipientByIndex(uint _i) public view returns (address _recipient, uint _totalBalance, uint _numPayments, bytes32 _name) {
         require(_i < Recipients.length, "Invalid Recipient index");
 
         _recipient = Recipients[_i];
@@ -184,27 +221,11 @@ function getRecipientByIndex(uint _i) public view returns (address _recipient, i
     }
 
     /**
-     * @dev Return balance of contract
-     * @return balance
-     */
-    function getBalance() public view returns (uint) {
-        return address(this).balance;
-    }
-
-    /**
-     * @dev Return total calculated balance
-     * @return uint balance
-     */
-    function getCalculatedBalance() public view returns (uint) {
-        return totalBalance;
-    }
-
-    /**
      * @dev Return Donations from Address
      * @param  _from Address
      * @return Balance
      */
-    function getDonorBalance(address _from) public view returns (int) {
+    function getDonorBalance(address _from) public view returns (uint) {
         return Donations[_from].totalBalance;
     }
 
@@ -213,7 +234,7 @@ function getRecipientByIndex(uint _i) public view returns (address _recipient, i
      * @param  _to Address
      * @return Balance
      */
-    function getRecipientBalance(address _to) public view returns (int) {
+    function getRecipientBalance(address _to) public view returns (uint) {
         return Payments[_to].totalBalance;
     }
 
@@ -275,7 +296,7 @@ function getRecipientByIndex(uint _i) public view returns (address _recipient, i
      * @return _totalBalance
      * @return _numPayments
      */
-    function getDonorByAddress(address _from) public view returns (int _totalBalance, uint _numPayments) {
+    function getDonorByAddress(address _from) public view returns (uint _totalBalance, uint _numPayments) {
         _totalBalance = getDonorBalance(_from);
         _numPayments = getDonationCounts(_from);
     }
@@ -286,7 +307,7 @@ function getRecipientByIndex(uint _i) public view returns (address _recipient, i
      * @return _totalBalance
      * @return _numPayments
      */
-    function getRecipientByAddress(address _to) public view returns (int _totalBalance, uint _numPayments) {
+    function getRecipientByAddress(address _to) public view returns (uint _totalBalance, uint _numPayments) {
         _totalBalance = getRecipientBalance(_to);
         _numPayments = getPaymentCounts(_to);
     }
@@ -319,20 +340,6 @@ function getRecipientByIndex(uint _i) public view returns (address _recipient, i
         _timestamp = Payments[_to].payments[_nr].timestamp;
     }
 
-    /**
-     * @dev Delete the smart contract
-     * @param _to address to send remaining money in the contract to
-     */
-    function destroySmartContract(address payable _to) public isOwner {
-        require(_to != address(0), "send to address is null");
-        selfdestruct(_to);
-    }
-
-    receive() external payable {
-        bytes32 name = "Anonymous Donor";
-        Donation(name);
-    }
-
      /**
      * @dev called when contract receives funding
      */
@@ -349,7 +356,12 @@ function getRecipientByIndex(uint _i) public view returns (address _recipient, i
             Donors.push(msg.sender);
         }
 
-        Donations[msg.sender].totalBalance = Donations[msg.sender].totalBalance.add(int(msg.value));
+        // let the donor overwrite his name
+        if (Donations[msg.sender].name != _name) {
+            Donations[msg.sender].name = _name;
+        }
+
+        Donations[msg.sender].totalBalance = Donations[msg.sender].totalBalance.add(msg.value);
         Donations[msg.sender].numPayments = numPayments;
         Donations[msg.sender].payments[numPayments].amount = msg.value;
         Donations[msg.sender].payments[numPayments].withdraw = false;
@@ -366,15 +378,15 @@ function getRecipientByIndex(uint _i) public view returns (address _recipient, i
      * @param _to address to send money to
      * @param _amount Amount of money to send
      */
-    function withdrawDonation(address payable _to, uint _amount) public isOwner {
+    function withdrawDonation(address payable _to, uint _amount) public {
         require(_to != address(0));
-        require(int(_amount) <= Donations[_to].totalBalance, "withdraw amount higher than your Donations");
+        require(_amount <= Donations[_to].totalBalance, "withdraw amount higher than your Donations");
         require(_amount <= address(this).balance, "not enough contract funds");
         //require(Donations[_to].numPayments + 1 > Donations[_to].numPayments, "uint32 overflow");
         uint64 numPayments;
         numPayments = Donations[_to].numPayments.add64(uint64(1));
 
-        Donations[_to].totalBalance = Donations[_to].totalBalance.sub(int(_amount));
+        Donations[_to].totalBalance = Donations[_to].totalBalance.sub(_amount);
         Donations[_to].numPayments = numPayments;
         Donations[_to].payments[numPayments].amount = _amount;
         Donations[_to].payments[numPayments].withdraw = true;
@@ -410,17 +422,16 @@ function getRecipientByIndex(uint _i) public view returns (address _recipient, i
 
         } else {
 
-            // check if the last payment is more than 24 hours ago
+            // check if the last payment is more than 12 hours ago
             for(uint i = Payments[_to].numPayments; i > 0; i--) {
                 timeLastTransfer = Math.max(timeLastTransfer, Payments[_to].payments[i].timestamp);
             }
-            if (timeLastTransfer > block.timestamp.sub(60*60*24)) {
-                revert("Only one request per 24 hours is allowed");
+            if (timeLastTransfer > block.timestamp.sub(60*60*12)) {
+                revert("Only one request per 12 hours is possible");
             }
-
         }
 
-        Payments[_to].totalBalance = Payments[_to].totalBalance.add(int(_amount));
+        Payments[_to].totalBalance = Payments[_to].totalBalance.add(_amount);
         Payments[_to].numPayments = numPayments;
         Payments[_to].payments[numPayments].amount = _amount;
         Payments[_to].payments[numPayments].withdraw = true;
@@ -436,7 +447,8 @@ function getRecipientByIndex(uint _i) public view returns (address _recipient, i
      * @dev Request bootstrap gas from the faucet
      * @param _to address to send the gas to
      */
-    function requestGas(address payable _to) public isOwner {
-        _to.transfer(300000);
+    function giveBootstrapGas(address payable _to, uint _amount) public isOwner {
+        require(_amount <= 1 ether, "1 NRG is more than enough gas!");
+        _to.transfer(_amount);
     }
 }
