@@ -9,19 +9,34 @@
   --f7-theme-color-shade: #2cd048;
   --f7-theme-color-tint: #6ee081;
 
+  --energi-color-text: #efe;
+
   --energi-color-green: #00e676;
-  --energi-color-yellow: #acbb27;
+  --energi-color-lightgreen: #5deda7cc;
   --energi-color-green-secondary: #69f0ae;
   --energi-color-grey: #939093;
-  --energi-color-text: #efe;
   --energi-color-red: #dd214a;
+  --energi-color-yellow: #acbb27;
+  --energi-color-turkis: #52ddfc;
+  --energi-color-blue: #3b3fac;
+  --energi-color-pink: #e655e1;
+  --energi-color-orange: #f86808;
+  --energi-color-lime: #b4fc63;
+  --energi-color-black: #000000;
 
   font-family: var(--f7-font-family);
   font-size:14px;
   font-weight:400;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+
   --energi-button-height:2.5rem;
   --energi-button-font-size:0.8rem;
-
 
   --f7-navbar-title-font-size:2rem;
   --f7-navbar-title-font-weight:800;
@@ -44,9 +59,90 @@
   --f7-list-item-footer-font-weight:200;
 
 }
+.colorturkis {
+  color: var(--energi-color-turkis);
+}
+.colorgreen {
+  color: var(--energi-color-green);
+}
+.colorlightgreen {
+  color: var(--energi-color-lightgreen);
+}
+.colorred {
+  color: var(--energi-color-red);
+}
+.coloryellow {
+  color: var(--energi-color-yellow);
+}
+.colorblue {
+  color: var(--energi-color-blue);
+}
+.colorpink {
+  color: var(--energi-color-pink);
+}
+.colororange {
+  color: var(--energi-color-orange);
+}
+.colorlime {
+  color: var(--energi-color-lime);
+}
+.colorgrey {
+  color: var(--energi-color-grey);
+}
+.colortext {
+  color: var(--energi-color-text);
+}
+
+.text {
+  font-family: var(--f7-font-family);
+  font-size:14px;
+  font-weight:400;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+}
 
 .hidden {
   display: none !important;
+}
+
+.fsl1 {
+    font-size: 1.2em;
+}
+.fsl2 {
+    font-size: 1.4em;
+}
+.fsl3 {
+    font-size: 1.6em;
+}
+.fss1 {
+    font-size: 0.8em;
+}
+.fss2 {
+    font-size: 0.6em;
+}
+.fss3 {
+    font-size: 0.4em;
+}
+
+.bround {
+    border-radius: 6px;
+    border-style: solid;
+    border-width: 1px;
+    padding: 5px;
+
+  /* border: 2px solid #73AD21; */
+/*  padding: 20px;
+   width: 200px;
+  height: 150px; */
+}
+.bgreen {
+    border-color: var(--energi-color-lightgreen);
+    background: var(--energi-color-black);
 }
 
 div .flex-row,

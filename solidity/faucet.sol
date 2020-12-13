@@ -1,4 +1,4 @@
-pragma solidity ^0.7.5;
+pragma solidity >=0.7.0 <0.8.0;
 
 /**
  * SPDX-License-Identifier: MIT
@@ -17,10 +17,15 @@ contract OwnedContract {
 
     // 104 name interface is bytes32
     // 104 published to '0x4b7c29e9c7e5132B140884A9dAc98427dcF97AbF'
+
     // 105 name interface is string
     // 105 published to '0xfC79349137862639A035c71C36fD4d71B2a5D668'
+
+    // 106 add country
+    // 106 published to '0x1EDf7947F7b95bA658D0A74024Dd8092e4D4831c'
+
     // http://localhost:49796
-    uint16 constant public version = 105;
+    uint16 constant public version = 106;
 
     // The creator of this contract
     address payable private owner;
@@ -52,8 +57,10 @@ contract OwnedContract {
      * @param newOwner address of new owner
      */
     function changeOwner(address payable newOwner) public isOwner {
-        emit OwnerSet(owner, newOwner);
+        address payable oldOwner = owner;
+
         owner = newOwner;
+        emit OwnerSet(oldOwner, newOwner);
     }
 
     /**
@@ -83,8 +90,8 @@ contract Faucet is OwnedContract {
     using SafeMath for uint64;
     using SignedSafeMath for int;
 
-    event ReceiveDonation(address indexed donor, uint amount, uint donationnumber, uint timestamp);
-    event GivenDonation(address indexed recipient, uint amount, uint donationnumber, uint timestamp);
+    event ReceivedDonation(address indexed donor, uint amount, uint donationnumber);
+    event GivenDonation(address indexed recipient, uint amount, uint donationnumber);
     event WithdrawMoney(address indexed to, uint indexed amount);
 
     struct Payment {
@@ -98,6 +105,7 @@ contract Faucet is OwnedContract {
         uint64 numPayments;
         uint64 index;
         string name;
+        bytes8 country;
         mapping(uint => Payment) payments;
     }
 
@@ -127,7 +135,12 @@ contract Faucet is OwnedContract {
 
     receive() external payable {
         string memory name = "Anonymous Donor";
-        Donation(name);
+        bytes8 country = "Terra";
+        Donation(name, country);
+    }
+
+    fallback() external {
+        revert("Have a look at https://github.com/kimxilxyong/Energi-Smart-Contract-Tutorial/blob/master/solidity/faucet.sol");
     }
 
     /**
@@ -179,14 +192,14 @@ contract Faucet is OwnedContract {
      * @return _numPayments
      * @return _name name of donor
      */
-    function getDonorByIndex(uint _i) public view returns (address _from, uint _totalBalance, uint _numPayments, string memory _name) {
-        require(_i < 100, "Max Donor count is 100");
+    function getDonorByIndex(uint _i) public view returns (address _from, uint _totalBalance, uint _numPayments, string memory _name, bytes8 _country) {
         require(_i < Donors.length, "Invalid Donor index");
 
         _from = Donors[_i];
         _totalBalance = Donations[_from].totalBalance;
         _numPayments = Donations[_from].numPayments;
         _name = Donations[_from].name;
+        _country = Donations[_from].country;
     }
 
     /**
@@ -214,13 +227,14 @@ contract Faucet is OwnedContract {
      * @return _numPayments
      * @return _name name of recipient
      */
-    function getRecipientByIndex(uint _i) public view returns (address _recipient, uint _totalBalance, uint _numPayments, string memory _name) {
+    function getRecipientByIndex(uint _i) public view returns (address _recipient, uint _totalBalance, uint _numPayments, string memory _name, bytes8 _country) {
         require(_i < Recipients.length, "Invalid Recipient index");
 
         _recipient = Recipients[_i];
         _totalBalance = Payments[_recipient].totalBalance;
         _numPayments = Payments[_recipient].numPayments;
         _name = Payments[_recipient].name;
+        _country = Payments[_recipient].country;
     }
 
     /**
@@ -267,14 +281,31 @@ contract Faucet is OwnedContract {
     function getDonorName(address _from) public view returns (string memory) {
         return Donations[_from].name;
     }
+    /**
+     * @dev Return Donations from Address country
+     * @param  _from Address
+     * @return country of donor
+     */
+    function getDonorCountry(address _from) public view returns (bytes8) {
+        return Donations[_from].country;
+    }
+
 
     /**
-     * @dev Return Donations to Address name
+     * @dev Return Payments to Address name
      * @param  _to Address
      * @return name of recipient
      */
     function getRecipientName(address _to) public view returns (string memory) {
         return Payments[_to].name;
+    }
+    /**
+     * @dev Return Payments to Address country
+     * @param  _to Address
+     * @return country of recipient
+     */
+    function getRecipientCountry(address _to) public view returns (bytes8) {
+        return Payments[_to].country;
     }
 
     /**
@@ -284,6 +315,13 @@ contract Faucet is OwnedContract {
     function setDonorName(string calldata _name) public {
         Donations[msg.sender].name = _name;
     }
+    /**
+     * @dev Sets a donor country
+     * @param  _country of donor
+     */
+    function setDonorCountry(bytes8 _country) public {
+        Donations[msg.sender].country = _country;
+    }
 
     /**
      * @dev Sets a recipients name
@@ -292,6 +330,13 @@ contract Faucet is OwnedContract {
     function setRecipientName(string calldata  _name) public {
         Payments[msg.sender].name = _name;
     }
+    /**
+     * @dev Sets a recipients country
+     * @param  _country of recipient
+     */
+    function setRecipientCountry(bytes8  _country) public {
+        Payments[msg.sender].country = _country;
+    }
 
     /**
      * @dev Return Donor info
@@ -299,9 +344,11 @@ contract Faucet is OwnedContract {
      * @return _totalBalance
      * @return _numPayments
      */
-    function getDonorByAddress(address _from) public view returns (uint _totalBalance, uint _numPayments) {
+    function getDonorByAddress(address _from) public view returns (uint _totalBalance, uint _numPayments, string memory _name, bytes8 _country) {
         _totalBalance = getDonorBalance(_from);
         _numPayments = getDonationCounts(_from);
+        _name = getDonorName(_from);
+        _country = getDonorCountry(_from);
     }
 
     /**
@@ -310,9 +357,11 @@ contract Faucet is OwnedContract {
      * @return _totalBalance
      * @return _numPayments
      */
-    function getRecipientByAddress(address _to) public view returns (uint _totalBalance, uint _numPayments) {
+    function getRecipientByAddress(address _to) public view returns (uint _totalBalance, uint _numPayments, string memory _name, bytes8 _country) {
         _totalBalance = getRecipientBalance(_to);
         _numPayments = getPaymentCounts(_to);
+        _name = getRecipientName(_to);
+        _country = getRecipientCountry(_to);
     }
 
     /**
@@ -346,16 +395,16 @@ contract Faucet is OwnedContract {
      /**
      * @dev called when contract receives funding
      */
-    function Donation(string memory _name) public payable {
+    function Donation(string memory _name, bytes8 _country) public payable {
         require(msg.sender != address(0),  "address is null");
         require(msg.value > 0, "amount should be greater than 0");
-        //require((Donations[msg.sender].numPayments + 1 > Donations[msg.sender].numPayments), "uint32 overflow");
 
         uint64 numPayments;
         numPayments = Donations[msg.sender].numPayments.add64(uint64(1));
         if (numPayments == 1) {
             Donations[msg.sender].index = uint64(Donors.length);
             Donations[msg.sender].name = _name;
+            Donations[msg.sender].country = _country;
             Donors.push(msg.sender);
         }
 
@@ -365,10 +414,9 @@ contract Faucet is OwnedContract {
         Donations[msg.sender].payments[numPayments].withdraw = false;
         Donations[msg.sender].payments[numPayments].timestamp = block.timestamp;
 
-        //addDonor(msg.sender);
         totalBalance = totalBalance.add(msg.value);
 
-        emit ReceiveDonation(msg.sender, msg.value, numPayments, block.timestamp);
+        emit ReceivedDonation(msg.sender, msg.value, numPayments);
     }
 
     /**
@@ -377,9 +425,9 @@ contract Faucet is OwnedContract {
      * @param _amount Amount of money to send
      */
     function withdrawDonation(address payable _to, uint _amount) public {
-        require(_to != address(0));
+        require(_to != address(0), "null address supplied");
         require(_amount <= Donations[_to].totalBalance, "withdraw amount higher than your Donations");
-        require(_amount <= address(this).balance, "not enough contract funds");
+        require(_amount <= getBalance(), "not enough contract funds");
         //require(Donations[_to].numPayments + 1 > Donations[_to].numPayments, "uint32 overflow");
         uint64 numPayments;
         numPayments = Donations[_to].numPayments.add64(uint64(1));
@@ -401,29 +449,34 @@ contract Faucet is OwnedContract {
      * @param _to address to send money to
      * @param _amount Amount of money to send
      */
-    function requestDonation(address payable _to, uint _amount) public {
-
+    function requestDonation(address payable _to, uint _amount, string memory _name, bytes8 _country) public {
         require(_to != address(0), "null address supplied");
-        require(_amount <= address(this).balance, "not enough contract funds");
+        //require(_amount <= getBalance(), "not enough contract funds");
         // allow only 1/10th of funds to pay out
-        require(_amount <= address(this).balance.div(10), "amount too high, maximum is one tenth of faucet funds");
+        require(_amount <= getBalance().div(10), "amount too high, maximum is one tenth of faucet funds");
 
         //bool AllowTransfer = true;
         uint timeLastTransfer = 0; // time of last request
         uint64 numPayments;
         numPayments = Payments[_to].numPayments.add64(1);
+        assert(numPayments > 0);
         if (numPayments == 1) {
 
             // new Recipient
             Payments[_to].index = uint64(Recipients.length);
+            Payments[_to].name = _name;
+            Payments[_to].country = _country;
             Recipients.push(_to);
-
+        } else if (numPayments == 0) {
+            revert("Internal error, integer overflow");
         } else {
 
             // check if the last payment is more than 12 hours ago
-            for(uint i = Payments[_to].numPayments; i > 0; i--) {
-                timeLastTransfer = Math.max(timeLastTransfer, Payments[_to].payments[i].timestamp);
-            }
+            //for(uint i = Payments[_to].numPayments; i > 0; i--) {
+            //    timeLastTransfer = Math.max(timeLastTransfer, Payments[_to].payments[i].timestamp);
+            //}
+            timeLastTransfer = Payments[_to].payments[numPayments.sub64(2)].timestamp;
+
             if (timeLastTransfer > block.timestamp.sub(60*60*12)) {
                 revert("Only one request per 12 hours is possible");
             }
@@ -437,7 +490,7 @@ contract Faucet is OwnedContract {
 
         totalBalance = totalBalance.sub(_amount);
         _to.transfer(_amount);
-        emit GivenDonation(_to, _amount, numPayments, block.timestamp);
+        emit GivenDonation(_to, _amount, numPayments);
     }
 
     /**
@@ -445,7 +498,7 @@ contract Faucet is OwnedContract {
      * @param _to address to send the gas to
      */
     function giveBootstrapGas(address payable _to, uint _amount) public isOwner {
-        require(_amount <= 1 ether, "1 NRG is more than enough gas!");
+        require(_amount <= 1 ether, "Max 1 NRG is more than enough gas!");
         _to.transfer(_amount);
     }
 }

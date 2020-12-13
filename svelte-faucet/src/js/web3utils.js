@@ -11,7 +11,7 @@ param address:
 param changesNumber: the number of coin balance history changes */
 //async function getBalanceHistory(provider, address, changesNumber) {
 
-export const getBalanceHistory = async (provider, address, changesNumber) => {
+export const getBalanceHistory = async (provider, address, changesNumber, maxZeroBlocks) => {
   trieMessageCount = 0;
 
   if (!ethers.utils.isAddress(address)) {
@@ -34,9 +34,15 @@ export const getBalanceHistory = async (provider, address, changesNumber) => {
       },];
     }
     let iteration = 0;
+    let zeroIteration = 0;
     let start;
     let end;
-    while (changesNumber > arrayHistory.length && (start > 0 || iteration === 0)) {
+    let allFound = false;
+    let wasDebug = false;
+    let lastItemBalance = ethers.constants.Zero;
+    let newDiff = ethers.constants.Zero;
+
+    while (!allFound && (changesNumber > arrayHistory.length) && (start > 0 || iteration === 0)) {
 
       // iteration == 0: go from latest-100 to latest
       // iteration > 0: go from latest-(100*iteration+1) to latest-(100*iteration)
@@ -49,13 +55,98 @@ export const getBalanceHistory = async (provider, address, changesNumber) => {
 
       tempArray = await getBalanceHistoryCrawler(provider, address, start, end);
 
+      // DEBUG
+      wasDebug = false;
       if (tempArray.length > 1) {
-        tempArray.shift();
+        for (let i = 0; i < tempArray.length; i++) {
+          console.log("DEBUG=", i, tempArray[i]);
+        }
+        wasDebug = true;
+      }
+      // DEBUG
+
+      if (tempArray.length > 1) {
+
+        // dont create zero diff gaps
+        if (arrayHistory.length > 0) {
+          if (tempArray[tempArray.length - 1].balance.eq(arrayHistory[0].balance)) {
+            arrayHistory.shift();
+          }
+        }
+        arrayHistory.unshift(tempArray);
+        /*
+                tempArray.shift();
+                arrayHistory.unshift(tempArray);
+
+         */
+        arrayHistory = arrayHistory.flat();
+        zeroIteration = 0;
+      } else if (tempArray.length === 0) {
+        zeroIteration++;
+      } else { // 1 Block returned
+
+        if (arrayHistory.length > 0) {
+          if (tempArray[0].balance.eq(arrayHistory[0].balance)) {
+            arrayHistory.shift();
+          }
+        }
         arrayHistory.unshift(tempArray);
         arrayHistory = arrayHistory.flat();
+
+        // check if we have a real balance change
+        if (arrayHistory[arrayHistory.length - 1].balance.eq(arrayHistory[0].balance)) {
+          arrayHistory.pop();
+        }
+
       }
+
+
+      // check if full balance history has been reached
+      let balanceHistory = ethers.constants.Zero; //ethers.BigNumber.from(0);
+      for (let i = 0; i < arrayHistory.length; i++) {
+        if (zeroIteration > 1) {
+          if (!lastItemBalance.eq(arrayHistory[i].balance)) {
+            newDiff = arrayHistory[i].balance.sub(lastItemBalance);
+            if (!arrayHistory[i].diff.eq(newDiff)) {
+              console.log("Found gap", lastItemBalance.toString(), " => ", arrayHistory[i].balance.toString(), ", diff", arrayHistory[i].diff.toString(), " =>", newDiff.toString());
+              arrayHistory[i].diff = ethers.BigNumber.from(newDiff);
+            }
+          }
+          lastItemBalance = arrayHistory[i].balance;
+        }
+
+        balanceHistory = balanceHistory.add(arrayHistory[i].diff);
+      }
+      console.log("balanceHistory", balanceHistory);
+      console.log("balance", balance);
+
+      console.log("balance.eq(balanceHistory)", balance.eq(balanceHistory), "zeroIteration", zeroIteration);
+      // check if full balance history has been reached
+      if ((balance.eq(balanceHistory) && iteration > 1) || zeroIteration > maxZeroBlocks) {
+        allFound = true;
+      }
+
       iteration++;
     }
+
+    console.log("Collection finished fixup history gaps in", arrayHistory.length, "Blocks");
+    // fixup history gaps
+    let balanceHistory = ethers.constants.Zero; //ethers.BigNumber.from(0);
+    lastItemBalance = ethers.constants.Zero;
+    newDiff = ethers.constants.Zero;
+    for (let i = 0; i < arrayHistory.length; i++) {
+
+      if (!lastItemBalance.eq(arrayHistory[i].balance)) {
+        newDiff = arrayHistory[i].balance.sub(lastItemBalance);
+        if (!arrayHistory[i].diff.eq(newDiff)) {
+          console.log("Found gap", lastItemBalance.toString(), " => ", arrayHistory[i].balance.toString(), ", diff", arrayHistory[i].diff.toString(), " =>", newDiff.toString());
+          arrayHistory[i].diff = ethers.BigNumber.from(newDiff);
+        }
+      }
+      lastItemBalance = arrayHistory[i].balance;
+      balanceHistory = balanceHistory.add(arrayHistory[i].diff);
+    }
+
     while (arrayHistory.length > changesNumber) {
       arrayHistory.shift();
     }
@@ -68,7 +159,7 @@ export const getBalanceHistory = async (provider, address, changesNumber) => {
     console.error("Top level catch:", error);
     throw (error);
   }
-}
+};
 
 /*
 function getBalanceHistoryBackCrawler
@@ -89,6 +180,20 @@ async function getBalanceHistoryBackCrawler(provider, address, blocks) {
   }
 }
 
+const catcherFunc = (e, i) => {
+  // check for missing trie node
+  if (e.toString().includes("missing trie node")) {
+    if (trieMessageCount % trieMessageShowEveryXMessage === 0) {
+      console.error("🐞 https://github.com/ethereum/go-ethereum/issues/17133", i);
+    }
+    trieMessageCount++;
+    //throw ("🐞 missing trie node https://github.com/ethereum/go-ethereum/issues/17133");
+  } else {
+    console.error(".Catch getBlock:", e.toString().slice(0, errorLen));
+  }
+  return undefined;
+};
+
 /*
 function getBalanceHistoryCrawler
 param provider
@@ -106,19 +211,7 @@ async function getBalanceHistoryCrawler(provider, address, start, end) {
   for (let i = start; i <= end; i++) {
     try {
       arrayBalances.push({
-        balancePromise: provider.getBalance(address, i).catch((e) => {
-          // check for missing trie node
-          if (e.toString().includes("missing trie node")) {
-            if (trieMessageCount % trieMessageShowEveryXMessage === 0) {
-              console.error("🐞 https://github.com/ethereum/go-ethereum/issues/17133", i);
-            }
-            trieMessageCount++;
-            //throw ("🐞 missing trie node https://github.com/ethereum/go-ethereum/issues/17133");
-          } else {
-            console.error(".Catch1:", e.toString().slice(0, errorLen));
-          }
-          return undefined;
-        }),
+        balancePromise: provider.getBalance(address, i).catch((e,i) => catcherFunc(e, i)),
         blockNr: i,
       });
       if (i % scanBlock === 0) {
@@ -158,19 +251,7 @@ async function getBalanceHistoryCrawler(provider, address, start, end) {
             {
               balance: balance,
               blockNr: item.blockNr,
-              block: provider.getBlockWithTransactions(item.blockNr).catch((e) => {
-                // check for missing trie node
-                if (e.toString().includes("missing trie node")) {
-                  if (trieMessageCount % trieMessageShowEveryXMessage === 0) {
-                    console.error("🐞 https://github.com/ethereum/go-ethereum/issues/17133", i);
-                  }
-                  trieMessageCount++;
-                  //throw ("🐞 missing trie node https://github.com/ethereum/go-ethereum/issues/17133");
-                } else {
-                  console.error(".Catch getBlock:", e.toString().slice(0, errorLen));
-                }
-                return undefined;
-              }),
+              block: provider.getBlockWithTransactions(item.blockNr).catch((e, i) => catcherFunc(e, i)),
             }
           );
         }
@@ -241,7 +322,7 @@ async function getBalanceHistoryCrawler(provider, address, start, end) {
             found = true;
           } else if (bndiff.eq(value)) {
             found = true;
-            if (bndiff.gt(ethers.constants.Zero)) { // greater zero, value > 0
+            if (bndiff.gte(ethers.constants.Zero)) { // greater zero, value >= 0
               incoming = true;
             }
           }
@@ -262,8 +343,8 @@ async function getBalanceHistoryCrawler(provider, address, start, end) {
 
       arrayBlocks.push({
         timestamp: timestamp,
-        balance: parseFloat(ethers.utils.formatEther(b.balance)),
-        diff: parseFloat(ethers.utils.formatEther(bndiff)),
+        balance: b.balance, //parseFloat(ethers.utils.formatEther(b.balance)),
+        diff: bndiff, //parseFloat(ethers.utils.formatEther(bndiff)),
         blockNr: b.blockNr,
         block: {
           timestamp: timestamp,
@@ -283,6 +364,9 @@ async function getBalanceHistoryCrawler(provider, address, start, end) {
   arrayChanges.length = 0;
 
   console.log("Collected: ", arrayBlocks.length, "Blocks in range", start, end);
+  if (arrayBlocks.length === 1) {
+    console.log("Block1", arrayBlocks[0]);
+  }
 
   return (arrayBlocks);
 }
@@ -318,57 +402,6 @@ const trieMessageShowEveryXMessage = (crawlerBlocks * 20); // show only each X's
 /* These consts make sure we don't overload the server (hopefully 😇)*/
 const scanBlock = 100;
 const scanBlockSleep = 100; // milliseconds
-
-
-const startTime = Date.now();
-// Get balance changes history for the last transactions count
-/* getBalanceHistory(provider, address, transactions).catch((e) => { console.error(e); }).then((h) => {
-  console.log('***************************************');
-  console.log(h);
-console.log('***************************************');
-  console.log("History", h.length, "transactions");
-  console.log("Elapsed:", Date.now() - startTime, "ms");
-  console.log('***************************************');
-}); */
-
-/*
-const blocks = 300;  //300000;
-getBalanceHistoryBackCrawler(provider, address, blocks).catch((e) => { console.log(e); }).then((h) => {
-    console.log('***************************************');
-    console.log(h);
-    console.log('***************************************');
-    console.log("History", h.length, "transactions");
-    console.log("Elapsed:", Date.now() - startTime, "ms");
-    console.log('***************************************');
-}); */
-
-export const timeDifference = (current, previous) => {
-
-  const msPerMinute = 60 * 1000;
-  const msPerHour = msPerMinute * 60;
-  const msPerDay = msPerHour * 24;
-  const msPerMonth = msPerDay * 30;
-  const msPerYear = msPerDay * 365;
-
-  const elapsed = current - previous;
-
-  if (elapsed < msPerMinute) {
-    return Math.round(elapsed / 1000) + ' seconds ago';
-  } else if (elapsed < msPerHour) {
-    return Math.round(elapsed / msPerMinute) + ' minutes ago';
-  } else if (elapsed < msPerDay) {
-    return Math.round(elapsed / msPerHour) + ' hours ago';
-  } else if (elapsed < msPerMonth) {
-    return 'approximately ' + Math.round(elapsed / msPerDay) + ' days ago';
-  } else if (elapsed < msPerYear) {
-    return 'approximately ' + Math.round(elapsed / msPerMonth) + ' months ago';
-  } else {
-    return 'approximately ' + Math.round(elapsed / msPerYear) + ' years ago';
-  }
-}
-
-
-
 
 export const listWallets = async (web3) => {
   try {

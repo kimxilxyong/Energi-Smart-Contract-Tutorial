@@ -1,82 +1,5 @@
 #! /usr/bin/env node
 
-/* const signTransaction = async (web3, contract, fromAddress, privateKey) => {
-    const tx = {
-        // Get the nonce
-        nonce: await web3.eth.getTransactionCount(fromAddress),
-        // this could be provider.addresses[0] if it exists
-        from: fromAddress,
-        // target address, this could be a smart contract address
-        to: contract._address,
-        // optional if you want to specify the gas limit
-        gasPrice: "20000000000",
-        gas: "2100000",
-        // optional if you are invoking say a payable function
-        value: 0,
-        // this encodes the ABI of the method and the arguements
-        data: contract.methods.getVersion().encodeABI(),
-    };
-
-    let signedTransaction;
-    try {
-        if (privateKey && testPrivateKey(privateKey)) {
-            // Private Key
-            signedTransaction = await web3.eth.accounts.signTransaction(tx, privateKey);
-        } else {
-            // unlocked Account
-            console.log('Signing with unlocked account', tx.from);
-            signedTransaction = await web3.eth.signTransaction(tx, tx.from); //.catch((e) => { console.log(e); });
-        }
-
-    } catch (e) {
-        console.log(e);
-        signedTransaction = undefined;
-    }
-    return signedTransaction;
-}
-
-const sendTransaction = async (web3, signedTx) => {
-    // raw transaction string may be available in .raw or
-    // .rawTransaction depending on which signTransaction
-    // function was called
-    try {
-        const sentTx = await web3.eth.sendSignedTransaction(signedTx.raw || signedTx.rawTransaction);
-        if (sentTx) {
-            console.log(sentTx);
-        }
-        return sentTx;
-
-    } catch (e) {
-        console.log(e);
-        return false;
-    }
-
-    /*     sentTx.on("receipt", receipt => {
-            // do something when receipt comes back
-        });
-        sentTx.on("error", err => {
-            // do something on transaction error
-        }); *
-
-}
-
-const getContractVersionSigned = async (web3, contract, fromAddress, privateKey) => {
-    try {
-        const signedTX = await signTransaction(web3, contract, fromAddress, privateKey);
-        if (signedTX) {
-            const sentTX = await sendTransaction(web3, signedTX);
-            console.log(sentTX);
-            return 1;
-        } else {
-            console.log("Failed to sign transaction");
-        }
-    } catch (e) {
-        console.log(e);
-    }
-    return -1;
-}
-*/
-
 const sendDonation = async (contract, donorName, wei, waitForConfirmations) => {
     let result;
     let lastConfirms = -2;
@@ -196,21 +119,17 @@ const execute = async () => {
     const faucet = new ethers.Contract(contractAddr, abi, signer);
 
 
-
     let r = await faucet.getVersion().catch((e) => { console.log("getVersion failed:", e); }); //.then((r) => { console.log("Faucet Version:", r); });
     console.log("Faucet Version:", r);
 
     r = await faucet.getOwner().catch((e) => { console.log("getOwner failed:", e); }); //.then((r) => { console.log("Faucet Owner:", r); });
     console.log("Faucet Owner:", r);
-    //callPureContractMethod(faucet, "getOwner()").catch((e) => { console.log("getOwner failed:", e); }).then((r) => { console.log("Owner:", r); });
 
     r = await faucet.getBalance().catch((e) => { console.log("getBalance failed:", e); }); //.then((r) => { console.log("Faucet Balance:", parseFloat(ethers.utils.formatEther(r))); });
     console.log("Faucet Balance:", parseFloat(ethers.utils.formatEther(r)));
-    // callPureContractMethod(faucet, "getBalance()").catch((e) => { console.log("getBalance failed:", e); }).then((r) => { console.log("Balance:", r); });
 
-    r = await faucet.getCalculatedBalance().catch((e) => { console.log("getCalculatedBalance failed:", e); }); //.then((r) => { console.log("Faucet CalculatedBalance:", parseFloat(ethers.utils.formatEther(r))); });
-    console.log("Faucet CalculatedBalance:", parseFloat(ethers.utils.formatEther(r)));
-    //callPureContractMethod(faucet, "getCalculatedBalance()").catch((e) => { console.log("getCalculatedBalance failed:", e); }).then((r) => { console.log("CalculatedBalance:", r); });
+    r = await faucet.getCalculatedBalance().catch((e) => { console.log("getCalculatedBalance failed:", e); }); //.then((r) => { console.log("Faucet Balance:", parseFloat(ethers.utils.formatEther(r))); });
+    console.log("Faucet Calculated Balance:", parseFloat(ethers.utils.formatEther(r)));
 
     if (name) {
         faucet.getDonorName(fromAddress).catch((e) => { console.log("getDonorName failed:", e); }).then((n) => { currentName = n; });
@@ -229,10 +148,11 @@ const execute = async () => {
                 }
                 console.log("personal.unlockAccount('" + fromAddress + "',null,secondsToUnlock,false)");
                 console.log("***********************************************************************************************");
+            } else {
+                console.log("*********************");
+                console.log("Donation failed with:", e);
+                console.log("*********************");
             }
-            console.log("*********************");
-            console.log("Donation failed with:", e);
-            console.log("*********************");
         })
         .then((r) => {
             if (r) {

@@ -15,6 +15,7 @@
             The faucet is implemented as a SmartContract written in solidity and deployed on the Testnet.
             You have to interact with the <b style="color:green;">faucet</b> to get some NRG.
             Each interaction costs a very small fee, called <b style="color:green;">gas</b>. Gas is needed to keep the blockchain going.
+            <p>Don't worry, gas will be provided</p>
         </CardContent>
     </Card>
     <br>
@@ -23,15 +24,16 @@
         <CardContent>
             <p>You need an Energi account inside a wallet to store NRGs into it. <b style="color:red;">ATTENTION:</b> Make sure you are on the <b style="color:red;">TESTNET</b> (setting inside the wallet at the upper right).</p>
             <p>
-                <Link href="https://wallet.energi.network/generate/keystore" external target="_blank">Create a Wallet</Link>
+                <Link href="https://wallet.energi.network/generate/keystore" external target="_blank">Create a keystore Wallet</Link>
             </p>
-            <p>There are several options to create a wallet, the best is a password encrypted keystore file.
-               From the wallet you get a public address (eg</p>
+            <p>There are several options to create a wallet, the best is a <b style="color:green;">password encrypted keystore file</b>. Store this keystore file in a <b style="color:blue;">save place</b>, for example on encrypted usb drives.
+               Use linux or mac, don't use 💩windows💩, if you are handling 💵heaps of money💵  🧠 😁</p>
+            <p>From the wallet you get a public address (eg</p>
             <p style="color:var(--energi-color-yellow);font-family:'Ubuntu Mono';">"0x771dDB07222A1f9442C91CF04f64F3164771BB62"</p>
             <p> ), this address will receive and hold your NRGs. Its like your bank account number.</p>
         </CardContent>
         <CardFooter>
-            <Link href="https://www.google.com/search?q=web3+create+provider" external target="_blank">More Information</Link>
+            <Link href="https://www.google.com/search?q=account+wallet+keystore+privatekey" external target="_blank">More Information</Link>
 
             <div style="display:flex;flex-direction: row;justify-content: flex-end;align-items:center;">
               <Button fill raised href="/web3provider/" view=".view-main" panelClose style="display:flex;align:center;align-items:center;padding-left:15%;bgcolor:var(--energi-color-green)">Next

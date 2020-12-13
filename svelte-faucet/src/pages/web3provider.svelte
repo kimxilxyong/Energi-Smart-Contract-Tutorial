@@ -38,7 +38,7 @@
     </CardContent>
     <CardFooter>
       <Link
-        href="https://www.google.com/search?q=web3+create+provider"
+        href="https://www.google.com/search?q=ethereum+node&oq=ethereum+node"
         external
         target="_blank"
       >
@@ -81,8 +81,8 @@
               floatingLabel
               type="text"
               clearButton
-              value="{web3URL}"
-              onInputClear="{() => { web3URL = ''; }}"
+              value="{$web3URL}"
+              onInputClear="{() => { $web3URL = ''; }}"
               onBlur="{(e) => urlChanged(e)}"
               style="vertical-align:top;"
               spellcheck="false"
@@ -107,7 +107,7 @@
         <Col width="100" class="flex-col dynamic">
         <List noHairlinesMd>
 
-          <ListInput
+            <ListInput
               outline
               disabled
               floatingLabel
@@ -122,23 +122,19 @@
               id="yellow-mono-small"
               spellcheck="false">
                     <!-- <i slot="media" class="nf-icons nf-hc-fw animate__animated animate__pulse animate__infinite" style="color:{connectedColor};">&#xf817;</i> -->
-                    <i slot="media" class="nf-icons nf-hc-fw {connectedAnimate}" style="color:{connectedColor};">&#xf817;</i>
+                    <i slot="media" class="nf-icons nf-hc-fw {animatePulseConnect}" style="color:{connectedColor};">&#xf817;</i>
 
             </ListInput>
-          </List>
+        </List>
     </Col>
       </Row>
     </CardContent>
     <CardFooter>
-      <a
-        href="https://www.google.com/search?q=web3+create+provider"
-        external
-        target="_blank"
-      >More Information</a>
+      <Link href="https://www.google.com/search?q=ethereum+connect+to+node&oq=ethereum+connect+to+node" external target="_blank">More Information</Link>
       <p>
         {#if connectedWeb3}connected{:else}selected{/if}
         URL:
-        {web3URL}
+        {$web3URL}
       </p>
     </CardFooter>
   </Card>
@@ -221,9 +217,9 @@
                       validate
                       pattern="^0x[a-fA-F0-9]*"
                       clearButton
-                      value="{privateKey}"
+                      value="{privateKeyField}"
                       onInputClear="{() => {
-                        privateKey = '';
+                        privateKeyField = '';
                       }}"
                       onBlur="{(e) => onPrivateKeyChanged(e)}"
                       onValidate="{(isValid) => checkPrivateKeyValid(isValid)}"
@@ -294,7 +290,7 @@
       </List>
     </CardContent>
     <CardFooter>
-      <a href="https://www.google.com/search?q=web3+create+provider" external target="_blank">More Information</a>
+      <Link href="https://www.google.com/search?q=ethereum+accounts+wallet+private+key&oq=ethereum+accounts+wallets+private" external target="_blank">More Information</Link>
       <p>Address: {selectedAddress}</p>
     </CardFooter>
   </Card>
@@ -351,7 +347,7 @@
             </Block>
           </Col>
           <Col width="100" class="flex-col dynamic">
-            <List noHairlinesMd>
+          <List noHairlinesMd>
               <ListInput
                 outline
                 disabled
@@ -386,8 +382,8 @@
             </ListItem>
 
             {#each balanceHistory as bhItem, i}
-              <ListItem header={"Block " + bhItem.blockNr + ", " + timeDifference(new Date(), bhItem.timestamp)} title={bhItem.diff + " NRG"} footer={bhItem.balance + " NRG"}>
-                <i slot="media" class="f7-icons size-20" style="color:{(bhItem.diff > 0) ? 'var(--energi-color-green)' : 'var(--energi-color-red)'};">{(bhItem.diff > 0) ? 'arrowtriangle_up_fill' : 'arrowtriangle_down_fill'}</i>
+              <ListItem header={"Block " + bhItem.blockNr + ", " + timeDifference(new Date(), bhItem.timestamp)} title={ethers.utils.formatEther(bhItem.diff) + " NRG"} footer={ethers.utils.formatEther(bhItem.balance) + " NRG"}>
+                <i slot="media" class="f7-icons size-20" style="color:{(bhItem.diff.gte(ethers.constants.Zero)) ? 'var(--energi-color-green)' : 'var(--energi-color-red)'};">{(bhItem.diff > 0) ? 'arrowtriangle_up_fill' : 'arrowtriangle_down_fill'}</i>
               </ListItem>
             {/each}
           {:else}
@@ -401,18 +397,21 @@
             </ListItem>
           {/if}
 
-          <ListItem header="Sign a message" title={signedTitle}>
+          <ListItem header="Sign a message" title={signedTitle} footer={signedFooter}>
             <i slot="media" class="f7-icons size-20" style="color:{pawColor};">paw</i>
           </ListItem>
-          {#if isManagedOnNode}
+          {#if $ethAccount.isManagedOnNode}
             <ListItem header="Choosen Account Address" title="{$ethAccount.address}" footer="{ choosenAddressIsValid ? 'Is validated' : 'Is not validated'}" after="">
               <i slot="media" class="f7-icons size-20" style="color:{thumbsupColor};">hand_thumbsup</i>
-              <i on:click={CopyToClipboard($ethAccount.address, false)} slot="after-end" class="f7-icons size-20" style="margin-right:5px;color:{rocketColor}">rocket</i>
+              <i on:click={requestGas($ethAccount.address)} slot="after-end" class="f7-icons size-20" style="margin-right:5px;color:{rocketColor}">rocket</i>
+              <!-- <i on:click={CopyToClipboard($ethAccount.address, false)} slot="after-end" class="f7-icons size-20" style="margin-right:5px;color:{rocketColor}">rocket</i> -->
             </ListItem>
-            <ListItem header="Private Key" title="Privatekey is managed by node {web3URL}" footer="Use personal.UnlockAccount on the nodes console" after="" link="">
+            <ListItem header="Private Key" title="Privatekey is managed by node {$web3URL}" footer={privateKeyFooter} after="">
               <i slot="media" class="f7-icons size-20" style="color:{privatekeyColor};">lock_slash</i>
             <!--  <i slot="after-start" class="f7-icons size-20">calendar_badge_plus</i> -->
-              <i on:click={CopyToClipboard($ethAccount.privateKey, true)}  slot="after-start" class="f7-icons size-20" style="margin-right:5px">lock_open</i>
+
+                <i on:click={(e) => {window.open('https://docs.energi.software/en/staking-guide','_blank');} } slot="after-start" class="f7-icons size-20" style="color:var(--energi-color-yellow);margin-right:5px;width:7em">{$ethAccount.isLocked?'lock_closed':'lock_open'}<i class="text" style="margin-left:0.5em">More Information </i></i>
+
             </ListItem>
           {:else}
             <ListItem header="Choosen Account Address" title="{$ethAccount.address}" footer="{ choosenAddressIsValid ? 'Is validated' : 'Is not validated'}">
@@ -421,20 +420,16 @@
             <ListItem header="Private Key" title="{$ethAccount.privateKey}" footer="IMPORTANT, don't loose it !!! Copy it to the clipboard and store it on an encrypted usb key" after="Copy">
               <i slot="media" class="f7-icons size-20" style="color:{privatekeyColor};">umbrella envelope_open</i>
             <!--  <i slot="after-start" class="f7-icons size-20">calendar_badge_plus</i> -->
-              <i on:click={CopyToClipboard($ethAccount.privateKey, true)}  slot="after-start" class="f7-icons size-20" style="margin-right:5px">tray_arrow_down</i>
+              <i on:click={CopyToClipboard($ethAccount.privateKey, true)}  slot="after-start" class="f7-icons size-20 {animatePulseCopy}" style="margin-right:5px" title="Copy to Clipboard">tray_arrow_down</i>
             </ListItem>
           {/if}
         </List>
       </Block>
     </CardContent>
     <CardFooter>
-      <a
-        href="https://www.google.com/search?q=ethereum+address+account+privatekey"
-        external
-        target="_blank"
-      >More Information</a>
+      <Link href="https://www.google.com/search?q=ethereum+address+account+private+key+education&oq=ethereum+address+account+private+key+education" external target="_blank">More Information</Link>
       <p>Balance: {selectedAddressBalance}</p>
-    <div style="display:flex;flex-direction: row;justify-content: flex-end;align-items:center;">
+      <div style="display:flex;flex-direction: row;justify-content: flex-end;align-items:center;">
         <Button disabled={!nextButtonEnabled} fill raised href="/smartcontract/" view=".view-main" panelClose class={nextButtonEnabled ? "" : "disablebar"} style="display:flex;align:center;align-items:center;padding-left:15%;bgcolor:{nextButtonEnabled ? 'var(--energi-color-green)' : 'var(--energi-color-grey)'}">Next
           <i class="f7-icons size-20" style="margin-left:0.2rem;margin-top:0.3rem">arrowtriangle_right</i>
         </Button>
@@ -474,13 +469,13 @@
   import ethers from "ethers";
   import { tick, getContext } from "svelte";
   import {
+    web3URL,
     visitedPages,
     isUnlocked,
     ethAccount,
-    getTime,
-    scrollTo,
   } from "../js/stores.js";
-  import { listWallets, getBalanceHistory, timeDifference } from "../js/web3utils.js";
+  import { listWallets, getBalanceHistory } from "../js/web3utils.js";
+  import { timeDifference, getTime, scrollTo } from "../js/utils.js";
   import ListInputPassword, { setFocus } from "../components/input-password.svelte";
 
 
@@ -501,7 +496,8 @@
   let password;
   let web3Error = "";
   let accountDetails = [];
-  let web3URL = "";
+  // is now in a store
+  //let web3URL = "";
   let connectedWeb3 = false;  // true if connection to remote or local node is established
   let isLocalNode = false;
 
@@ -512,13 +508,14 @@
   let numberOfTransactionsToFetchForBalanceHistory = 5;
 
   let selectedAddress;
-  let privateKey;
+  let privateKeyField;
+
   let gotBalance;
+  let gotHistory;
   let isSigned;
   let isVerified;
 
   let connectedColor = "var(--energi-color-red)";
-  let connectedAnimate = "animate__animated animate__pulse animate__infinite";
   let creditcardColor = "var(--energi-color-grey)";
   let pawColor = "var(--energi-color-grey)";
   let plusminusColor = "var(--energi-color-grey)";
@@ -528,17 +525,30 @@
   let selectedAddressBalance = 0;
   let balanceTitle = "N/A";
   let signedTitle = "N/A";
+  let signedFooter = "N/A";
+  let privateKeyFooter = "N/A"
   let choosenAddressIsValid = false;
   let nextButtonEnabled = false;
-  let isManagedOnNode = false;
+  //let isManagedOnNode = false;
 
+  // see animate.css - https://animate.style/  Version - 4.1.1
+  let animatePulseConnect = "animate__animated animate__pulse animate__infinite";
+  //let animatePulseCopy = "animate__animated animate__pulse animate__infinite";
+  let animatePulseCopy = "";
 
+  // stop animation if
   setInterval(() => {
 
     // check connection
     if (connectedWeb3) {
-      connectedAnimate = "";
+      animatePulseConnect = "";
     }
+    // check next button
+    if (nextButtonEnabled) {
+      animatePulseCopy = "";
+    }
+
+
   }, 1000);
 
   $: {
@@ -598,21 +608,33 @@
     */
   function radioProviderChanged(e) {
     console.log("radioProviderChanged(e): ", e.target.value);
-    web3URL = e.target.value;
+    $web3URL = e.target.value;
   }
+
+  // User selected an account from the node's account list
   function radioAccountsChanged(e, i) {
     console.log("radioAccountsChanged(e): ", e.target.value);
-    selectedAddress = e.target.value;
-    isManagedOnNode = true;
 
-    console.log("accountDetails[i]: ", accountDetails[i]);
+    resetValidEthAccount();
 
+    web3.eth.defaultAccount = ethers.constants.AddressZero;
+    web3.eth.accounts.wallet.clear();
+    resetValidEthAccount();
+
+    // get the new address
+    selectedAddress = Web3.utils.toChecksumAddress(e.target.value);
+
+    web3.eth.defaultAccount = selectedAddress;
     $ethAccount.address = selectedAddress;
-    $ethAccount.isManagedOnNode = isManagedOnNode;
-    $ethAccount.isUnlocked = false;
+    $ethAccount.privateKey = null;
+    $ethAccount.isManagedOnNode = true;
+    $ethAccount.isLocked = true;
+    $ethAccount.eth = null;
+
     if (accountDetails[i].status) {
-      if (accountDetails[i].status !== "Locked") {
-        $ethAccount.isUnlocked = true;
+      console.log("accountDetails[i]: ", accountDetails[i]);
+      if (accountDetails[i].status === "Unlocked") {
+        $ethAccount.isLocked = false;
       }
     }
 
@@ -621,9 +643,10 @@
       scrollTo("scrolltarget2");
     }
   }
+
   function urlChanged(e) {
     console.log("urlChanged(e): " + e.target.value);
-    web3URL = e.target.value;
+    $web3URL = e.target.value;
   }
   function addressSelectedChanged(e) {
     console.log("accountSelected(e): ", e.target.value);
@@ -640,7 +663,7 @@
   }
   function onPrivateKeyChanged(c) {
     console.log("Key: ", c);
-    privateKey = c.target.value;
+    privateKeyField = c.target.value;
   }
 
   function toggleAccordionItem(index, open) {
@@ -665,6 +688,22 @@
     }
   }
 
+  async function requestGas(toAdr) {
+    try {
+      let response = await fetch('/ajax/requestGas?toAdr=' + toAdr);
+      if (response.ok) {
+        const json = await response.json();
+        console.log("Gas Response:", json);
+        return Promise.resolve(json);
+      } else {
+        return Promise.reject('Request Gas failed');
+      }
+    } catch (e) {
+    console.log("ERROR:", e);
+      return Promise.reject(e);
+    }
+  }
+
   async function ConnectToRPCProviderUrl() {
     let callsFinished = 0;
     let complete = 2;
@@ -674,27 +713,28 @@
     accountDetails = [];
     connectedWeb3 = false;
     connectedColor = "var(--energi-color-red)";
-    connectedAnimate = "animate__animated animate__pulse animate__infinite";
+    animatePulseConnect = "animate__animated animate__pulse animate__infinite";
 
     // Reset connection details
     isLocalNode = false;
-    if (web3URL.includes("localhost") || web3URL.includes("127.0.0.1")) {
+    $ethAccount.isManagedOnNode = false;
+    if ($web3URL.includes("localhost") || $web3URL.includes("127.0.0.1")) {
       isLocalNode = true;
-    } else {
-      isManagedOnNode = false;
     }
 
     // Reset verification details
     gotBalance = false;
+    gotHistory = false;
     isSigned = false;
     isVerified = false;
+web3.eth.accounts.wallet.clear();
     resetValidEthAccount();
 
-    logConnect = getTime() + ": Try connect to " + web3URL;
+    logConnect = getTime() + ": Try connect to " + $web3URL;
 
-    f7.dialog.preloader("Connecting to " + web3URL);
+    f7.dialog.preloader("Connecting to " + $web3URL);
 
-    let p = web3.setProvider(new Web3.providers.HttpProvider(web3URL));
+    let p = web3.setProvider(new Web3.providers.HttpProvider($web3URL));
     console.log("SetProvider: ", p);
 
     try {
@@ -719,7 +759,7 @@
           }
           web3Error = error;
           console.log("catch:", error);
-          logConnect = logConnect + `\n${getTime()}: ${error}`;
+          logConnect = logConnect + `\n${getTime()}: 🤕 ${error}`;
         });
     }
     catch (error) {
@@ -729,7 +769,7 @@
       }
       web3Error = error;
       console.log("catch:", error);
-      logConnect = logConnect + `\n${getTime()}: ${error}`;
+      logConnect = logConnect + `\n${getTime()}: 🤕 ${error}`;
     }
 
     try {
@@ -747,7 +787,7 @@
         if (callsFinished > complete) f7.dialog.close();
         web3Error = error;
         console.log(error);
-        logConnect = logConnect + `\n${getTime()}: ${error}`;
+        logConnect = logConnect + `\n${getTime()}: 🤕 ${error}`;
       });
     }
     catch (error) {
@@ -757,122 +797,114 @@
         }
         web3Error = error;
         console.log("catch:", error);
-        logConnect = logConnect + `\n${getTime()}: ${error}`;
+        logConnect = logConnect + `\n${getTime()}: 🤕 ${error}`;
     }
 
     try {
-    web3.eth.personal.getAccounts()
-      .then((a) => {
-        callsFinished++;
-        accounts = a;
-        logConnect = logConnect + `\n${getTime()}: Accounts: ${accounts}`;
-        if (callsFinished > complete) {
-          connectedWeb3 = true;
-          connectedColor = "var(--energi-color-green)";
-          f7.dialog.close();
-        }
-        if (accounts[0]) {
-          toggleAccordionItem(3, true);
-        }
-        //make the parent to scroll into view, smoothly!
-        scrollTo("scrolltarget1");
-
-        // fetch account status
-        listWallets(web3)
-          .then( async (r) => {
-            console.log("listWallets:", r.result.length);
-            for (let i = 0; i < r.result.length; i++) {
-              accountDetails.push({
-                status: r.result[i].status,
-                address: r.result[i].accounts[0].address,
-                balance: "-1",
-              });
-            };
+        web3.eth.personal.getAccounts()
+        .then((a) => {
+            callsFinished++;
+            accounts = a;
+            logConnect = logConnect + `\n${getTime()}: Accounts: ${accounts}`;
+            if (callsFinished > complete) {
+            connectedWeb3 = true;
             connectedColor = "var(--energi-color-green)";
-
-            await tick();
-            scrollTo("scrolltarget1");
-          });
-          /*
-          .catch((e) => {
-            logConnect += `\n${getTime()}: listWallets: ${e}`;
-            logConnect += `\n${getTime()}: NOTE: Make sure personal is loaded in your node`;
-            logConnect += `\n${getTime()}: {@html "Example: ./energi --rpcapi admin,web3,eth,debug,<strong>personal</strong>,net,energi"}`;
-
-            accountDetails.push({
-              status: "-1",
-              address: e,
-              balance: "-1",
-            });
-            if (web3URL.includes("localhost")) {
-              console.log("web3URL.contains(localhost)");
-              console.log(web3URL);
-              connectedColor = "var(--energi-color-red)";
-            } else {
-              console.log("NOT web3URL.contains(localhost)");
-              connectedColor = "var(--energi-color-green)";
+            f7.dialog.close();
             }
-          }); */
-      })
-      .catch((error) => {
-        callsFinished++;
-        if (callsFinished > complete) {
-          connectedWeb3 = true;
-          f7.dialog.close();
-        }
-        web3Error = error;
-        console.log(error);
-        logConnect += `\n${getTime()}: ${error}`;
-        accountDetails.push({
-          status: "-1",
-          address: error,
-          balance: "-1",
+            if (accounts[0]) {
+            toggleAccordionItem(3, true);
+            }
+            //make the parent to scroll into view, smoothly!
+            scrollTo("scrolltarget1");
+
+            // fetch account status
+            listWallets(web3).then( async (r) => {
+                console.log("listWallets:", r.result.length);
+                for (let i = 0; i < r.result.length; i++) {
+                    accountDetails.push({
+                        status: r.result[i].status,
+                        address: r.result[i].accounts[0].address,
+                        balance: "-1",
+                    });
+                };
+                connectedColor = "var(--energi-color-green)";
+
+                await tick();
+                scrollTo("scrolltarget1");
+            });
+        })
+        .catch((error) => {
+            callsFinished++;
+            if (callsFinished > complete) {
+                connectedWeb3 = true;
+                f7.dialog.close();
+            }
+            web3Error = error;
+            console.log(error);
+            logConnect += `\n${getTime()}: 🤕 ${error}`;
+            accountDetails.push({
+                status: "-1",
+                address: error,
+                balance: "-1",
+            });
+            if (isLocalNode) {
+                logConnect += `\n${getTime()}: 🤓 NOTE: Make sure personal is loaded in your node`;
+                logConnect += `\n${getTime()}: 🤓 "Example: ./energi --rpcapi personal,admin,web3,eth,debug,net,energi"`;
+                connectedColor = "var(--energi-color-red)";
+            } else {
+                connectedColor = "var(--energi-color-green)";
+            }
+            if (!accounts[0]) {
+                toggleAccordionItem(1, true);
+            }
+            //make the parent to scroll into view, smoothly!
+            scrollTo("scrolltarget1");
         });
-        if (isLocalNode) {
-          logConnect += `\n${getTime()}: NOTE: Make sure personal is loaded in your node`;
-          logConnect += `\n${getTime()}: "Example: ./energi --rpcapi admin,web3,eth,debug,personal,net,energi"`;
-          connectedColor = "var(--energi-color-red)";
-        } else {
-          connectedColor = "var(--energi-color-green)";
-        }
-        if (!accounts[0]) {
-          toggleAccordionItem(1, true);
-        }
-        //make the parent to scroll into view, smoothly!
-        scrollTo("scrolltarget1");
-      });
     }
     catch (error) {
-      callsFinished++;
-      if (callsFinished > complete) {
-        f7.dialog.close();
-      }
-      web3Error = error;
-      console.log("catch:", error);
-      logConnect = logConnect + `\n${getTime()}: ${error}`;
+        callsFinished++;
+        if (callsFinished > complete) {
+            f7.dialog.close();
+        }
+        web3Error = error;
+        console.log("catch:", error);
+        logConnect = logConnect + `\n${getTime()}: 🤕 ${error}`;
     }
   }
 
 
   function ScanPrivateKey() {
     resetValidEthAccount();
-    f7.dialog.preloader(
-      "web3.eth.accounts.privateKeyToAccount (" + privateKey
-    ) + ")";
 
-    console.log("ConvertPrivateKey: ", privateKey);
+    web3.eth.defaultAccount = ethers.constants.AddressZero;
+    web3.eth.accounts.wallet.clear();
+    resetValidEthAccount();
+
+    $ethAccount.isManagedOnNode = false;
+    $ethAccount.isLocked = true;
+
+    f7.dialog.preloader("web3.eth.accounts.privateKeyToAccount (" + privateKeyField + ")");
+
+    console.log("ConvertPrivateKey: ", privateKeyField);
 
     try {
-      const account = web3.eth.accounts.privateKeyToAccount(privateKey, true);
+      const account = web3.eth.accounts.privateKeyToAccount(privateKeyField, true);
       web3.eth.accounts.wallet.add(account);
       web3.eth.defaultAccount = account.address;
       selectedAddress = web3.eth.defaultAccount;
+
       console.log("Address: ${account.address}");
       console.log("Account: ", account);
       logAccount = logAccount + "\n" + getTime() + ": Address " + account.address;
 
       // store account object for later
-      $ethAccount = account;
+      $ethAccount.eth = account;
+      $ethAccount.address =  account.address;
+      $ethAccount.privateKey =  account.privateKey;
+      $ethAccount.isManagedOnNode = false;
+      $ethAccount.isLocked = false;
+
+      console.log("$EthAccount:", $ethAccount);
 
       f7.dialog.close();
       creditcardColor = "var(--energi-color-yellow)";
@@ -880,8 +912,8 @@
       f7.dialog.close();
       web3Error = e;
       console.log("catch:", e);
-      logAccount = logAccount + `\n${getTime()}: ${web3Error}`;
-      createErrorPopup("Error converting Private Key", web3Error);
+      logAccount = logAccount + `\n${getTime()}:🥶 ${web3Error}`;
+      createErrorPopup("🥶 Error converting Private Key 🥶", web3Error);
       creditcardColor = "var(--energi-color-red)";
     }
   }
@@ -891,19 +923,31 @@
     f7.dialog.preloader("Unlocking Keystore");
     console.log("unlockKeystore: " + keystoreJson);
 
+    web3.eth.defaultAccount = ethers.constants.AddressZero;
+    web3.eth.accounts.wallet.clear();
+    resetValidEthAccount();
+
+    $ethAccount.isManagedOnNode = false;
+    $ethAccount.isLocked = true;
+
     setTimeout(() => {
       try {
         const decryptedAccount = web3.eth.accounts.decrypt(keystoreJson, password);
 
         if (decryptedAccount) {
           selectedAddress = decryptedAccount.address;
-          privateKey = decryptedAccount.privateKey;
+          privateKeyField = decryptedAccount.privateKey;
 
           web3.eth.accounts.wallet.add(decryptedAccount);
           web3.eth.defaultAccount = decryptedAccount.address;
 
           // store account object for later
-          $ethAccount = decryptedAccount;
+          $ethAccount.eth = decryptedAccount;
+          $ethAccount.address = decryptedAccount.address;
+          $ethAccount.privateKey = decryptedAccount.privateKey;
+          $ethAccount.isManagedOnNode = false;
+          $ethAccount.isLocked = false;
+
           $isUnlocked = true;
 
           logAccount += "\n" + getTime() + ": decryptedAccount **********************";
@@ -911,7 +955,7 @@
           logAccount += "\n" + getTime() + ": ***************************************";
           logAccount = logAccount.trim();
 
-          console.log(decryptedAccount);
+          console.log("$EthAccount:", $ethAccount);
 
           //make the parent to scroll into view, smoothly!
           scrollTo("scrolltarget2");
@@ -919,7 +963,7 @@
         }
         } catch(e) {
             f7.dialog.close();
-            createErrorPopup("Unlocking failed", e);
+            createErrorPopup("🤢 Unlocking failed 🤮", e);
             creditcardColor = "var(--energi-color-red)";
         }
       }, 300);
@@ -932,18 +976,22 @@
     pawColor = "var(--energi-color-grey)";
     plusminusColor = "var(--energi-color-grey)";
     rocketColor = "var(--energi-color-grey)";
-    thumbsupColor = $ethAccount.address ? "var(--energi-color-red)" : "var(--energi-color-grey)";
-    privatekeyColor = $ethAccount.privateKey ? "var(--energi-color-red)" : "var(--energi-color-grey)";
+    thumbsupColor = "var(--energi-color-grey)";
+    privatekeyColor = "var(--energi-color-grey)";
     balanceTitle = "N/A";
     signedTitle = "N/A";
+    signedFooter = "N/A";
 
     selectedAddressBalance = 0;
+    balanceHistory.length = 0;
 
     choosenAddressIsValid = false;
     nextButtonEnabled = false;
-    gotBalance = false;
 
-    balanceHistory.length = 0;
+    gotBalance = false;
+    gotHistory = false;
+    isSigned = false;
+    isVerified = false;
  }
 
 function setValidatedColor() {
@@ -964,57 +1012,73 @@ function setValidatedColor() {
     pawColor = "var(--energi-color-red)";
   }
 
+  if (gotBalance && isSigned && gotHistory) {
+    isVerified = true;
+    choosenAddressIsValid = true;
+  }
+
   if (isVerified) {
     creditcardColor = "var(--energi-color-green)";
     thumbsupColor = "var(--energi-color-green)";
     rocketColor = "var(--energi-color-green)";
-    if (isManagedOnNode) {
+    if ($ethAccount.isManagedOnNode) {
       privatekeyColor = "var(--energi-color-green)";
     } else {
       privatekeyColor = "var(--energi-color-yellow)";
     }
   }
-  console.log("setValidatedColor", gotBalance, isSigned, isVerified);
+  console.log("setValidatedColor", "gotBalance", gotBalance, "gotHistory", gotHistory, "isSigned", isSigned, "isVerified", isVerified);
+  if (choosenAddressIsValid) {
+    if ($ethAccount.isManagedOnNode) {
+      nextButtonEnabled = true;
+      logAccount = (logAccount + "\n" + getTime() + ": Account is Valid ✅").trim();
+    } else {
+      animatePulseCopy = "animate__animated animate__pulse animate__infinite colorturkis";
+      logAccount = (logAccount + "\n" + getTime() + ": Account is Valid ✅, click on copy PK to continue").trim();
+    }
+    console.log("Stored info to pass to the next page (SmartContract):", $ethAccount);
+  }
 }
 
  async function TestAccount() {
     f7.dialog.preloader("Testing Account");
     let errorMessageForPopup;
 
+    resetValidEthAccount();
+
     if (selectedAddress !== $ethAccount.address) {
       $ethAccount.address = selectedAddress;
     }
-
-    resetValidEthAccount();
 
     try {
       const balance = await getBalance($ethAccount.address);
       if (balance) {
         balanceTitle = ethers.utils.formatEther(balance) + " NRG";
         gotBalance = true;
+        selectedAddressBalance = balanceTitle;
+        logAccount = (logAccount + "\n" + getTime() + ": Fetching balance was successfull").trim();
       } else {
         balanceTitle = "Failed to get the balance of " + $ethAccount.address;
+        logAccount = (logAccount + "\n" + getTime() + ": Failed to get the balance of " + $ethAccount.address).trim();
       }
 
       const wasSigned = await testSignMessage($ethAccount.address, $ethAccount.privateKey);
       if (wasSigned) {
-        signedTitle = "Successfully signed a message with " + ($ethAccount.privateKey ? $ethAccount.privateKey : $ethAccount.address);
+        signedTitle = "Successfully signed a message with " + ($ethAccount.isManagedOnNode ? $ethAccount.address : $ethAccount.privateKey);
       } else {
-        signedTitle = "Failed to sign a message with " + ($ethAccount.privateKey ? $ethAccount.privateKey : $ethAccount.address);
+        signedTitle = "Failed to sign a message with " + ($ethAccount.isManagedOnNode ? $ethAccount.address : $ethAccount.privateKey);
       }
 
-      const provider = new ethers.providers.JsonRpcProvider(web3URL);
+      const provider = new ethers.providers.JsonRpcProvider($web3URL);
       if (provider) {
         console.log("getBalanceHistory", numberOfTransactionsToFetchForBalanceHistory);
+        const maxZeroBlocks = 10;
         const transactions = numberOfTransactionsToFetchForBalanceHistory;
         const startTime = Date.now();
-        const bh = await getBalanceHistory(provider, $ethAccount.address, transactions).catch((e) => { console.error(e); errorMessageForPopup = e;});
+        const bh = await getBalanceHistory(provider, $ethAccount.address, transactions, maxZeroBlocks).catch((e) => { console.error(e); errorMessageForPopup = e;});
 
         if (bh && bh.length > 0) {
           for (let i = 0; i < bh.length; i++ ) {
-              console.log('***************************************');
-            console.log("typeof bh.diff", typeof bh[i].diff);
-            console.log("typeof bh.balance", typeof bh[i].balance);
             balanceHistory.unshift(bh[i]);
           }
         }
@@ -1027,7 +1091,9 @@ function setValidatedColor() {
         console.log('***************************************');
 
         if (balanceHistory.length > 0) {
+          gotHistory = true;
           balanceHistory = balanceHistory;
+          logAccount = (logAccount + "\n" + getTime() + ": Balance History found " + balanceHistory.length + " changes").trim();
         }
       }
 
@@ -1051,39 +1117,31 @@ function setValidatedColor() {
         checksumAddress = Web3.utils.toChecksumAddress(address);
 
         if (checksumAddress !== address) {
-          //TODO REMOVE f7.dialog.close();
-          //TODO REMOVE setValidatedColor();
           logAccount = logAccount + "\n" + getTime() + ": Invalid address checksum";
           logAccount = logAccount.trim();
-          //TODO REMOVE createErrorPopup("Error occured", "Invalid address checksum");
+          signedFooter = address + ": Invalid address checksum";
         } else {
           try {
             balance = await web3.eth.getBalance(address).catch((e) => {
-                                                                        //TODO REMOVE f7.dialog.close();
-                                                                        //TODO REMOVE setValidatedColor();
-                                                                        //TODO REMOVE createErrorPopup("Error occured", e);
+                                                                        f7.dialog.close();
+                                                                        createErrorPopup("Error occured", e);
                                                                         console.log(e);
                                                                       });
           } catch (e) {
             console.log(e);
-            //TODO REMOVE f7.dialog.close();
-            //TODO REMOVE setValidatedColor();
-            //TODO REMOVE createErrorPopup("Error occured", error);
+            throw(e);
           }
         }
 
       } catch (e) {
         console.log(e);
-        //TODO REMOVE f7.dialog.close();
-        //TODO REMOVE setValidatedColor();
-        //TODO REMOVE createErrorPopup("Error occured", error);
+        f7.dialog.close();
+        createErrorPopup("Error occured", error);
       }
 
     } else {
-        //TODO REMOVE setValidatedColor();
         logAccount = logAccount + "\n" + getTime() + ": Address is not set";
         logAccount = logAccount.trim();
-        //TODO REMOVE f7.dialog.close();
     }
     return balance;
   }
@@ -1094,30 +1152,65 @@ function setValidatedColor() {
     try {
       let signator;
       // check how to sign: with private key or letting the node do it
-      if (privateKey && privateKey !== "") {
+      console.log("testSignMessage", $ethAccount);
+      if ($ethAccount.isManagedOnNode === false) {
+        signedFooter = "Private Key signature";
         const signatureObject = web3.eth.accounts.sign(msg, privateKey);
         signator = web3.eth.accounts.recover(signatureObject);
       } else {
-        const signature = await web3.eth.sign(msg, adr).catch((e) => {logAccount = (logAccount + "\n" + getTime() + ": web3.eth.sign failed for " + adr + ": " + e).trim();});
-        signator = await web3.eth.personal.ecRecover(msg, signature).catch((e) => {logAccount = (logAccount + "\n" + getTime() + ": web3.eth.personal.ecRecover failed: " + e).trim();});
-        signator = Web3.utils.toChecksumAddress(signator);
-        console.log("signator", signator);
+        signedFooter = "Account signature";
+        const signature = await web3.eth.sign(msg, adr); //.catch((e) => {logAccount = (logAccount + "\n" + getTime() + ": web3.eth.sign failed for " + adr + ": " + e).trim();});
+        if (signature) {
+          signator = await web3.eth.personal.ecRecover(msg, signature).catch((e) => {logAccount = (logAccount + "\n" + getTime() + ": web3.eth.personal.ecRecover failed: " + e).trim();});
+          if (signator) {
+            signator = Web3.utils.toChecksumAddress(signator);
+            console.log("signator", signator);
+          }
+        }
       }
 
       if (signator == adr) {
-        //TODO REMOVE signedTitle = 'Address ' + adr + '" is VALID';
         isSigned = true;
-        //choosenAddressIsValid = true; TODO REMOVE FROM HERE
+        $ethAccount.isLocked = false;
+        signedFooter += " OK";
+        if ($ethAccount.isManagedOnNode) {
+          privateKeyFooter = "Node did successfully sign a message with the Private Key on the node";
+          logAccount = (logAccount + "\n" + getTime() + ": Node did successfully sign a message with the Private Key on the node").trim();
+        }
+        logAccount = (logAccount + "\n" + getTime() + ": Message signing was successfull").trim();
+
       } else {
         if (signator === undefined) {
           signator = 'undefined';
         }
-        //TODO REMOVE signedTitle = 'Signator "' + signator + '" is INVALID';
+        signedFooter += " FAILED";
+        if ($ethAccount.isManagedOnNode) {
+          privateKeyFooter = "Node failed to sign a message with the Private Key on the node";
+        }
         isSigned = false;
+        logAccount = (logAccount + "\n" + getTime() + ": Message signing failed").trim();
       }
 
     } catch (e) {
       logAccount = (logAccount + "\n" + getTime() + ": web3.eth.sign failed for " + adr + ": " + e).trim();
+      // Check for auth msg
+      if (e.toString().includes("authentication needed")) {
+        console.log("Auth needed");
+        if (e.toString().includes("only staking")) {
+            signedFooter = "Your account is in staking only mode";
+        } else {
+            signedFooter = "Your account is locked";
+        }
+        signedFooter += ", you need to unlock it in the nodes console.";
+        privateKeyFooter = "Use personal.unlockAccount('{$ethAccount.address}',null,0,false) on the nodes console";
+      } else {
+        console.log("Failed Auth needed", e.toString());
+        signedFooter += " invalid, Error:" + e.toString();
+        if ($ethAccount.isManagedOnNode) {
+          privateKeyFooter = "Use personal.unlockAccount('{$ethAccount.address}',null,0,false) on the nodes console";
+        }
+      }
+      $ethAccount.isLocked = true;
       isSigned = false;
     }
 
@@ -1171,12 +1264,6 @@ function setValidatedColor() {
         }
       }
     });
-  }
-
-
-  function sleepFor(sleepDuration) {
-    let now = new Date().getTime();
-    while (new Date().getTime() < now + sleepDuration) { tick(); }
   }
 
   function onShow() {

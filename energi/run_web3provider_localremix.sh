@@ -1,8 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2020 Kim Il Yong
-
-
 #####################################################################
 # Description: This script is to start energi core in testmode as a web3 provider for remix desktop IDE
 #

@@ -50,6 +50,7 @@
           <CardContent>
             <List>
               <ListItem link="#" view=".view-main" back panelClose title="Back in history"/>
+              <ListItem link="/" view=".view-main" panelClose title="Home" style="{homeStyleLink}"/>
             </List>
           </CardContent>
         </Card>
@@ -154,9 +155,11 @@
   let web3Style = infoStyle;
   let scStyle = infoStyle;
 
+
   let infoStyleLink = `color:var(--energi-color-text)`;
   let web3StyleLink = infoStyleLink;
   let scStyleLink = infoStyleLink;
+  let homeStyleLink = infoStyleLink;
 
   const unsubscribe = visitedPages.subscribe(visitedPages => {
 
