@@ -6,7 +6,7 @@ Framework7 app created with following options:
 
 ```
 {
-  "cwd": "/home/moe/source/Energi-Smart-Contract-Tutorial/svelte-faucet/faucet",
+  "cwd": "/home/kim/source/Energi-Smart-Contract-Tutorial/svelte-faucet/faucet",
   "type": [
     "pwa"
   ],
