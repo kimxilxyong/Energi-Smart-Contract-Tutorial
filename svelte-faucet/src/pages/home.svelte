@@ -11,8 +11,8 @@
 </Navbar>
   <!-- Toolbar -->
   <Toolbar bottom>
-    <Link>Right Link</Link>
-    <Link iconIos="f7:menu" iconAurora="f7:menu" iconMd="material:menu" panelOpen="left" />
+    <Link panelOpen="right">Right Link</Link>
+    <Link iconIos="f7:right" iconAurora="f7:right" iconMd="material:right" panelOpen="right" />
   </Toolbar>
   <!-- Page content -->
 
@@ -34,7 +34,7 @@
             </span>
           </ListItem>
         {:else}
-          <ListItem title="Donors Count: {r.donorsCount}"  badge={r.donorsCount} footer="No donors found 🙄">
+        <ListItem title="Donors Count: {r.donorsCount}"  badge={r.donorsCount} footer="No donors found 🙄">
             <i slot="media" class="nf-icons nf-hc-fw colorgrey">&#xf263;</i>
           </ListItem>
         {/if}
@@ -55,27 +55,6 @@
           <i slot="media" class="nf-icons nf-hc-fw {nf_hc_spinR} colororpink">&#xf263;</i>
         </ListItem>
         <!-- OK-Square U+F634  clipboard U+F429 -->
-        <ListItem style="color:var(--energi-color-yellow);" title="Owner: {r.owner}" after="&nbsp;">
-            <div slot="after-title" class="colortext" style="margin-left: 20px;">
-              {#if r.owner !== ethers.constants.AddressZero}
-                <span class="bround bgreen fss3 {isClipboardDoneClass1}">
-                Copied!
-                </span>
-                <i on:click={ () => {
-                                        isClipboardDoneClass1 = "animate__animated animate__fadeOut animate__delay-2s";
-                                        copyToClipboard(r.owner);
-                                        setTimeout(() =>   {
-                                                                if (isClipboardDoneClass1 !== "hidden") {
-                                                                    isClipboardDoneClass1 = "hidden";
-                                                                }
-                                                            }, 3300);
-                                    }
-                            } title="Copy to clipboard" class="nf-icons nf-hc-1x colorgrey">&#xF429;
-                </i>
-              {/if}
-            </div>
-        </ListItem>
-
         <ListItem style="color:yellow;"title="Contract Address: {r.contractAddress}" after="&nbsp;">
             <div slot="after-title" class="colortext" style="margin-left: 20px;">
               {#if r.contractAddress !== ethers.constants.AddressZero}
@@ -96,6 +75,26 @@
               {/if}
             </div>
         </ListItem>
+        <ListItem style="color:var(--energi-color-yellow);" title="Owner: {r.owner}" after="&nbsp;">
+            <div slot="after-title" class="colortext" style="margin-left: 20px;">
+              {#if r.owner !== ethers.constants.AddressZero}
+                <span class="bround bgreen fss3 {isClipboardDoneClass1}">
+                Copied!
+                </span>
+                <i on:click={ () => {
+                                        isClipboardDoneClass1 = "animate__animated animate__fadeOut animate__delay-2s";
+                                        copyToClipboard(r.owner);
+                                        setTimeout(() =>   {
+                                                                if (isClipboardDoneClass1 !== "hidden") {
+                                                                    isClipboardDoneClass1 = "hidden";
+                                                                }
+                                                            }, 3300);
+                                    }
+                            } title="Copy to clipboard" class="nf-icons nf-hc-1x colorgrey">&#xF429;
+                </i>
+              {/if}
+            </div>
+        </ListItem>
         <ListItem title="Result: {r.error}" class="{ r.error === "OK" ? 'colorgreen' : r.error.toString().includes("Error") ? 'colorred' : ''}"></ListItem>
         <ListItem title="Activity: {currentActivity}"></ListItem>
       </List>
@@ -107,6 +106,12 @@
     <CardContent>
         <List noHairlinesMd>
             <ListItem style="color:var(--energi-color-turkis);" title="JSON-RPC provider node: {$web3URL}"></ListItem>
+            <ListItem title="Log size: {countMaxLogLength} chars maximum">
+                <span slot="after">
+                    <Stepper value={countMaxLogLength} max=10000 name=""
+                        onStepperChange={(v) => {countMaxLogLength = v}} small wraps autorepeat autorepeatDynamic inputReadonly/>
+                </span>
+            </ListItem>
             <ListInput
                 outline
                 disabled
@@ -121,12 +126,33 @@
                 spellcheck="false">
                     <!-- <i slot="media" class="nf-icons nf-hc-fw animate__animated animate__pulse animate__infinite" style="color:{connectedColor};">&#xf817;</i> -->
                     <!-- <i slot="media" class="nf-icons nf-hc-fw {animatePulseConnect}" style="color:{connectedColor};">&#xf817;</i> -->
-                    <i slot="media" class="nf-icons nf-hc-fw" style="">&#xf817;</i>
+                    <i slot="media" class="nf-icons nf-hc-fw" style="">&#xf02d;</i>
             </ListInput>
+            <li><div class="seperator"/></li>
+            <ListItem title="Source code repository" link="https://github.com/kimxilxyong/Energi-Smart-Contract-Tutorial" target="_blank" external>
+                <i slot="media" class="f7-icons colororpink">logo_github</i>
+                <!-- <Link href="https://github.com/kimxilxyong/Energi-Smart-Contract-Tutorial" external target="_blank" iconF7="f7:logo_github" iconIos="f7:logo_github">Source code repository</Link> -->
+            </ListItem>
+            <li><div class="seperator"/></li>
+            <ListItem title="Powerd by">
+                <div slot="inner-end" class="flex-row">
+                    <div class="flex-col dynamic" style='height: 2em; width: 10em; background-image: url("svelte-logo-horizontal.svg");'>
+                      <a external target="_blank" rel="prefetch" href="https://svelte.dev/" style='background-image: url("svelte-logo-horizontal.svg");'>Svelte</a>
+                    </div>
+                    <div class="flex-col dynamic nf-icons nf-hc-fw">&#xf1d2;</div>  <!-- GIT -->
+                    <div class="flex-col dynamic nf-icons nf-hc-fw">&#xf17c;</div>  <!-- Linux -->
+                    <div class="flex-col dynamic nf-icons nf-hc-fw">&#xe779;</div>  <!-- GNU -->
+                    <div class="flex-col dynamic nf-icons nf-hc-fw">&#xf81c;</div>  <!-- HTML5 -->
+                    <div class="flex-col dynamic nf-icons nf-hc-fw">&#xf81d;</div>  <!-- JS -->
+                </div>
+            </ListItem>
+            <li><div class="seperator"/></li>
         </List>
 
     </CardContent>
   </Card>
+
+  <!-- chain &#xf838;  OKman &#xf263;  people &#xf007; GIT f1d2 , LogBook f02d , Linux f17c , GNU e779 , gitcat &#xf09b; html5 f81c , js f81d , linux f83c , box arrow right f705 -->
 
 
   <Block strong>
@@ -206,7 +232,7 @@
     Col,
     Button
   } from 'framework7-svelte';
-  import ethers from "ethers";
+  import { ethers } from "ethers";
   import { tick, getContext } from "svelte";
   import {
     web3URL,
@@ -217,6 +243,8 @@
   import { timeDifference, copyToClipboard, getTime, scrollTo } from "../js/utils.js";
   import {abi106} from '../js/abi.js';
   const abi = abi106;
+
+  let countMaxLogLength = 5000;
 
   let animateSwingClass = "animate__animated animate__swing animate__infinite colorturkis";
   let isClipboardDoneClass1 = "hidden";
@@ -468,7 +496,7 @@
     currentActivity = "Details loading ...";
     const startSeconds = new Date();
 
-    if (logText.length > 1000) {
+    if (logText.length == 0 || logText.length > countMaxLogLength) {
         logText = getTime() + ": Starting to fetch data from " + $web3URL;
     } else {
         logText = logText + "\n" + getTime() + ": Starting to fetch data from " + $web3URL;

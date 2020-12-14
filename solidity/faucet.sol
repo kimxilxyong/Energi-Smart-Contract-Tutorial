@@ -5,6 +5,8 @@ pragma solidity >=0.7.0 <0.8.0;
  * Copyright (c) 2020 Kim Il Yong
  */
 
+// Connect Remix to: http://localhost:49796
+
 import "./safemath.sol";
 import "./signedsafemath.sol";
 import "./math.sol";
@@ -23,8 +25,6 @@ contract OwnedContract {
 
     // 106 add country
     // 106 published to '0x1EDf7947F7b95bA658D0A74024Dd8092e4D4831c'
-
-    // http://localhost:49796
     uint16 constant public version = 106;
 
     // The creator of this contract

@@ -1,5 +1,6 @@
 <!-- SPDX-License-Identifier: MIT
-     Copyright (c) 2020 Kim Il Yong -->
+     Copyright (c) 2020 Kim Il Yong
+     Version 1.0.0 -->
 
 <ListInput
     input={true}

@@ -466,7 +466,7 @@
     Preloader,
   } from "framework7-svelte";
   import Web3 from "web3";
-  import ethers from "ethers";
+  import { ethers } from "ethers";
   import { tick, getContext } from "svelte";
   import {
     web3URL,

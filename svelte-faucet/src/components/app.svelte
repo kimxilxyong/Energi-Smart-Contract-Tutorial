@@ -1,7 +1,14 @@
 
 <svelte:head>
-  <link href="https://fonts.googleapis.com/css?family=Open Sans" rel="stylesheet">
+<!--   <link href="https://fonts.googleapis.com/css?family=Open Sans" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
+ -->
+  <meta charset="UTF-8">
+  <meta name="description" content="Smart Contract tutorials">
+  <meta name="keywords" content="svelte, solidity, smart contract, energi3, web3, ethers.js, ethers.io, crypto wallets, energi, JavaScript">
+  <meta name="author" content="Kim Il">
+  <meta name="generator" content="svelte">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </svelte:head>
 
 <App params={ f7params } themeDark>
@@ -17,7 +24,7 @@
         </div>
 
         <Card outline>
-          <CardHeader style="{infoStyle}">Information</CardHeader>
+          <CardHeader style="{infoStyle}">Start</CardHeader>
           <CardContent>
             <List>
               <ListItem link="/info/" view=".view-main" panelClose title="About" style="{infoStyleLink}"/>
@@ -63,6 +70,29 @@
     <View main class="safe-areas" url="/" />
 
     Icons made by <a href="http://www.freepik.com/" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
+
+
+  <!-- Right panel with cover effect when hidden -->
+  <Panel right reveal themeDark visibleBreakpoint={1360}>
+    <View>
+      <Page>
+        <div class="navbar theme-dark">
+          <div class="navbar-bg">
+           <img src="./images/EnergiLogo-Light.png" alt="Energi Logo" height="60%" width="60%" style="left:11px;top:12px;position:absolute;"/>
+          </div>
+        </div>
+
+        <Card outline>
+          <CardHeader style="{infoStyle}">Information</CardHeader>
+          <CardContent>
+            <List>
+              <ListItem title="Test"/>
+            </List>
+          </CardContent>
+        </Card>
+      </Page>
+    </View>
+  </Panel>
 
   <!-- Popup -->
   <Popup id="my-popup">
@@ -190,7 +220,25 @@
     routes: routes,
     // Register service worker
     serviceWorker: {
-      path: '/service-worker.js',
+        path: '/service-worker.js',
+    },
+    clicks: {
+        externalLinks: '.external',
+    },
+    touch: {
+        tapHold: true,
+    },
+    panel: {
+        swipe: true,
+        visibleBreakpoint: 1024,
+    },
+    // Extended by Dialog component:
+    dialog: {
+        title: 'Faucet',
+    },
+    // Extended by Statusbar component:
+    statusbar: {
+        iosOverlaysWebview: true,
     },
   };
   // Login screen demo data

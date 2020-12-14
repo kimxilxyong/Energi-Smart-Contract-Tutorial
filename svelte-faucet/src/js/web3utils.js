@@ -2,7 +2,7 @@
    Copyright (c) 2020 Kim Il Yong */
 
 //import Web3 from 'web3';
-import ethers from "ethers";
+import { ethers } from "ethers";
 
 /*
 function getBalanceHistory
