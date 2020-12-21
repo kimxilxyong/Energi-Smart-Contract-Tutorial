@@ -141,8 +141,7 @@
   </LoginScreen>
 </App>
 <script>
-  import { onMount, onDestroy } from 'svelte';
-
+  import { onMount, onDestroy, setContext } from 'svelte';
   import {
     f7,
     f7ready,
@@ -174,7 +173,6 @@
   import Web3 from 'web3';
   import routes from '../js/routes';
   import { visitedPages } from '../js/stores.js';
-  import { setContext } from 'svelte';
 
   // store the web3 object globally into a svelte context
   const web3 = new Web3('http://localhost:8545');
@@ -250,7 +248,8 @@
     f7.dialog.alert('Username: ' + username + '<br>Password: ' + password, () => {
       f7.loginScreen.close();
     });
-  }
+  };
+
   onMount(() => {
     f7ready(() => {
 

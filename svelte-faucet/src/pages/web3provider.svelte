@@ -225,6 +225,7 @@
                       onValidate="{(isValid) => checkPrivateKeyValid(isValid)}"
                       inputId="inputIDPrivateKey"
                       spellcheck="false"
+                      autocomplete="off"
                     >
                     </ListInput>
                   </Col>
