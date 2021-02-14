@@ -1,7 +1,14 @@
 /* SPDX-License-Identifier: MIT
-   Copyright (c) 2020 Kim Il Yong */
+   Copyright (c) 2020 Kim Il Yong
+   Version 1.0.0 */
 
-/* Your app custom styles here */
+@charset "UTF-8";
+
+.mono-small {
+  font-family: var(--f7-font-family-mono);
+  font-weight: 400;
+  font-size: 1rem;
+}
 
 :root {
   --f7-font-size: 14px;
@@ -21,7 +28,9 @@
   --f7-safe-area-outer-right: 0px;
   --f7-device-pixel-ratio: 1;
 
-  --energi-color-text: #efe;
+  --f7-tooltip-bg-color: rgba(78, 76, 76, 0.863);
+
+  --energi-color-text: #e0f0e0;
 
   --energi-color-green: #00e676;
   --energi-color-lightgreen: #5deda7cc;
@@ -31,6 +40,7 @@
   --energi-color-yellow: #acbb27;
   --energi-color-turkis: #52ddfc;
   --energi-color-blue: #3b3fac;
+  --energi-color-lightblue: #393fec;
   --energi-color-pink: #e655e1;
   --energi-color-orange: #f86808;
   --energi-color-lime: #b4fc63;
@@ -69,8 +79,50 @@
   --f7-list-item-header-font-weight:500;
   --f7-list-item-footer-font-size:0.6rem;
   --f7-list-item-footer-font-weight:200;
-
 }
+
+.text {
+  font-family: var(--f7-font-family);
+  font-size:14px;
+  font-weight:400;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Invert navigation bars to fill style #263238; */
+:root,
+:root.theme-dark,
+:root .theme-dark {
+  --f7-bars-bg-color: var(--f7-theme-color);
+  --f7-bars-bg-color-rgb: var(--f7-theme-color-rgb);
+  --f7-bars-translucent-opacity: 0.9;
+  --f7-bars-text-color: var(--energi-color-text);
+  --f7-bars-link-color: var(--energi-color-text);
+  --f7-navbar-subtitle-text-color: rgba(255, 255, 255, 0.85);
+  --f7-bars-border-color: transparent;
+  --f7-tabbar-link-active-color: var(--energi-color-text);
+  --f7-tabbar-link-inactive-color: rgba(255, 255, 255, 0.54);
+  --f7-sheet-border-color: transparent;
+  --f7-tabbar-link-active-border-color: var(--energi-color-text);
+
+  /*--f7-appbar-app-offset: 150px; */
+  --f7-appbar-height: 96px;
+
+  --f7-navbar-title-font-weight: 600;
+  --f7-card-header-font-weight: 600;
+  --f7-input-focused-border-color: var(--energi-color-green);
+  /* Radio buttons local/remote*/
+  --f7-radio-extra-margin: 2px;
+  --f7-list-item-media-margin: 5px;
+
+  /*--f7-label-focused-text-color: #2cd048; */
+}
+
 .colorturkis {
   color: var(--energi-color-turkis);
 }
@@ -89,6 +141,9 @@
 .colorblue {
   color: var(--energi-color-blue);
 }
+.colorlightblue {
+  color: var(--energi-color-lightblue);
+}
 .colorpink {
   color: var(--energi-color-pink);
 }
@@ -105,40 +160,80 @@
   color: var(--energi-color-text);
 }
 
-.text {
-  font-family: var(--f7-font-family);
-  font-size:14px;
-  font-weight:400;
-  font-style: normal;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 .hidden {
   display: none !important;
 }
+.noline ::after {
+  display: none !important;
+}
+
+.dinherit {
+  display: inherit;
+}
+.mhauto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.button {
+  max-height: 2.5rem;
+  height: 2.5rem;
+  min-height: 2.5rem;
+}
+.button.disablebar {
+  background-color: var(--energi-color-grey);
+}
+.button:not(.disablebar) {
+  background-color: var(--energi-color-green);
+}
+.leftbuttonicon,
+.button-icon {
+  font-size: inherit;
+  margin-top: 0.1em;
+  margin-right: 0.3em;
+}
+
+
+.button.tab-link:not(.tab-link-active) {
+  background-color: var(--energi-color-grey);
+}
+.button.tab-link.tab-link-active {
+  background-color: var(--energi-color-green);
+}
+
+.stepper.stepper-small.font06 .stepper-input-wrap input {
+  font-size: 0.6em;
+  padding-left: 0.8em;
+  padding-right: 0.8em;
+}
+.stepper.stepper-small.font07 .stepper-input-wrap input {
+  font-size: 0.7em;
+  padding-left: 0.7em;
+  padding-right: 0.7em;
+}
+.stepper.stepper-small.font08 .stepper-input-wrap input {
+  font-size: 0.8em;
+  padding-left: 0.6em;
+  padding-right: 0.6em;
+}
 
 .fsl1 {
-    font-size: 1.2em;
+  font-size: 1.2em;
 }
 .fsl2 {
-    font-size: 1.4em;
+  font-size: 1.4em;
 }
 .fsl3 {
-    font-size: 1.6em;
+  font-size: 1.6em;
 }
 .fss1 {
-    font-size: 0.8em;
+  font-size: 0.8em;
 }
 .fss2 {
-    font-size: 0.6em;
+  font-size: 0.6em;
 }
 .fss3 {
-    font-size: 0.4em;
+  font-size: 0.4em;
 }
 
 .bround {
@@ -178,56 +273,53 @@ div.flex-col.fixed {
   position: relative;
 }
 div.flex-col.top2 {
-  top: -0.2rem;
+  top: -2pt;
 }
 div.flex-col.top3 {
-    top: -0.3rem;
+  top: -3pt;
 }
 div.flex-col.top4 {
-  top: -0.4rem;
+  top: -4pt;
 }
 div.flex-col.top5 {
-    top: -0.5rem;
+  top: -5pt;
 }
-div.flex-col.top62 {
-    top: -0.62rem;
+div.flex-col.top6 {
+  top: -6pt;
 }
 div.flex-col.top9 {
-    top: -0.9rem;
+  top: -9pt;
 }
 
-div.seperator {
+/* div.seperator {
     content: '';
-    position: absolute;
+    position: inherit;
     background-color: var(--f7-list-item-border-color);
     display: block;
     z-index: 15;
-    top: auto;
     right: auto;
-    bottom: 0;
     left: 0;
     height: 1px;
     width: 100%;
     transform-origin: 50% 100%;
     transform: scaleY(calc(1 / var(--f7-device-pixel-ratio)));
 }
+div.seperator.bottom {
+    top: auto;
+    bottom: 0;
+}
+div.seperator.top {
+    top: 0;
+    bottom: auto;
+} */
 
-.button {
-  max-height: 2.5rem;
-  height: 2.5rem;
-  min-height: 2.5rem;
-}
-.button.disablebar {
-  background-color: var(--energi-color-grey);
-}
-.button:not(.disablebar) {
-  background-color: var(--energi-color-green);
+.seperator.item-content,
+.seperator .item-content .item-inner {
+  min-height: 1px;
+  padding-top: 0px;
+  padding-bottom: 5px;
 }
 
-.button-icon {
-  font-size:0.8rem;
-  margin-right: 0.3rem;
-}
 .bold {
   font-weight:1000;
 }
@@ -256,11 +348,6 @@ div.seperator {
   padding-right: 0.2rem;
 }
 
-#REMOVEDINPUT {
-  width: 0;
-  height: 0;
-}
-
 img.pngColorGreen {
   filter: invert(83%) sepia(14%) saturate(5968%) hue-rotate(90deg) brightness(89%) contrast(103%);
 }
@@ -272,47 +359,11 @@ img.pngColorNone {
   filter: invert(0%);
 }
 
-#logtextarea textarea {
-  color: var(--energi-color-yellow);
-  font-family: var(--f7-font-family-mono);
-  font-weight: 400;
-  font-size: 0.8rem;
-}
-
-#yellow-mono-small textarea {
-  color: var(--energi-color-yellow);
-  font-family: var(--f7-font-family-mono);
-  font-weight: 400;
-  font-size: 0.8rem;
-}
-#yellow-mono-small .item-radio div.item-title {
-  color: var(--energi-color-yellow);
-  font-family: var(--f7-font-family-mono);
-  font-weight: 400;
-  font-size: 0.8rem;
-}
-
-#grey-mono-small .item-radio div.item-title {
-  color: var(--energi-color-grey);
-  font-family: var(--f7-font-family-mono);
-  font-weight: 400;
-  font-size: 0.8rem;
-}
-
-#inputIDPrivateKey,
-#inputIDSelectedAddress,
-#mono-small,
-.mono-small {
-  font-family: var(--f7-font-family-mono);
-  font-weight: 400;
-  font-size: 0.8rem;
-}
-
 .list #small .item-title ,
 .list .small .item-title {
   font-family: var(--f7-font-family);
   font-weight: 400;
-  font-size: 0.6rem;
+  font-size: 0.8rem;
 }
 
 .md .item-input .item-media {
@@ -392,35 +443,6 @@ li.accordion-item > a.item-link div.item-title {
   );
 }
 
-/* Invert navigation bars to fill style #263238; */
-:root,
-:root.theme-dark,
-:root .theme-dark {
-  --f7-bars-bg-color: var(--f7-theme-color);
-  --f7-bars-bg-color-rgb: var(--f7-theme-color-rgb);
-  --f7-bars-translucent-opacity: 0.9;
-  --f7-bars-text-color: var(--energi-color-text);
-  --f7-bars-link-color: var(--energi-color-text);
-  --f7-navbar-subtitle-text-color: rgba(255, 255, 255, 0.85);
-  --f7-bars-border-color: transparent;
-  --f7-tabbar-link-active-color: var(--energi-color-text);
-  --f7-tabbar-link-inactive-color: rgba(255, 255, 255, 0.54);
-  --f7-sheet-border-color: transparent;
-  --f7-tabbar-link-active-border-color: var(--energi-color-text);
-
-  /*--f7-appbar-app-offset: 150px; */
-  --f7-appbar-height: 96px;
-
-  --f7-navbar-title-font-weight: 600;
-  --f7-card-header-font-weight: 600;
-  --f7-input-focused-border-color: var(--energi-color-green);
-  /* Radio buttons local/remote*/
-  --f7-radio-extra-margin: 2px;
-  --f7-list-item-media-margin: 5px;
-
-  /*--f7-label-focused-text-color: #2cd048; */
-}
-
 .button-fill:not(.disabled) {
   --f7-button-text-color: var(--energi-color-text);
   --f7-button-pressed-text-color: var(
@@ -486,8 +508,20 @@ li.accordion-item > a.item-link div.item-title {
   --f7-navbar-large-title-text-color: #fff;
 }
 
+/* Left Panel right border when it is made visible by user */
+.panel-left.panel-in:before {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.5);
+  content: "";
+  z-index: 6000;
+}
+
 /* Left Panel right border when it is visible by breakpoint */
-.panel-left.panel-in-breakpoint:before {
+/* .panel-left.panel-in-breakpoint:before {
   position: absolute;
   right: 0;
   top: 0;
@@ -496,7 +530,7 @@ li.accordion-item > a.item-link div.item-title {
   background: rgba(0, 0, 0, 0.1);
   content: "";
   z-index: 6000;
-}
+} */
 
 /* Hide navbar link which opens left panel when it is visible by breakpoint */
 .panel-left.panel-in-breakpoint ~ .appbar .panel-open[data-panel="left"] {
@@ -521,4 +555,14 @@ li.accordion-item > a.item-link div.item-title {
   background: rgba(0, 0, 0, 0.1);
   content: "";
   z-index: 6000;
+}
+
+/* Hide navbar link which opens right panel when it is visible by breakpoint */
+.panel-right.panel-in-breakpoint ~ .appbar .panel-open[data-panel="right"] {
+  display: none;
+}
+
+/* Hide navbar link which opens right panel when it is visible by breakpoint */
+.panel-right.panel-in-breakpoint ~ .view .navbar .panel-open[data-panel="right"] {
+  display: none;
 }

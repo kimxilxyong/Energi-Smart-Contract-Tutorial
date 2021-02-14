@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT -->
+// Copyright (c) 2020 Kim Il Yong -->
+// Version 1.0.0 -->
 
 import HomePage from '../pages/home.svelte';
 import InfoPage from '../pages/info.svelte';
@@ -22,14 +25,41 @@ let routes = [
   {
     path: '/info/',
     component: InfoPage,
+    on: { pageAfterIn: function (e, page) {
+          // do something after page gets into the view
+          console.log("pageAfterIn", e, page);
+        },
+        pageInit: function (e, page) {
+          // do something when page initialized
+          console.log("pageInit", e, page);
+        },
+    },
   },
   {
     path: '/web3provider/',
     component: Web3ProviderPage,
+    on: { pageAfterIn: function (e, page) {
+          // do something after page gets into the view
+          console.log("pageAfterIn", e, page);
+        },
+        pageInit: function (e, page) {
+          // do something when page initialized
+          console.log("pageInit", e, page);
+        },
+    },
   },
   {
     path: '/smartcontract/',
     component: SmartContractPage,
+    on: { pageAfterIn: function (e, page) {
+          // do something after page gets into the view
+          console.log("pageAfterIn", e, page);
+        },
+        pageInit: function (e, page) {
+          // do something when page initialized
+          console.log("pageInit", e, page);
+        },
+    },
   },
   {
     path: '/about/',

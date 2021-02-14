@@ -25,7 +25,10 @@ contract OwnedContract {
 
     // 106 add country
     // 106 published to '0x1EDf7947F7b95bA658D0A74024Dd8092e4D4831c'
-    uint16 constant public version = 106;
+
+    // 107 one more require(_amount <= getBalance(), "not enough contract funds");
+    // 107 not published yet
+    uint16 constant public version = 107;
 
     // The creator of this contract
     address payable private owner;
@@ -451,7 +454,7 @@ contract Faucet is OwnedContract {
      */
     function requestDonation(address payable _to, uint _amount, string memory _name, bytes8 _country) public {
         require(_to != address(0), "null address supplied");
-        //require(_amount <= getBalance(), "not enough contract funds");
+        require(_amount <= getBalance(), "not enough contract funds");
         // allow only 1/10th of funds to pay out
         require(_amount <= getBalance().div(10), "amount too high, maximum is one tenth of faucet funds");
 

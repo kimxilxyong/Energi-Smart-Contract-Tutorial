@@ -11,6 +11,7 @@
     clearButton="{clearButton}"
     id="{id}"
     inputId="REMOVEDINPUT"
+    autocomplete="current-password"
     value="{password}"
     onInputClear="{() => {password = ""; clearButtonVisible = false; thisInput.focus();}}"
     onFocus={onFocus}
@@ -25,12 +26,14 @@
                 on:input="{() => onInput()}"
                 on:change="{() => onChange()}"
                 spellcheck="false"
+                autocomplete="current-password"
                 >
             {:else}
                 <input type="password" bind:value="{password}" bind:this={thisInput} id={inputId}
                 on:input="{() => onInput()}"
                 on:change="{() => onChange()}"
                 spellcheck="false"
+                autocomplete="current-password"
                 >
             {/if}
           </div>

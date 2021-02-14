@@ -18,6 +18,7 @@ import (
 	ethereum "energi.world/core/gen3"
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/common/hexutil"
+	"energi.world/core/gen3/params"
 	"energi.world/core/gen3/rpc"
 
 	chromahtml "github.com/alecthomas/chroma/formatters/html"
@@ -28,9 +29,9 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 )
 
-const version = 100
-const serverIPC = "/home/moe/.energicore3/testnet/energi3.ipc"
-const gasDonorAddress = "0x3b5abf9b81d5b62df65bf63e163463d0aa42e53b"
+const version = 101
+const serverIPC = "/home/kim/.energicore3/testnet/energi3.ipc"
+const gasDonorAddress = "0x09ae1a5ddfd481cfd3cc4390b0e08a0832709a06"
 const weiGasDonation = 3020100 // 3 million wei for gas to send
 /*
 	Returns the most probable filepath and mime type
@@ -254,6 +255,15 @@ type AjaxResponse struct {
 	Err             error  `json:"error"`
 }
 
+type MsgError struct {
+	Code 		int 		`json:"code"`
+	Message string 	`json:"message"`
+}
+
+func (e *MsgError) Error() string {
+  return e.Message
+}
+
 // AJAX Request Handler
 func ajaxHandlerRequestGas(w http.ResponseWriter, r *http.Request) {
 	var sendGasTo string
@@ -282,22 +292,46 @@ func ajaxHandlerRequestGas(w http.ResponseWriter, r *http.Request) {
 	// TODO security
 
 	fmt.Println("Incoming AJAX reuest, sendGasTo ", sendGasTo)
-	var response AjaxResponse
-
-	tx, from, to, wei, err = sendGas(sendGasTo)
-	response.Err = err
+	balance, err := getBalance(gasDonorAddress);
 	if err != nil {
-		//w.Write([]byte(err.Error()))
-		//http.Error(w, err.Error(), http.StatusInternalServerError)
-		response.Status = false
+		fmt.Println("ERROR: getBalance(gas) failed:", err)
 	} else {
-		response.Status = true
+		fmt.Println("Current gasFrom Balance: ",  weiToEther(&balance), "NRG")
 	}
+
+	var response AjaxResponse
 	response.Version = version
-	response.TransactionHash = tx.String()
-	response.To = to
-	response.From = from
-	response.Wei = wei
+
+	// Ceck the bablance of the requester
+	balance, err = getBalance(sendGasTo);
+	if err != nil {
+		fmt.Println("ERROR: getBalance(to) failed:", err)
+	} else {
+		fmt.Println("Current gasTo Balance: ",  weiToEther(&balance), "NRG")
+
+		weiInt := big.NewInt(weiGasDonation)
+
+		if weiInt.Cmp(&balance) > 0  {
+			tx, from, to, wei, err = sendGas(sendGasTo)
+			response.Err = err
+			if err != nil {
+				response.Status = false
+			} else {
+				response.Status = true
+			}
+			response.TransactionHash = tx.String()
+			response.To = to
+			response.From = from
+			response.Wei = wei
+	  } else {
+			response.To = sendGasTo
+			response.Wei = weiGasDonation
+			response.Status = false
+		response.Err = &MsgError{Code: 1, Message: "You have enough gas" }
+			fmt.Println("You have enough gas",  response)
+		}
+  }
+
 	//fmt.Println("tx", tx.String())
 	//fmt.Println("Response", response)
 
@@ -345,21 +379,59 @@ func sendGas(gasToAddress string) (hexutil.Bytes, string, string, uint, error) {
 	return hex, gasDonorAddress, gasToAddress, weiGasDonation, err
 }
 
+// returns the balance
+func getBalance(address string) (big.Int, error) {
+	var err error
+	var ec *rpc.Client // NOTE: rpc NOT ethclient
+
+	ctx := context.Background()
+
+	ec, err = rpc.DialContext(ctx, serverIPC)
+	if err != nil {
+		fmt.Println("ERROR: could not connect to Ethereum gateway:", err)
+	}
+	defer ec.Close()
+
+	// eth_getBalance
+	var response string
+	err = ec.CallContext(ctx, &response, "eth_getBalance", address, "latest")
+	if err != nil {
+		fmt.Println("ERROR: eth_getBalance failed:", err)
+		return big.Int{}, err
+	}
+	return ParseBigInt(response)
+}
+
 func main() {
 
 	path, err := os.Getwd()
 	if err != nil {
 		log.Println(err)
+		os.Exit(1)
 	} else {
+
+		balance, err := getBalance(gasDonorAddress);
+		if err != nil {
+			log.Fatal("Communication with node failed!")
+			log.Fatal(err)
+			os.Exit(1)
+		}
+
+		fmt.Println("Server version", version)
+		fmt.Println("IPC: ", serverIPC)
+		fmt.Println("Gas Donor: ", gasDonorAddress)
+		fmt.Println("Gas Donation amount: ", weiGasDonation, "wei")
+		fmt.Println("Gas Balance: ",  weiToEther(&balance), "NRG")
 		fmt.Println("Start serving files in", filepath.Join(path, "www"))
-		fmt.Println("Start serving AJAX reguests under /ajax/")
+		fmt.Println("Start serving AJAX gas donation reguests under /ajax/requestGas")
 	}
 
 	http.HandleFunc("/ajax/requestGas", ajaxHandlerRequestGas)
 	http.HandleFunc("/md/", markdownHandler)
 	http.HandleFunc("/", generalHandler)
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	//log.Fatal(http.ListenAndServeTLS(":443", "ssl_server.crt", "ssl_server.key", nil))
+	log.Fatal(http.ListenAndServeTLS(":8443", "ssl_server.crt", "ssl_server.key", nil))
 
 	print("Exiting server")
 	os.Exit(0)
@@ -384,6 +456,22 @@ func toCallArg(msg ethereum.CallMsg) interface{} {
 		arg["gasPrice"] = (*hexutil.Big)(msg.GasPrice)
 	}
 	return arg
+}
+
+// ParseBigInt parse hex string value to big.Int
+func ParseBigInt(value string) (big.Int, error) {
+	i := big.Int{}
+	_, err := fmt.Sscan(value, &i)
+
+	return i, err
+}
+
+func etherToWei(val *big.Int) *big.Int {
+	return new(big.Int).Mul(val, big.NewInt(params.Ether))
+}
+
+func weiToEther(wei *big.Int) *big.Float {
+	return new(big.Float).Quo(new(big.Float).SetInt(wei), big.NewFloat(params.Ether))
 }
 
 /*

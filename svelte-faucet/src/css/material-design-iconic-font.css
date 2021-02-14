@@ -2,6 +2,9 @@
  *  Material Design Iconic Font by Sergey Kupletsky (@zavoloklom) - http://zavoloklom.github.io/material-design-iconic-font/
  *  License - http://zavoloklom.github.io/material-design-iconic-font/license (Font: SIL OFL 1.1, CSS: MIT License)
  */
+
+@charset "UTF-8";
+
 @font-face {
   font-family: 'Material-Design-Iconic-Font';
   src: url('../fonts/Material-Design-Iconic-Font.woff2') format('woff2'),

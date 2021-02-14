@@ -1,3 +1,7 @@
+<!-- SPDX-License-Identifier: MIT -->
+<!-- Copyright (c) 2020 Kim Il Yong -->
+<!-- Version 1.0.0 -->
+
 <Page>
   <Navbar title="Not found" backLink="Back" />
   <Block strong>

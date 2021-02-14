@@ -1,5 +1,41 @@
 [
   {
+    "name": "Energi Mainnet",
+    "chainId": 39797,
+    "shortName": "nrg",
+    "chain": "NRG",
+    "network": "mainnet",
+    "networkId": 39797,
+    "nativeCurrency": {"name":"Energi","symbol":"NRG","decimals":18},
+    "rpc": ["https://nodeapi.gen3.energi.network"],
+    "faucets": [],
+    "infoURL": "https://www.energi.world"
+  },
+  {
+    "name": "Energi Testnet",
+    "chainId": 49797,
+    "shortName": "tnrg",
+    "chain": "NRG",
+    "network": "testnet",
+    "networkId": 49797,
+    "nativeCurrency": {"name":"Energi","symbol":"NRG","decimals":18},
+    "rpc": ["https://nodeapi.test3.energi.network"],
+    "faucets": [],
+    "infoURL": "https://www.energi.world"
+  },
+  {
+    "name": "Energi Local Testnet",
+    "chainId": 49797,
+    "shortName": "tnrg",
+    "chain": "NRG",
+    "network": "testnet",
+    "networkId": 49797,
+    "nativeCurrency": {"name":"Energi","symbol":"NRG","decimals":18},
+    "rpc": ["http://localhost:49796"],
+    "faucets": ["http://localhost:8080"],
+    "infoURL": "https://www.energi.world"
+  },
+  {
     "name": "Ethereum Mainnet",
     "chainId": 1,
     "shortName": "eth",
@@ -610,41 +646,6 @@
     "rpc": ["https://core.poa.network"],
     "faucets": [],
     "infoURL": "https://poa.network"
-  },
-  {
-    "name": "Energi Mainnet",
-    "chainId": 39797,
-    "shortName": "nrg",
-    "chain": "NRG",
-    "network": "mainnet",
-    "networkId": 39797,
-    "nativeCurrency": {"name":"Energi","symbol":"NRG","decimals":18},
-    "rpc": ["https://nodeapi.gen3.energi.network"],
-    "faucets": [],
-    "infoURL": "https://www.energi.world"
-  },
-  { 
-    "name": "Energi Testnet",
-    "chainId": 49797,
-    "shortName": "tnrg",
-    "chain": "NRG",
-    "network": "testnet",
-    "networkId": 49797,  
-    "nativeCurrency": {"name":"Energi","symbol":"NRG","decimals":18},
-    "rpc": ["https://nodeapi.test3.energi.network"],
-    "faucets": [],
-    "infoURL": "https://www.energi.world"
-  },
-  {
-    "name": "Energi Local Testnet",
-    "chainId": 49797,
-    "shortName": "tnrg",
-    "chain": "NRG",
-    "network": "testnet",
-    "networkId": 49797,
-    "nativeCurrency": {"name":"Energi","symbol":"NRG","decimals":18},
-    "rpc": ["http://localhost:49796"],
-    "faucets": ["http://localhost:8080"],
-    "infoURL": "https://www.energi.world"
   }
+
 ]

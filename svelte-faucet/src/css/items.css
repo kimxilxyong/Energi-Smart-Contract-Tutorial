@@ -1,0 +1,50 @@
+/* SPDX-License-Identifier: MIT
+   Copyright (c) 2020 Kim Il Yong
+   Version 1.0.0 */
+
+@charset "UTF-8";
+
+#REMOVEDINPUT {
+  width: 0;
+  height: 0;
+}
+#RIGHTSIDEBAR,
+.RIGHTSIDEBAR {
+  background-image: url("../images/background_right.png");
+ }
+
+ #logtextarea textarea {
+  color: var(--energi-color-yellow);
+  font-family: var(--f7-font-family-mono);
+  font-weight: 400;
+  font-size: 0.8rem;
+}
+
+#yellow-mono-small textarea {
+  color: var(--energi-color-yellow);
+  font-family: var(--f7-font-family-mono);
+  font-weight: 400;
+  font-size: 0.8rem;
+}
+#yellow-mono-small .item-radio div.item-title {
+  color: var(--energi-color-yellow);
+  font-family: var(--f7-font-family-mono);
+  font-weight: 400;
+  font-size: 0.8rem;
+}
+
+#grey-mono-small .item-radio div.item-title {
+  color: var(--energi-color-grey);
+  font-family: var(--f7-font-family-mono);
+  font-weight: 400;
+  font-size: 0.8rem;
+}
+
+#inputIDPrivateKey,
+#inputIDSelectedAddress,
+#inputIDmanuellAccount,
+#mono-small {
+  font-family: var(--f7-font-family-mono);
+  font-weight: 400;
+  font-size: 1.14286rem;
+}

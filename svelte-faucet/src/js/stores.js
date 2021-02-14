@@ -1,6 +1,8 @@
 /* eslint-disable ParseError */
-/* SPDX-License-Identifier: MIT
-   Copyright (c) 2020 Kim Il Yong */
+// SPDX-License-Identifier: MIT -->
+// Copyright (c) 2020 Kim Il Yong -->
+// Version 1.0.0 -->
+
 
 import { writable } from 'svelte/store';
 
@@ -25,6 +27,9 @@ const ethAccountObject = {
   signTransaction: {},
   isManagedOnNode: false,
   isLocked: true,
+  isManagedInBrowserWallet: false,
+  isManagedByWebWallet: false,
+  accountStore: "none",
 };
 
 export const visitedPages = writable(visitedSvelte);

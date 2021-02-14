@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: MIT -->
+// Copyright (c) 2020 Kim Il Yong -->
+// Version 1.0.0 -->
+
 // Import Framework7
 import Framework7 from 'framework7/framework7.esm.bundle.js';
 
@@ -10,6 +14,7 @@ import 'framework7/css/framework7.bundle.css';
 // Import Icons and App Custom Styles
 import '../css/fonts.css';
 import '../css/icons.css';
+import '../css/items.css';
 import '../css/app.css';
 import '../css/animate.css';
 //import '../css/material-design-iconic-font.css';

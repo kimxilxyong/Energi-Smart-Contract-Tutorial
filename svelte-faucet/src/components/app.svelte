@@ -17,18 +17,19 @@
   <Panel left reveal themeDark visibleBreakpoint={960}>
     <View>
       <Page>
-        <div class="navbar theme-dark">
-          <div class="navbar-bg">
-           <img src="./images/EnergiLogo-Light.png" alt="Energi Logo" height="60%" width="60%" style="left:11px;top:12px;position:absolute;"/>
-          </div>
-        </div>
+        <Navbar>
+            <Link href="https://www.energi.world/" external target="_blank">
+              <img src="./images/energi_logo.svg" alt="Energi Logo" height="60%" width="60%"/>
+            </Link>
+        </Navbar>
 
+        <!-- Navigation links -->
         <Card outline>
           <CardHeader style="{infoStyle}">Start</CardHeader>
           <CardContent>
             <List>
               <ListItem link="/info/" view=".view-main" panelClose title="About" style="{infoStyleLink}"/>
-              <ListItem link="https://wallet.energi.network/generate/keystore" external target="_blank" panelClose title="Create a Wallet"/>
+              <ListItem link="https://wallet.test3.energi.network/generate/keystore" external target="_blank" panelClose title="Create a Wallet"/>
             </List>
           </CardContent>
         </Card>
@@ -67,32 +68,66 @@
   </Panel>
 
   <!-- Your main view, should have "view-main" class -->
-    <View main class="safe-areas" url="/" />
+<!--   <View main class="safe-areas" url="/" pushState="true"/> -->
 
-    Icons made by <a href="http://www.freepik.com/" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
-
-
-  <!-- Right panel with cover effect when hidden -->
-  <Panel right reveal themeDark visibleBreakpoint={1360}>
+  <!-- Right panel resizeable with reveal effect when hidden -->
+  <Panel right reveal themeDark visibleBreakpoint={1360} resizable>
     <View>
       <Page>
         <div class="navbar theme-dark">
           <div class="navbar-bg">
-           <img src="./images/EnergiLogo-Light.png" alt="Energi Logo" height="60%" width="60%" style="left:11px;top:12px;position:absolute;"/>
+           <!-- <img src="./images/EnergiLogo-Light.png" alt="Energi Logo" height="60%" width="60%" style="left:11px;top:12px;position:absolute;"/> -->
           </div>
         </div>
 
         <Card outline>
-          <CardHeader style="{infoStyle}">Information</CardHeader>
+          <CardHeader>Browser</CardHeader>
           <CardContent>
             <List>
-              <ListItem title="Test"/>
+              {#if browserDetails.date === 0}
+                <ListItem header="No data yet" footer="Waiting for identification"/>
+              {:else}
+                {#if browserDetails.browser.error}
+                  <ListItem title="Unknown browser"/>
+                {:else}
+                  <ListItem title="{browserDetails.browser.name}" header="Name"/>
+                  <ListItem title="{browserDetails.browser.version}" header="Version"/>
+                {/if}
+                {#if browserDetails.wallet.exists}
+                  <ListItem title="Crypto wallet detected" footer="ChainID: {browserDetails.wallet.chain}"/>
+                  <ListItem header="Selected Address" footer="{ window.ethereum ? window.ethereum.selectedAddress : 'None'}"/>
+                  <ListItem header="Active Address" footer="{ browserDetails.wallet.activeAccount ? browserDetails.wallet.activeAccount : 'None'}"/>
+                  {#if browserDetails.wallet.enabled}
+                    <ListItem title="Crypto wallet enabled" footer="{browserDetails.wallet.chain}"/>
+                    {#if browserDetails.wallet.accounts.length === 0}
+                      <ListItem title="No accounts found"/>
+                    {:else}
+                      {#each browserDetails.wallet.accounts as acc, i}
+                        <ListItem title="{acc}" header="Account {i+1}"/>
+                      {/each}
+                    {/if}
+                  {:else}
+                    <ListItem title="Crypto wallet disabled"/>
+                    {#if browserDetails.wallet.error}
+                      <ListItem title="{browserDetails.wallet.error.code}" footer="{browserDetails.wallet.error.reason}"/>
+                      <ListItem onClick="{(e) => { e.stopPropagation(); openCryptoWallet(e) }}" title="{browserDetails.todo.text}}" link/>
+                    {/if}
+                  {/if}
+                {:else}
+                  <ListItem title="No crypto wallet detected"/>
+                {/if}
+                <ListItem title="{browserDetails.time}" header="Last Update"/>
+              {/if}
             </List>
           </CardContent>
         </Card>
       </Page>
     </View>
   </Panel>
+
+   <!-- Your main view, should have "view-main" class -->
+  <View main class="safe-areas" url="/" pushState="true"/>
+
 
   <!-- Popup -->
   <Popup id="my-popup">
@@ -119,6 +154,7 @@
             type="text"
             name="username"
             placeholder="Your username"
+            autocomplete="off"
             value={username}
             onInput={(e) => username = e.target.value}
           />
@@ -126,6 +162,7 @@
             type="password"
             name="password"
             placeholder="Your password"
+            autocomplete="current-password"
             value={password}
             onInput={(e) => password = e.target.value}
           />
@@ -171,11 +208,15 @@
     BlockFooter
   } from 'framework7-svelte';
   import Web3 from 'web3';
+
+  // Framework7 routes
   import routes from '../js/routes';
+
   import { visitedPages } from '../js/stores.js';
+  import { initBrowserDetails, getBrowserDetails, openCryptoWallet } from '../js/utils.js';
 
   // store the web3 object globally into a svelte context
-  const web3 = new Web3('http://localhost:8545');
+  const web3 = new Web3('http://localhost:49796');
   setContext('web3', web3);
 
 
@@ -243,6 +284,34 @@
   let username = '';
   let password = '';
 
+  let browserDetails = initBrowserDetails();
+
+  /**
+   * Listening for MetaMask address changes.
+   * @param  {Function} callback Resolve when address is changed
+  */
+  if (window.ethereum) {
+    window.ethereum.on('accountsChanged', (accounts) => {
+      // Time to reload your interface with accounts[0]
+      console.log("accountsChanged", accounts);
+      browserDetails.wallet.activeAccount = accounts[0];
+    });
+  }
+
+  const updateBrowserDetails = () => {
+    console.log("getBrowserDetails...");
+    getBrowserDetails().catch((e) => {
+      console.log("ERROR getBrowserDetails", e);
+      browserDetails.browser.error = e;
+      browserDetails.wallet.error = e;
+    }).then((bd) => {
+      if (bd) {
+        browserDetails = bd;
+      } else {
+        console.log("ERROR getBrowserDetails undefined");
+      }
+    });
+  }
 
   function alertLoginData() {
     f7.dialog.alert('Username: ' + username + '<br>Password: ' + password, () => {
@@ -250,13 +319,20 @@
     });
   };
 
+  let clearIv;
+
   onMount(() => {
     f7ready(() => {
-
+      // Refresh browser details every 60 seconds
+      clearIv = setInterval(() => {
+        updateBrowserDetails();
+      }, 60000);
       // Call F7 APIs here
+      updateBrowserDetails();
     });
   });
   onDestroy(() => {
+    clearInterval(clearIv);
     unsubscribe();
 	});
 </script>
