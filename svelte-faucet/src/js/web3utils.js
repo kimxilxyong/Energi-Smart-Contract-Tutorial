@@ -5,6 +5,9 @@
 import { ethers } from "ethers";
 import { getTime, sleep } from "../js/utils.js";
 
+// Gas limit for contract calls
+const constGasLimit = "3000000";
+
 /*
 function getBalanceHistory
 param provider:
@@ -584,7 +587,9 @@ export const fetchFaucetDetails = async (providerAddress, faucetAddress, abi) =>
 
 
 /**
-* @param  faucet is an ethers.js initiated contract, @example faucet = new ethers.Contract(contractAddr, abi, signer);
+* Calls the function which actually executes the contract call, handles errors and sets the name (if changed)
+*
+* @param faucet is an ethers.js initiated contract, @example faucet = new ethers.Contract(contractAddr, abi, signer);
 * @param name is the entered nickname of the recipient and supports UTF - 8
 * @param country is the flag of the users country determined by IP geolocation api, eg "🇦🇹"
 * @param eth the value to request in NRG as a number
@@ -625,9 +630,9 @@ export const callRequest = async (faucet, name, country, eth, confirmations, cal
 
     if (result.status) {
 
-      // Update donors name
+      // Update recipient name
       if (currentName && name && currentName !== name) {
-          // update donor name
+        // update recipient name
         let sdnTX = await faucet.setRecipientName(name).catch((e) => { e.step = "SetName failed"; throw (e); });
         result.sdnTX = sdnTX;
       }
@@ -702,6 +707,8 @@ export const callRequest = async (faucet, name, country, eth, confirmations, cal
 };
 
 /**
+* Calls the contract.requestDonation and handles the transaction receipt
+*
 * @param contract is an ethers.js initiated contract, @example faucet = new ethers.Contract(contractAddr, abi, signer);
 * @param recipientName is the entered nickname of the recipient and supports UTF - 8
 * @param recipientCountry is the flag of the users country determined by IP geolocation api, eg "🇦🇹"
@@ -715,14 +722,14 @@ const requestDonationAndWait = async (contract, recipientName, recipientCountry,
     let lastConfirms = -2;
     try {
       console.log("testing if requestDonation would execute");
-      let r = await contract.callStatic.requestDonation(contract.signer._address, wei, recipientName, ethers.utils.toUtf8Bytes(recipientCountry), { gasLimit: "3000000", }).catch((e) => { e.step = "contract.callStatic.requestDonation"; throw (e); });
+      let r = await contract.callStatic.requestDonation(contract.signer._address, wei, recipientName, ethers.utils.toUtf8Bytes(recipientCountry), { gasLimit: constGasLimit, }).catch((e) => { e.step = "contract.callStatic.requestDonation"; throw (e); });
       if (r) {
         console.log("requestDonation would execute, continue ...");
 
         console.log("Calling faucet.requestDonation(", recipientName, ",", recipientCountry, ",", wei, ")");
         console.log("Transaction is pending, waiting for execution response ... ");
 
-        const txResponse = await contract.requestDonation(contract.signer._address, wei, recipientName, ethers.utils.toUtf8Bytes(recipientCountry), { gasLimit: "3000000", }).catch((e) => { e.step = "contract.requestDonation"; throw (e); });
+        const txResponse = await contract.requestDonation(contract.signer._address, wei, recipientName, ethers.utils.toUtf8Bytes(recipientCountry), { gasLimit: constGasLimit, }).catch((e) => { e.step = "contract.requestDonation"; throw (e); });
 
         console.log("Transaction", txResponse.hash, "was executed, waiting for miners ... ");
 
@@ -781,9 +788,66 @@ const requestDonationAndWait = async (contract, recipientName, recipientCountry,
     }
 };
 
+/**
+* Builds the url arguments to call Donation from the webwallet
+*
+* @param contract is an ethers.js initiated contract, @example faucet = new ethers.Contract(contractAddr, abi, signer);
+* @param recipientName is the entered nickname of the donor and supports UTF - 8
+* @param recipientCountry is the flag of the users country determined by IP geolocation api, eg "🇦🇹"
+* @param eth the value to donate in NRG as a number, is NOT converted into wei with ethers.utils.parseEther(eth.toString()).toString()
+* @return {url='', status=1 success, =0 reverted}
+*/
+export const buildCallrequestDonationArguments = async (contract, recipientAddress, recipientName, recipientCountry, eth) => {
+
+  let result = { status: 0, url: "", error: {code: "JAVASCRIPT_911", reason: "callStatic returned null", message: "🥶 CALL 911 or shout U RTardApe",},};
+  try {
+
+    const wei = ethers.utils.parseEther(eth.toString()).toString();
+    console.log("Fake calling faucet.callStatic.requestDonation(", recipientAddress, "," + recipientName, ",", recipientCountry, ",", wei, ")");
+
+    // Ask for donation, but do not really execute
+    const r = await contract.callStatic.requestDonation(recipientAddress, wei, recipientName, ethers.utils.toUtf8Bytes(recipientCountry), { gasLimit: constGasLimit, }).catch((e) => { e.step = "contract.callStatic.requestDonation"; throw (e); });
+    if (r) {
+      console.log("requestDonation would execute, populate unsigned tx data ...");
+
+      let unsignedTx = await contract.populateTransaction.requestDonation(recipientAddress, wei, recipientName, ethers.utils.toUtf8Bytes(recipientCountry), { gasLimit: constGasLimit, }).catch((e) => { e.step = "contract.populateTransaction.requestDonation"; throw (e); });
+      if (unsignedTx) {
+        console.log(unsignedTx);
+        console.log("Building webwallet URL for requesting", eth, "NRG to contract", contract.address);
+
+        let url = "https://wallet.test3.energi.network/account/send/?gasLimit=" + constGasLimit + "&value=0";
+        url += "&to=" + contract.address;
+        url += "&data=" + unsignedTx.data;
+        url += "&warnings=0&ts=" + Math.floor(new Date() / 1000);
+
+        console.log("Finished building URL:", url);
+
+      /* https://wallet.test3.energi.network/account/send/?gasLimit=3000000&value=0&to=0x0000000000000000000000000000000000000309&data=0x6112fe2e00000000000000000000000000000000000000000000003635c9adc5dea00000&warnings=0&ts=1608741991354 */
+
+        result.status = 1;
+        result.url = url;
+        result.error = { code: "NO_ERROR", reason: "", message: "", };
+      }
+
+    } else {
+      console.log("TRANSACTION FAILED WITHOUT EXCEPTION 🥶 CALL 911");
+      result.status = -1;
+    }
+    return result;
+
+  } catch (e) {
+    if (!e.step) {
+      e.step = "catch buildCallrequestDonationArguments";
+    }
+    console.log("catch in buildCallrequestDonationArguments, throwing", e);
+    throw (e);
+  }
+};
 
 /**
-* @param  faucet is an ethers.js initiated contract, @example faucet = new ethers.Contract(contractAddr, abi, signer);
+* Calls the function which actually executes the contract call, handles errors and sets the name (if changed)
+*
+* @param faucet is an ethers.js initiated contract, @example faucet = new ethers.Contract(contractAddr, abi, signer);
 * @param name is the entered nickname of the donor and supports UTF - 8
 * @param country is the flag of the users country determined by IP geolocation api, eg "🇦🇹"
 * @param eth the value to donate in NRG as a number
@@ -825,7 +889,7 @@ export const callDonation = async (faucet, name, country, eth, confirmations, ca
 
     if (result.status) {
 
-      // Update donors name
+      // Update donors name if changed
       if (currentName && name && currentName !== name) {
           // update donor name
         let sdnTX = await faucet.setDonorName(name).catch((e) => { e.step = "SetName failed"; throw (e); });
@@ -903,7 +967,9 @@ export const callDonation = async (faucet, name, country, eth, confirmations, ca
 };
 
 /**
-* @param  contract is an ethers.js initiated contract, @example faucet = new ethers.Contract(contractAddr, abi, signer);
+* Calls the contract.Donation and handles the transaction receipt
+*
+* @param contract is an ethers.js initiated contract, @example faucet = new ethers.Contract(contractAddr, abi, signer);
 * @param donorName is the entered nickname of the donor and supports UTF - 8
 * @param donorCountry is the flag of the users country determined by IP geolocation api, eg "🇦🇹"
 * @param wei the value to donate in wei as a string, eg from ethers.utils.parseEther(donationInETH).toString()
@@ -971,4 +1037,59 @@ const callDonationAndWait = async (contract, donorName, donorCountry, wei, waitF
       console.log("catch in callDonationAndWait, throwing", e);
       throw (e);
     }
+};
+
+/**
+* Builds the url arguments to call Donation from the webwallet
+*
+* @param contract is an ethers.js initiated contract, @example faucet = new ethers.Contract(contractAddr, abi, signer);
+* @param donorName is the entered nickname of the donor and supports UTF - 8
+* @param donorCountry is the flag of the users country determined by IP geolocation api, eg "🇦🇹"
+* @param eth the value to donate in NRG as a number, is NOT converted into wei with ethers.utils.parseEther(eth.toString()).toString()
+* @return {url='', status=1 success, =0 reverted}
+*/
+export const buildCallDonationArguments = async (contract, donorName, donorCountry, eth) => {
+
+  let result = { status: 0, url: "", error: {code: "JAVASCRIPT_911", reason: "callStatic returned null", message: "🥶 CALL 911 or shout U RTardApe",},};
+  try {
+
+    const wei = ethers.utils.parseEther(eth.toString()).toString();
+    console.log("Fake calling faucet.callStatic.Donation(", donorName, ",", donorCountry, ",", wei, ")");
+
+    // Ask for donation, but do not really execute
+    const r = await contract.callStatic.Donation(donorName, ethers.utils.toUtf8Bytes(donorCountry), { gasLimit: constGasLimit, value: wei, }).catch((e) => { e.step = "contract.callStatic.Donation"; throw (e); });
+    if (r) {
+      console.log("Donation would execute, populate unsigned tx data ...");
+
+      let unsignedTx = await contract.populateTransaction.Donation(donorName, ethers.utils.toUtf8Bytes(donorCountry)).catch((e) => { e.step = "contract.populateTransaction.Donation"; throw (e); });
+      if (unsignedTx) {
+        console.log(unsignedTx);
+        console.log("Building webwallet URL for donating", eth, "NRG to contract", contract.address);
+
+        let url = "https://wallet.test3.energi.network/account/send/?gasLimit=" + constGasLimit + "&value=" + eth.toString();
+        url += "&to=" + contract.address;
+        url += "&data=" + unsignedTx.data;
+        url += "&warnings=0&ts=" + Math.floor(new Date() / 1000);
+
+        console.log("Finished building URL:", url);
+
+      /* https://wallet.test3.energi.network/account/send/?gasLimit=3000000&value=0&to=0x0000000000000000000000000000000000000309&data=0x6112fe2e00000000000000000000000000000000000000000000003635c9adc5dea00000&warnings=0&ts=1608741991354 */
+
+        result.status = 1;
+        result.url = url;
+      }
+
+    } else {
+      console.log("TRANSACTION FAILED WITHOUT EXCEPTION 🥶 CALL 911");
+      result.status = -1;
+    }
+    return result;
+
+  } catch (e) {
+    if (!e.step) {
+      e.step = "catch buildCallDonationArguments";
+    }
+    console.log("catch in buildCallDonationArguments, throwing", e);
+    throw (e);
+  }
 };

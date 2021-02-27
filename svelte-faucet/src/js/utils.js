@@ -183,7 +183,11 @@ export const detectBrowser = (result) => {
 export const getBrowserDetails = async (e) => {
 
   let result = initBrowserDetails();
-  result.date = new Date();
+
+  // TODO REMOVE DEBUG ONLY
+  // dont disturb my circles while devving
+
+/*   result.date = new Date();
   result.time = getTime();
 
   if (!window) {
@@ -200,7 +204,7 @@ export const getBrowserDetails = async (e) => {
   } catch (error) {
     result.wallet.error = error;
   }
-
+ */
   return result;
 };
 
@@ -335,7 +339,7 @@ export const requestWalletAccounts = async (result) => {
       // If you fail to retrieve the user's account(s), you should encourage the user
       // to initiate the attempt.
       if (result.wallet.enabled === false) {
-        result.wallet.accounts = await browserProvider.request({ method: 'eth_requestAccounts' }).catch((err) => {
+        result.wallet.accounts = await browserProvider.request({ method: 'eth_requestAccounts', }).catch((err) => {
           if (err.code === 4001) {
             // EIP-1193 userRejectedRequest error
             // If this happens, the user rejected the connection request.

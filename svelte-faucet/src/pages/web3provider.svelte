@@ -40,26 +40,31 @@
       you can use it for Energi, too. Although MetaMask is not a recommended way
       for Energi, experienced users may have fun playing with it on the testnet.
       <br />
+      <br />
       <List>
         <ListItem class="seperator"></ListItem>
-        <ListItem title="🚀 Implementation status for faucet version 0.1"></ListItem>
-        <ListItem title="💵 Account type"></ListItem>
+        <ListItem class="colortuerkis" title="Implementation status for faucet version 0.1  🚀"></ListItem>
+        <ListItem class="colorgreen" title="Account management"></ListItem>
         <ListItem title="Keystore: partial, not finished">
           <div slot="media">❌</div>
         </ListItem>
         <ListItem title="PrivateKey: partial, not finished">
           <div slot="media">❌</div>
         </ListItem>
-        <ListItem title="LocalNode - Accounts active on the provider: fully">
+        <ListItem title="LocalNode - Accounts active on the provider: fully" footer="How to install a local node" href="https://docs.energi.software/en/downloads/core-node" external target="_blank">
           <div slot="media">✅</div>
         </ListItem>
         <ListItem title="MetaMask, Brave, others: development started, not functional">
           <div slot="media">☣️</div>
         </ListItem>
-        <ListItem title="Webwallet: fully for Donors, partial for Recipients">
-          <div slot="media">☑️ ☑</div>
+        <ListItem title="Webwallet: fully for Donors and Recipients">
+          <div slot="media">✅</div>
         </ListItem>
-        <ListItem class="seperator"></ListItem>
+        <!-- <ListItem class="seperator"></ListItem> -->
+        <ListItem class="colorgreen" title="Balance History"></ListItem>
+        <ListItem title="Is very slow, not optimized yet">
+          <div slot="media">🔰</div>
+        </ListItem>
       </List>
     </CardContent>
     <CardFooter>
@@ -169,7 +174,7 @@
 
   <Card outline>
 
-    <CardHeader>Choose an account to use</CardHeader>
+    <CardHeader>Choose how to access your account</CardHeader>
 
     <CardContent>
       <List accordionList accordionOpposite>
@@ -471,7 +476,7 @@
             id="yellow-mono-small"
             spellcheck="false"
             autocomplete="off">
-              <i slot="media" class="nf-icons {v_nf_hc_spin} {verifiedColor}">&#xFC8F</i>
+              <i slot="media" class="nf-icons {v_nf_hc_spin} {verifiedColor}">💤</i> <!--  &#xFC8F -->
 
         </ListInput>
 
@@ -487,7 +492,7 @@
           </ListItem>
 
           {#each balanceHistory as bhItem, i}
-            <ListItem header={"Block " + bhItem.blockNr + ", " + timeDifference(new Date(), bhItem.timestamp)} title={ethers.utils.formatEther(bhItem.diff) + " NRG"} footer={ethers.utils.formatEther(bhItem.balance) + " NRG"}>
+            <ListItem header={"Block " + bhItem.blockNr + ", " + timeDifference(new Date(), bhItem.timestamp)} title={"Transaction: " + ethers.utils.formatEther(bhItem.diff) + " NRG"} footer={"Total: " + ethers.utils.formatEther(bhItem.balance) + " NRG"}>
               <i slot="media" class="f7-icons size-20" style="color:{(bhItem.diff >= 0) ? 'var(--energi-color-green)' : 'var(--energi-color-red)'};">{(bhItem.diff >= 0) ? 'arrowtriangle_up_fill' : 'arrowtriangle_down_fill'}</i>
             </ListItem>
           {/each}
@@ -508,12 +513,26 @@
         {#if $ethAccount.isManagedOnNode || $ethAccount.isManagedByWebWallet || $ethAccount.isManagedInBrowserWallet}
           <ListItem header="Choosen Account Address" title="{$ethAccount.address}" footer="{ choosenAddressIsValid ? 'Is validated' : 'Is not validated'}" after="">
             <i slot="media" class="f7-icons size-20" style="color:{thumbsupColor};">hand_thumbsup</i>
-            <i on:click={requestGas($ethAccount.address)} slot="after-end" class="f7-icons size-20" style="margin-right:5px;color:{rocketColor}">rocket</i>
+            <!-- <i on:click={requestGas($ethAccount.address)} slot="after-end" class="f7-icons size-20" style="margin-right:5px;color:{rocketColor}">rocket</i> -->
           </ListItem>
-          <ListItem header="Private Key" title="Privatekey is managed by node {$web3URL}" footer={privateKeyFooter} after="">
-            <i slot="media" class="f7-icons size-20" style="color:{privatekeyColor};">lock_slash</i>
-            <i on:click={(e) => { nextButtonEnabled=true; } } slot="after-start" class="f7-icons size-20" style="color:var(--energi-color-yellow);margin-right:5px;width:7em">{$ethAccount.isLocked?'lock_closed':'lock_open'}<i class="text" style="margin-left:0.5em;font-size:0.6em;">I know what i'm doing</i></i>
-          </ListItem>
+
+          {#if $ethAccount.isManagedByWebWallet}
+            <ListItem header="Private Key" title="Privatekey will be managed by the webwallet" footer={privateKeyFooter} after="">
+              <i slot="media" class="f7-icons size-20 colorgreen">lock</i>
+              <i on:click={(e) => { nextButtonEnabled=true; } } slot="after-start" class="f7-icons size-20" style="color:var(--energi-color-yellow);margin-right:5px;width:7em">{$ethAccount.isLocked?'lock_closed':'lock_open'}<i class="text" style="margin-left:0.5em;font-size:0.6em;">I know what i'm doing</i></i>
+            </ListItem>
+          {:else if $ethAccount.isManagedInBrowserWallet}
+            <ListItem header="Private Key" title="Privatekey is managed by the browser" footer={privateKeyFooter} after="">
+              <i slot="media" class="f7-icons size-20 coloryellow">lock_slash</i>
+              <i on:click={(e) => { nextButtonEnabled=true; } } slot="after-start" class="f7-icons size-20" style="color:var(--energi-color-yellow);margin-right:5px;width:7em">{$ethAccount.isLocked?'lock_closed':'lock_open'}<i class="text" style="margin-left:0.5em;font-size:0.6em;">I know what i'm doing</i></i>
+            </ListItem>
+          {:else}
+            <ListItem header="Private Key" title="Privatekey is managed by node {$web3URL}" footer={privateKeyFooter} after="">
+              <i slot="media" class="f7-icons size-20" style="color:{privatekeyColor};">lock_slash</i>
+              <i on:click={(e) => { nextButtonEnabled=true; } } slot="after-start" class="f7-icons size-20" style="color:var(--energi-color-yellow);margin-right:5px;width:7em">{$ethAccount.isLocked?'lock_closed':'lock_open'}<i class="text" style="margin-left:0.5em;font-size:0.6em;">I know what i'm doing</i></i>
+            </ListItem>
+          {/if}
+
         {:else}
           <ListItem header="Choosen Account Address" title="{$ethAccount.address}" footer="{ choosenAddressIsValid ? 'Is validated' : 'Is not validated'}">
             <i slot="media" class="f7-icons size-20" style="color:{thumbsupColor};">hand_thumbsup</i>
@@ -684,7 +703,7 @@ f7,
       };
       reader.onerror = function (e) {
         console.log(e);
-        createErrorPopup("Error " + e.target.error.name, e.target.error.message);
+        createErrorPopup("Error " + e.target.error.name, e.target.error.message, true);
         keystoreJson = "";
       };
       reader.readAsText(keyfile);
@@ -1075,26 +1094,33 @@ f7,
     console.log("ScanManuellAccountNr", manuellAccountField);
     try {
 
-      if (Web3.utils.checkAddressChecksum(manuellAccountField) === false) {
-        createErrorPopup("🥶 Invalid address checksum 🥶", "Your entry has been converted to a checksum address, try again");
-        manuellAccountField = Web3.utils.toChecksumAddress(manuellAccountField);
-        // TODO REMOVE
-        //creditcardColor = "var(--energi-color-red)";
+      if (ethers.utils.isAddress(manuellAccountField) === false) {
+        createErrorPopup("🥶 Invalid address", "Your entry is not a valid address, please enter an address again");
         verifiedColor = "colorred";
         return;
       }
 
-      resetValidEthAccount();
+      if (ethers.utils.getAddress(manuellAccountField) !== manuellAccountField) {
+      // TODO REMOVE
+      //if (Web3.utils.checkAddressChecksum(manuellAccountField) === false) {
+        createErrorPopup("🤠 Invalid checksum", "Your entry has been converted to a checksum address, please scan again");
+        manuellAccountField = ethers.utils.getAddress(manuellAccountField);
+        verifiedColor = "colorred";
+        return;
+      }
+
+      // TODO REMOVE
+      /* resetValidEthAccount();
       web3.eth.defaultAccount = ethers.constants.AddressZero;
       web3.eth.accounts.wallet.clear();
-      resetValidEthAccount();
+      resetValidEthAccount(); */
 
       $ethAccount.isManagedOnNode = false;
       $ethAccount.isManagedByWebWallet = true;
       $ethAccount.isManagedInBrowserWallet = false;
-      $ethAccount.isLocked = false;
+      $ethAccount.isLocked = true;
 
-      selectedAddress = Web3.utils.toChecksumAddress(manuellAccountField);
+      selectedAddress = ethers.utils.getAddress(manuellAccountField);
       if (selectedAddress !== manuellAccountField) {
         logAccount = logAccount + "\n" + getTime() + ": Invalid address checksum";
         logAccount = logAccount.trim();
@@ -1102,24 +1128,18 @@ f7,
 
         manuellAccountField = selectedAddress;
 
-        createErrorPopup("🥶 Invalid address checksum 🥶", "Your entry is not a valid address, please try again");
-        // TODO REMOVE
-        //creditcardColor = "var(--energi-color-red)";
+        createErrorPopup("🥶 Invalid checksum 🥶", "Your entry is not a valid address, please try again", true);
+
         verifiedColor = "colorred";
         return;
       }
 
-      web3.eth.defaultAccount = selectedAddress;
       $ethAccount.address =  selectedAddress;
 
-      // TODO REMOVE
-      //creditcardColor = "var(--energi-color-yellow)";
       verifiedColor = "coloryellow";
 
     } catch (error) {
-      createErrorPopup("🤕 Unexpected error 🤕", error);
-      // TODO REMOVE
-      //creditcardColor = "var(--energi-color-red)";
+      createErrorPopup("🤕 Unexpected error 🤕", error, true);
       verifiedColor = "colorred";
     }
   }
@@ -1280,7 +1300,11 @@ function setValidatedColor() {
       privatekeyColor = "var(--energi-color-yellow)";
     }
   } else {
-    pawColor = "var(--energi-color-red)";
+    if ($ethAccount.isManagedInBrowserWallet || $ethAccount.isManagedByWebWallet) {
+      pawColor = "var(--energi-color-yellow)";
+    } else {
+      pawColor = "var(--energi-color-red)";
+    }
   }
 
   if (gotBalance && isSigned && gotHistory) {
@@ -1302,7 +1326,7 @@ function setValidatedColor() {
   }
   console.log("setValidatedColor", "gotBalance", gotBalance, "gotHistory", gotHistory, "isSigned", isSigned, "isVerified", isVerified);
   if (choosenAddressIsValid) {
-    if ($ethAccount.isManagedOnNode) {
+    if ($ethAccount.isManagedOnNode || $ethAccount.isManagedByWebWallet || $ethAccount.isManagedInBrowserWallet) {
       nextButtonEnabled = true;
       logAccount = (logAccount + "\n" + getTime() + ": Account is Valid ✅").trim();
     } else {
@@ -1341,9 +1365,11 @@ async function TestAccount() {
     if ($ethAccount.isManagedByWebWallet) {
       signedTitle = "Skipped test to sign a message with " + $ethAccount.address;
       signedFooter = "Because you choosed to use the WebWallet for interaction with the faucet";
+      isSigned = true;
     } else if ($ethAccount.isManagedInBrowserWallet) {
       signedTitle = "Skipped test to sign a message with " + $ethAccount.address;
       signedFooter = "Because you choosed to use the Browser crypto wallet (Metamask, Brave, ...) for interaction with the faucet";
+      isSigned = true;
     } else {
       const wasSigned = await testSignMessage($ethAccount.address, $ethAccount.privateKey);
       if (wasSigned) {
@@ -1603,13 +1629,19 @@ function CopyToClipboard(text, isPrivateKey) {
 }
 
 let popup;
-function createErrorPopup(title, error) {
+function createErrorPopup(title, error, showGit) {
   try {
     // Create popup
     if (popup) {
+      console.log("createErrorPopup", popup);
+      popup.close();
       f7.popup.close(popup);
       f7.popup.destroy(popup);
-      popup = null;
+      //popup = null;
+    }
+    let git = "";
+    if (showGit) {
+      git = '<a class="link external" href="https://github.com/kimxilxyong/Energi-Smart-Contract-Tutorial/issues" target="_blank" external="true">Please open an issue on github</a>';
     }
 
     popup = f7.popup.create({
@@ -1620,13 +1652,13 @@ function createErrorPopup(title, error) {
             <div class="navbar-bg" style="background-color: red"></div>
               <div class="navbar-inner">
                 <div class="title">${title}</div>
-                <div class="right"><a href="#" class="link popup-close">Close</a></div>
+                <div class="right"><a href="#" class="link popup-close">X</a></div>
               </div>
             </div>
             <div class="page-content">
               <div class="block">
                 <p class="mono-small">${error}<br>
-                  <a class="link external" href="https://github.com/kimxilxyong/Energi-Smart-Contract-Tutorial/issues" target="_blank" external="true">Please open an issue on github</a>
+                 ${git}
                 </p>
               </div>
             </div>

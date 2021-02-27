@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	ethereum "energi.world/core/gen3"
@@ -28,6 +29,8 @@ import (
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
 )
+
+
 
 const version = 101
 const serverIPC = "/home/kim/.energicore3/testnet/energi3.ipc"
@@ -152,7 +155,7 @@ func generalHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if atype == "image" {
-		subdir = "img"
+		subdir = "images"
 	} else if atype == "text" {
 		if adetail == "javascript" {
 			subdir = "js"
@@ -172,7 +175,7 @@ func generalHandler(w http.ResponseWriter, r *http.Request) {
 
 	filenamePath, mime, err := getSemanticFile("www", subdir, filename)
 	if err != nil {
-		filenamePath, mime, err = getSemanticFile("www", "build", filename)
+		filenamePath, mime, err = getSemanticFile("www", "static", filename)
 		if err != nil {
 			log.Println("ERROR:", err)
 			w.WriteHeader(http.StatusNotFound)
@@ -255,13 +258,14 @@ type AjaxResponse struct {
 	Err             error  `json:"error"`
 }
 
+// MsgError Our error object which is returned in an ajax response
 type MsgError struct {
 	Code 		int 		`json:"code"`
 	Message string 	`json:"message"`
 }
-
+// Implement the error interface for our own error
 func (e *MsgError) Error() string {
-  return e.Message
+  return "Error " + strconv.Itoa(e.Code) + ", " + e.Message
 }
 
 // AJAX Request Handler
@@ -280,62 +284,64 @@ func ajaxHandlerRequestGas(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	sendGasTo = r.Form["toAdr"][0]
-	//  TODO check if sendGasTo is a valid address
-	if sendGasTo == "" {
-		fmt.Println("ERROR: Ajax data ", r.Form)
-		fmt.Println("ERROR: Adr ", r.Form["toAdr"])
-		http.Error(w, r.Form.Encode(), http.StatusBadRequest)
-		return
-	}
-	// TODO security
-
-	fmt.Println("Incoming AJAX reuest, sendGasTo ", sendGasTo)
-	balance, err := getBalance(gasDonorAddress);
-	if err != nil {
-		fmt.Println("ERROR: getBalance(gas) failed:", err)
-	} else {
-		fmt.Println("Current gasFrom Balance: ",  weiToEther(&balance), "NRG")
-	}
 
 	var response AjaxResponse
 	response.Version = version
 
-	// Ceck the bablance of the requester
-	balance, err = getBalance(sendGasTo);
-	if err != nil {
-		fmt.Println("ERROR: getBalance(to) failed:", err)
+	//  TODO check if sendGasTo is a valid address
+	if sendGasTo == "" {
+		fmt.Println("ERROR: Ajax data ", r.Form)
+		fmt.Println("ERROR: Adr ", r.Form["toAdr"])
+		//http.Error(w, r.Form.Encode(), http.StatusBadRequest)
+		//return
+		response.Status = false
+		response.Err = &MsgError{Code: 1, Message: "address not set" }
 	} else {
-		fmt.Println("Current gasTo Balance: ",  weiToEther(&balance), "NRG")
+		// TODO security
 
-		weiInt := big.NewInt(weiGasDonation)
-
-		if weiInt.Cmp(&balance) > 0  {
-			tx, from, to, wei, err = sendGas(sendGasTo)
-			response.Err = err
-			if err != nil {
-				response.Status = false
-			} else {
-				response.Status = true
-			}
-			response.TransactionHash = tx.String()
-			response.To = to
-			response.From = from
-			response.Wei = wei
-	  } else {
-			response.To = sendGasTo
-			response.Wei = weiGasDonation
+		fmt.Println("Incoming AJAX reuest, sendGasTo ", sendGasTo)
+		balance, err := getBalance(gasDonorAddress);
+		if err != nil {
+			fmt.Println("ERROR: getBalance(gas) failed:", err)
 			response.Status = false
-		response.Err = &MsgError{Code: 1, Message: "You have enough gas" }
-			fmt.Println("You have enough gas",  response)
-		}
-  }
+			response.Err = &MsgError{Code: 2, Message: "getBalance(gasDonorAddress) failed: " + err.Error() }
+		} else {
+			fmt.Println("Current gasFrom Balance: ",  weiToEther(&balance), "NRG")
 
-	//fmt.Println("tx", tx.String())
-	//fmt.Println("Response", response)
+			// Ceck the bablance of the requester
+			balance, err = getBalance(sendGasTo);
+			if err != nil {
+				fmt.Println("ERROR: getBalance(to) failed:", err)
+			} else {
+				fmt.Println("Current gasTo Balance: ",  weiToEther(&balance), "NRG")
 
-	// create json response from struct
+				weiInt := big.NewInt(weiGasDonation)
+
+				if weiInt.Cmp(&balance) > 0  {
+					tx, from, to, wei, err = sendGas(sendGasTo)
+					response.Err = err
+					if err != nil {
+						response.Status = false
+					} else {
+						response.Status = true
+					}
+					response.TransactionHash = tx.String()
+					response.To = to
+					response.From = from
+					response.Wei = wei
+				} else {
+					response.To = sendGasTo
+					response.Wei = weiGasDonation
+					response.Status = false
+					response.Err = &MsgError{Code: 3, Message: "You have enough gas" }
+					fmt.Println("You have enough gas",  response)
+				}
+			}
+	  }
+	}
+
+	// create json from response struct
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
 		fmt.Println("ERROR: ", err)

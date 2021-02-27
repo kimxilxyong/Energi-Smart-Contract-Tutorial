@@ -67,25 +67,16 @@
     </CardFooter>
   </Card>
 
-<!--   <Navbar title="Giver or Taker">
-    <Subnavbar>
-      <Segmented raised>
-        <Button tabLink="#tabRecipient" tabLinkActive>Recipient</Button>
-        <Button tabLink="#tabDonor">Donor</Button>
-      </Segmented>
-    </Subnavbar>
-  </Navbar>
- -->
   <Card outline>
     <CardHeader>Giver or Taker</CardHeader>
       <CardContent>
         <List>
           {#if (recipient.balance === ethers.constants.Zero && donor.balance === ethers.constants.Zero)}
-            <ListItem header="What are you?" title="The all-knowing, all-seeing Trash Heap has not spoken yet" link="https://www.youtube.com/watch?v=cZKc4D86ctE" target="_blank" external>
+            <ListItem header="Which one are you?" title="The all-knowing, all-seeing Trash Heap has not spoken yet" link="https://www.youtube.com/watch?v=cZKc4D86ctE" target="_blank" external>
               <div slot=media>👳‍♀</div>
             </ListItem>
           {:else}
-            <ListItem header="What are you?" title="The all-knowing, all-seeing Trash Heap said: You are a {userIsDonor ? 'Donor':'Recipient'}" link="https://www.youtube.com/watch?v=cZKc4D86ctE" target="_blank" external>
+            <ListItem header="Which one are you?" title="The all-knowing, all-seeing Trash Heap said: You are a {userIsDonor ? 'Donor':'Recipient'}" link="https://www.youtube.com/watch?v=cZKc4D86ctE" target="_blank" external>
               <div slot=media>👳‍♀</div>
             </ListItem>
           {/if}
@@ -106,17 +97,95 @@
         <CardContent>
           <List>
 
-            {#if !recipient.address || recipient.address === ethers.constants.AddressZero}
+            {#if !recipient.address || recipient.address === ethers.constants.AddressZero || manualRecipientAddressEntry === true}
               <ListItem link="/web3provider/" view=".view-main" panelClose header="No or invalid recipient address" title="Please go back to provider/account selection (Web3Provider, step 2) to select a valid address" footer="Click here to go to step 2">
                 <div slot="media">🥵</div>
               </ListItem>
+
+              <List accordionList accordionOpposite>
+                <ListItem accordionItem title="I know what i'm doing" id="AccordiumItemRecipient">
+                  <AccordionItem>
+                    <AccordionContent>
+
+                      <!-- name="Nr of NRGs" inputReadonly style="margin-right: 10px;" -->
+                      <ListInput value="{recipient.name}" onInput="{(e) => recipientNameChanged(e)}" onBlur="{(e) => recipientNameChanged(e)}" onInputClear="{()=>{recipient.name='';}}" label="Please tell us your nick" info="Your name, can by any string, min 3 characters" errorMessage="Not empty please!"
+                        outline floatingLabel type="text" clearButton spellcheck="false" autocomplete="off"
+                        inputId="inputIDRecipientNameWW">
+                        <div slot="media">{recipient.country}</div>
+                        <span slot="content-end">
+                          <small>NRG amount</small>
+                          <Stepper value={recipient.amount} style="background-color: aquamarine;" class="font07"
+                                   onStepperChange={(v) => {recipient.amount = v}} max="9999"
+                                   small wraps autorepeat autorepeatDynamic autocomplete="off"/>
+                        </span>
+                      </ListInput>
+                      <ListInput label="Energi Account address" type="text" placeholder="Enter account address" info="42 char hexnumber starting with 0x" errorMessage="Only hexnumbers starting with 0x please!"
+                          clearButton outline required floatingLabel
+                          value="{recipient.address}"
+                          onInputClear="{() => { manualRecipientAddressEntry = false; recipient.address = ''; }}"
+                          onInput ="{(e) => { manualRecipientAddressEntry = true; recipientAddressChanged(e); }}"
+                          onBlur="{(e) => { manualRecipientAddressEntry = true; recipientAddressChanged(e); }}"
+                          validate pattern="^0x[a-fA-F0-9]*"
+                          onValidate="{(isValid) => { if (!isValid) {recipient.isAddressValid = false}; isValid = false; return false;}}"
+                          inputId="inputIDmanualRecipientAccount" class="mono-small" spellcheck="false" autocomplete="on">
+                        <div slot="media">📫</div>
+                      </ListInput>
+
+                      <ListItem class="seperator"></ListItem>
+
+                      <ListItem header="I want to execute the requesting TX with the Webwallet" title="Request {recipient.amount} NRGs to {recipient.address}">
+                        <img slot="media" src="NRG16x16.png" alt="NRG" width="16" height="16">
+                        <span slot="after" style="display:flex;flex-direction:column;top:-0.5em;position:relative;">
+                          <small>Confirmations</small>
+                          <Stepper name="Confirmations" value={confirmations} style="background-color: aquamarine;"
+                                    onStepperChange={(v) => {confirmations = v}} max="100"
+                                    small wraps autorepeat autorepeatDynamic autocomplete="off"/>
+                        </span>
+                        <div slot="after-end">
+                          <Button
+                            fill
+                            raised
+                            class={requestButtonEnabled ? "" : "disablebar"} style="margin-left:0.8em;margin-top:0.35em;bgcolor:{requestButtonEnabled ? 'var(--energi-color-green)' : 'var(--energi-color-grey)'}"
+                            on:click="{(e) => {if (requestButtonEnabled) {requestDonationWithWebWallet();}}}"
+                          >
+                            <i class="f7-icons button-icon">arrow_down_circle</i>
+                            Request
+                          </Button>
+                        </div>
+                      </ListItem>
+
+                      <ListInput value="{recipient.txhash}" onInput="{(e) => recipientTxChanged(e)}" onBlur="{(e) => recipientTxChanged(e)}" onInputClear="{()=>{recipient.txhash='';}}"
+                                  label="Transaction hash" info="The transaction you want to check" errorMessage="Not empty please!" outline floatingLabel type="text" clearButton spellcheck="false" autocomplete="off"
+                                  inputId="inputIDcheckTXRecipient">
+                        <div slot="media">🈺</div>
+                        <div slot="content-end">
+                          <Button
+                            fill
+                            raised
+                            class={recipientTxCheckButtonEnabled ? "" : "disablebar"}
+                            style="margin-right:0.8em;margin-top:0.4em;"
+                            on:click="{(e) => {if (recipientTxCheckButtonEnabled) {checkTransaction(recipient.txhash);}}}"
+                          >
+                            <i class="f7-icons button-icon">camera</i>
+                            Check
+                          </Button>
+                        </div>
+                      </ListInput>
+
+                    </AccordionContent>
+                  </AccordionItem>
+                </ListItem>
+              </List>
+
             {:else}
               <ListItem header="Reciving address" title="{recipient.address}" after="Balance {ethers.utils.formatEther(recipient.balance)} NRG">
                 <div slot="media">👼</div>
               </ListItem>
 
               <!-- name="Nr of NRGs" inputReadonly style="margin-right: 10px;" -->
-              <ListInput value="{recipient.name}" onInput="{(e) => recipientNameChanged(e)}" onBlur="{(e) => recipientNameChanged(e)}" onInputClear="{()=>{recipient.name='';}}" label="Your Name" info="Your name, can by any string, min 3 characters" errorMessage="Not empty please!" outline floatingLabel type="text" clearButton spellcheck="false" autocomplete="off">
+              <ListInput value="{recipient.name}" onInput="{(e) => recipientNameChanged(e)}" onBlur="{(e) => recipientNameChanged(e)}" onInputClear="{()=>{recipient.name='';}}" label="Your Name" info="Your name, can by any string, min 3 characters" errorMessage="Not empty please!"
+                outline floatingLabel type="text" clearButton spellcheck="false" autocomplete="off"
+                inputId="inputIDRecipientName">
                 <div slot="media">{recipient.country}</div>
                 <span slot="content-end">
                   <small>NRG amount</small>
@@ -126,55 +195,54 @@
                 </span>
               </ListInput>
 
-              <ListItem header="Start transaction" title="Request a donation of {recipient.amount} NRGs to {recipient.address}">
+              <ListItem header="Start transaction" title="Request {recipient.amount} NRGs to {recipient.address}">
                 <img slot="media" src="NRG16x16.png" alt="NRG" width="16" height="16">
                 <div slot="after">
                   <Button
                     fill
                     raised
-                    class={requestButtonEnabled ? "" : "disablebar"} style="bgcolor:{requestButtonEnabled ? 'var(--energi-color-green)' : 'var(--energi-color-grey)'}"
-                    on:click="{requestDonation}"
+                    class={requestButtonEnabled ? "" : "disablebar"} style="margin-left:0.8em;margin-top:0.35em;bgcolor:{requestButtonEnabled ? 'var(--energi-color-green)' : 'var(--energi-color-grey)'}"
+                    on:click="{(e) => {if (requestButtonEnabled) {requestDonation();}}}"
                   >
                     <i class="f7-icons button-icon">arrow_down_circle</i>
                     Request
                   </Button>
                 </div>
               </ListItem>
-
-              {#if transactionReciepts.length > 0}
-
-                <ListItem  header="{spin_css_tx ? 'Waiting for transaction to be mined ...' : 'Transaction finished'}" title="TX: {transactionReciepts[0].transactionHash}"
-                           footer="{spin_css_tx ? `In progress, please wait for ${confirmations} confirmations`:''}" after="&nbsp;">
-                  <div slot="media" class="{spin_css_tx}">⏳</div>
-                  <div slot="after-title" class="colortext" style="margin-left: 20px;">
-                          <span class="bround bgreen fss3 {isClipboardDoneClass}">
-                          Copied!
-                          </span>
-                          <i on:click={ () => {
-                                                isClipboardDoneClass = "animate__animated animate__fadeOut animate__delay-2s";
-                                                copyToClipboard(transactionReciepts[0].transactionHash);
-                                                setTimeout(() => {
-                                                                    if (isClipboardDoneClass !== "hidden") {
-                                                                      isClipboardDoneClass = "hidden";
-                                                                    }
-                                                                  }, 3300);
-                                              }
-                                      } title="Copy to clipboard" class="nf-icons nf-hc-1x colorgrey">&#xF429;
-                          </i>
-                      </div>
-                </ListItem>
-
-                {#each transactionReciepts as tr , i}
-                  {#if tr.confirmations > 0}
-                    <ListItem  header="{tr.confirmations} Confirmation(s) for block {tr.blockNumber}" title="Timestamp: {tr.time}, Balance: {tr.balance}" footer="Gas used: {tr.gasUsed}">
-                      <div slot="media">✅</div>
-                    </ListItem>
-                  {/if}
-                {/each}
-              {/if}
-
             {/if}
-
+            {#if transactionReciepts.length > 0}
+              <ListItem  header="{spin_css_tx ? ( transactionReciepts[0].blockNumber !== -1 ? 'Waiting for confirmations of transaction ...' : 'Waiting for transaction to be mined ...' ) : 'Transaction finished'}" title="TX: {transactionReciepts[0].transactionHash}"
+                          footer="{spin_css_tx ? `In progress, please wait for ${confirmations} confirmations`:''}" after="&nbsp;">
+                <div slot="media" class="{spin_css_tx}">⏳</div>
+                <div slot="after-title" class="colortext" style="margin-left: 20px;">
+                  <span class="bround bgreen fss3 {isClipboardDoneClass}">Copied!</span>
+                  <i on:click={ () => {
+                                        isClipboardDoneClass = "animate__animated animate__fadeOut animate__delay-2s";
+                                        copyToClipboard(transactionReciepts[0].transactionHash);
+                                        setTimeout(() => {
+                                                            if (isClipboardDoneClass !== "hidden") {
+                                                              isClipboardDoneClass = "hidden";
+                                                            }
+                                                          }, 3300);
+                                      }
+                              } title="Copy to clipboard" class="nf-icons nf-hc-1x colorgrey">&#xF429;
+                  </i>
+                </div>
+              </ListItem>
+              {#if transactionReciepts[0].blockNumber > 0}
+                <ListItem  header="Transaction was mined in block {transactionReciepts[0].blockNumber}" title="Time: {transactionReciepts[0].time}, Value: {transactionReciepts[0].value} NRG" footer="Gas used: {transactionReciepts[0].gasUsed}">
+                  <div slot="media">⚒️</div>
+                </ListItem>
+              {/if}
+              {#each transactionReciepts as tr , i}
+                {#if i > 0 && tr.confirmations > 0 && tr.blockNumber > 0}
+                  <!-- transactionHash -->
+                  <ListItem  header="{tr.confirmations} Confirmation(s) for block {tr.blockNumber}" title="Time: {tr.time}, Value: {tr.value} NRG" footer="Gas used: {tr.gasUsed}">
+                    <div slot="media">✅</div>
+                  </ListItem>
+                {/if}
+              {/each}
+            {/if}
           </List>
 
         </CardContent>
@@ -193,63 +261,65 @@
                 <div slot="media">🥵</div>
               </ListItem>
 
-                <List accordionList accordionOpposite>
-                  <ListItem accordionItem title="I know what i'm doing" id="AccordiumItemDonor">
-                    <AccordionItem>
-                      <AccordionContent>
+              <List accordionList accordionOpposite>
+                <ListItem accordionItem title="I know what i'm doing" id="AccordiumItemDonor">
+                  <AccordionItem>
+                    <AccordionContent>
 
-                        <!-- name="Nr of NRGs" inputReadonly style="margin-right: 10px;" -->
-                        <ListInput value="{donor.name}" onInput="{(e) => donorNameChanged(e)}" onBlur="{(e) => donorNameChanged(e)}" onInputClear="{()=>{donor.name='';}}" label="Please tell us your nick" info="Your name, can by any string, min 3 characters" errorMessage="Not empty please!" outline floatingLabel type="text" clearButton spellcheck="false" autocomplete="off">
-                          <div slot="media">{donor.country}</div>
-                          <span slot="content-end">
-                            <small>NRG amount</small>
-                              <Stepper value={donor.amount} style="background-color: aquamarine;" class="font07"
-                                      onStepperChange={(v) => {donor.amount = v}} max="9999"
-                                      small wraps autorepeat autorepeatDynamic autocomplete="off"/>
+                      <!-- name="Nr of NRGs" inputReadonly style="margin-right: 10px;" -->
+                      <ListInput value="{donor.name}" onInput="{(e) => donorNameChanged(e)}" onBlur="{(e) => donorNameChanged(e)}" onInputClear="{()=>{donor.name='';}}" label="Please tell us your nick" info="Your name, can by any string, min 3 characters" errorMessage="Not empty please!"
+                        outline floatingLabel type="text" clearButton spellcheck="false" autocomplete="off"
+                        inputId="inputIDDonorNameWW">
+                        <div slot="media">{donor.country}</div>
+                        <span slot="content-end">
+                          <small>NRG amount</small>
+                            <Stepper value={donor.amount} style="background-color: aquamarine;" class="font07"
+                                    onStepperChange={(v) => {donor.amount = v}} max="9999"
+                                    small wraps autorepeat autorepeatDynamic autocomplete="off"/>
+                      </span>
+                      </ListInput>
+
+                      <ListItem class="seperator"></ListItem>
+
+                      <ListItem header="I want to execute the donation TX with the Webwallet" title="Send a donation of {donor.amount} NRGs to {faucetInfo.contractAddress}">
+                        <img slot="media" src="NRG16x16.png" alt="NRG" width="16" height="16">
+                        <span slot="after" style="display:flex;flex-direction:column;top:-0.5em;position:relative;">
+                          <small>Confirmations</small>
+                          <Stepper name="Confirmations" value={confirmations} style="background-color: aquamarine;"
+                                    onStepperChange={(v) => {confirmations = v}} max="100"
+                                    small wraps autorepeat autorepeatDynamic autocomplete="off"/>
                         </span>
-                        </ListInput>
+                        <div slot="after-end">
+                          <Button
+                            fill
+                            raised
+                            class={sendButtonEnabled ? "" : "disablebar"}
+                            style="margin-left:0.8em;margin-top:0.35em;bgcolor:{sendButtonEnabled ? 'var(--energi-color-green)' : 'var(--energi-color-grey)'}"
+                            on:click="{(e) => { if (sendButtonEnabled) {sendDonationWithWebWallet();} }}"
+                          >
+                            <i class="f7-icons button-icon">arrow_up_circle</i>
+                            Send
+                          </Button>
+                        </div>
+                      </ListItem>
 
-                        <ListItem class="seperator"></ListItem>
-
-                        <ListItem header="I want to execute the donation TX with the Webwallet" title="Send a donation of {donor.amount} NRGs to {faucetInfo.contractAddress}">
-                          <img slot="media" src="NRG16x16.png" alt="NRG" width="16" height="16">
-                          <span slot="after" style="display:flex;flex-direction:column;top:-0.5em;position:relative;">
-                            <small>Confirmations</small>
-                            <Stepper name="Confirmations" value={confirmations} style="background-color: aquamarine;"
-                                      onStepperChange={(v) => {confirmations = v}} max="100"
-                                      small wraps autorepeat autorepeatDynamic autocomplete="off"/>
-                          </span>
-                          <div slot="after-end">
-                            <Button
-                              fill
-                              raised
-                              class={sendButtonEnabled ? "" : "disablebar"}
-                              style="margin-left:1em;top: 0.4em;position:relative;bgcolor:{sendButtonEnabled ? 'var(--energi-color-green)' : 'var(--energi-color-grey)'}"
-                              on:click="{sendDonationWithWebWallet}"
-                            >
-                              <i class="f7-icons button-icon">arrow_up_circle</i>
-                              Send
-                            </Button>
-                          </div>
-                        </ListItem>
-
-                        <ListInput value="{donor.txhash}" onInput="{(e) => donorTxChanged(e)}" onBlur="{(e) => donorTxChanged(e)}" onInputClear="{()=>{donor.txhash='';}}"
-                                   label="Transaction hash" info="The transaction you want to check" errorMessage="Not empty please!" outline floatingLabel type="text" clearButton spellcheck="false" autocomplete="off">
-                          <div slot="media">🈺</div>
-                          <div slot="content-end">
-                            <Button
-                              fill
-                              raised
-                              class={donorTxCheckButtonEnabled ? "" : "disablebar"}
-                              style="bgcolor: var(--energi-color-green)"
-                              on:click="{checkDonationTransaction}"
-                            >
-                              <i class="f7-icons button-icon">camera</i>
-                              Check
-                            </Button>
-                          </div>
-                        </ListInput>
-
+                      <ListInput value="{donor.txhash}" onInput="{(e) => donorTxChanged(e)}" onBlur="{(e) => donorTxChanged(e)}" onInputClear="{()=>{donor.txhash='';}}"
+                                  label="Transaction hash" info="The transaction you want to check" errorMessage="Not empty please!" outline floatingLabel type="text" clearButton spellcheck="false" autocomplete="off"
+                                  inputId="inputIDcheckTXDonor">
+                        <div slot="media">🈺</div>
+                        <div slot="content-end">
+                          <Button
+                            fill
+                            raised
+                            class={donorTxCheckButtonEnabled ? "" : "disablebar"}
+                            style="margin-right:0.8em;margin-top:0.4em;"
+                            on:click="{(e) => {if (donorTxCheckButtonEnabled) { checkTransaction(donor.txhash); }}}"
+                          >
+                            <i class="f7-icons button-icon">camera</i>
+                            Check
+                          </Button>
+                        </div>
+                      </ListInput>
 
                     </AccordionContent>
                   </AccordionItem>
@@ -263,7 +333,9 @@
               </ListItem>
 
               <!-- name="Nr of NRGs" inputReadonly style="margin-right: 10px;" -->
-              <ListInput value="{donor.name}" onInput="{(e) => donorNameChanged(e)}" onBlur="{(e) => donorNameChanged(e)}" onInputClear="{()=>{donor.name='';}}" label="Your Name" info="Your name, can by any string, min 3 characters" errorMessage="Not empty please!" outline floatingLabel type="text" clearButton spellcheck="false" autocomplete="off">
+              <ListInput value="{donor.name}" onInput="{(e) => donorNameChanged(e)}" onBlur="{(e) => donorNameChanged(e)}" onInputClear="{()=>{donor.name='';}}" label="Your Name" info="Your name, can by any string, min 3 characters" errorMessage="Not empty please!"
+                outline floatingLabel type="text" clearButton spellcheck="false" autocomplete="off"
+                inputId="inputIDDonorName">
                 <div slot="media">{donor.country}</div>
                 <span slot="content-end">
                   <small>NRG amount</small>
@@ -286,8 +358,8 @@
                     fill
                     raised
                     class={sendButtonEnabled ? "" : "disablebar"}
-                    style="margin-left:1em;top: 0.4em;position:relative;bgcolor:{sendButtonEnabled ? 'var(--energi-color-green)' : 'var(--energi-color-grey)'}"
-                    on:click="{sendDonation}"
+                    style="margin-left:0.8em;margin-top:0.35em;bgcolor:{sendButtonEnabled ? 'var(--energi-color-green)' : 'var(--energi-color-grey)'}"
+                    on:click="{(e) => { if (sendButtonEnabled) {sendDonation();} }}"
                   >
                     <i class="f7-icons button-icon">arrow_up_circle</i>
                     Send
@@ -297,39 +369,40 @@
             {/if}
 
             {#if transactionReciepts.length > 0}
-
-              <ListItem  header="{spin_css_tx ? 'Waiting for transaction to be mined ...' : 'Transaction finished'}" title="TX: {transactionReciepts[0].transactionHash}"
-                          footer="{spin_css_tx ? `In progress, please wait for ${confirmations} confirmations`:''}" after="&nbsp;">
+              <ListItem  header="{spin_css_tx ? ( transactionReciepts[0].blockNumber !== -1 ? 'Waiting for confirmations of transaction ...' : 'Waiting for transaction to be mined ...' ) : 'Transaction finished'}" title="TX: {transactionReciepts[0].transactionHash}"
+                         footer="{spin_css_tx ? `In progress, please wait for ${confirmations} confirmations`:''}" after="&nbsp;">
                 <div slot="media" class="{spin_css_tx}">⏳</div>
                 <div slot="after-title" class="colortext" style="margin-left: 20px;">
-                        <span class="bround bgreen fss3 {isClipboardDoneClass}">
-                        Copied!
-                        </span>
-                        <i on:click={ () => {
-                                              isClipboardDoneClass = "animate__animated animate__fadeOut animate__delay-2s";
-                                              copyToClipboard(transactionReciepts[0].transactionHash);
-                                              setTimeout(() => {
-                                                                  if (isClipboardDoneClass !== "hidden") {
-                                                                    isClipboardDoneClass = "hidden";
-                                                                  }
-                                                                }, 3300);
-                                            }
-                                    } title="Copy to clipboard" class="nf-icons nf-hc-1x colorgrey">&#xF429;
-                        </i>
-                    </div>
+                  <span class="bround bgreen fss3 {isClipboardDoneClass}">Copied!</span>
+                  <i on:click={ () => {
+                                        isClipboardDoneClass = "animate__animated animate__fadeOut animate__delay-2s";
+                                        copyToClipboard(transactionReciepts[0].transactionHash);
+                                        setTimeout(() => {
+                                                            if (isClipboardDoneClass !== "hidden") {
+                                                              isClipboardDoneClass = "hidden";
+                                                            }
+                                                          }, 3300);
+                                      }
+                              } title="Copy to clipboard" class="nf-icons nf-hc-1x colorgrey">&#xF429;
+                  </i>
+                </div>
               </ListItem>
-
+              {#if transactionReciepts[0].blockNumber > 0}
+                <ListItem  header="Transaction was mined in block {transactionReciepts[0].blockNumber}" title="Time: {transactionReciepts[0].time}, Value: {transactionReciepts[0].value} NRG" footer="Gas used: {transactionReciepts[0].gasUsed}">
+                  <div slot="media">⚒️</div>
+                </ListItem>
+              {/if}
               {#each transactionReciepts as tr , i}
-                {#if tr.confirmations > 0}
+                {#if i > 0 && tr.confirmations > 0 && tr.blockNumber > 0}
                   <!-- transactionHash -->
-                  <ListItem  header="{tr.confirmations} Confirmation(s) for block {tr.blockNumber}" title="Time: {tr.time}, Value: {tr.balance} NRG" footer="Gas used: {tr.gasUsed}">
+                  <ListItem  header="{tr.confirmations} Confirmation(s) for block {tr.blockNumber}" title="Time: {tr.time}, Value: {tr.value} NRG" footer="Gas used: {tr.gasUsed}">
                     <div slot="media">✅</div>
                   </ListItem>
                 {/if}
               {/each}
             {/if}
-
           </List>
+
         </CardContent>
         <CardFooter><Link href="https://www.google.com/search?q=about+smart+contracts" external target="_blank">More Information</Link></CardFooter>
       </Card>
@@ -375,12 +448,12 @@ import {
   gasDonorAddress
 } from "../js/stores.js";
 import { errorToReason, errorToCode, getCountryFlag, timeDifference, copyToClipboard, getTime, scrollTo, sleep } from "../js/utils.js";
-import { callRequest, callDonation, fetchFaucetDetailsAsync, fetchFaucetDetails } from "../js/web3utils.js";
+import { buildCallrequestDonationArguments, buildCallDonationArguments, callRequest, callDonation, fetchFaucetDetailsAsync, fetchFaucetDetails } from "../js/web3utils.js";
 
 import {abi106} from '../js/abi.js';
 const abi = abi106;
 
-let logText = "";
+const dividerInNRG = "500";
 
 let faucetInfo = {
   version: 0,
@@ -400,8 +473,9 @@ let recipient = {
   nameOverwritten: false,
   country: "🗺",
   balance: ethers.constants.Zero,
-  amount: 10,
+  amount: 100,
   address: ethers.constants.AddressZero,
+  isAddressValid: false,
   signer: null,
 };
 
@@ -412,15 +486,9 @@ let donor = {
   balance: ethers.constants.Zero,
   amount: 1000,
   address: ethers.constants.AddressZero,
+  isAddressValid: false,
   signer: null,
 };
-
-let spin_css = "nf-hc-spin";
-let spin_css_tx;
-let isClipboardDoneClass = "hidden";
-let requestButtonEnabled = false;
-let sendButtonEnabled = false;
-let donorTxCheckButtonEnabled = false;
 
 let result = {
     status: false,
@@ -441,17 +509,51 @@ let transactionReciepts = [];
 let confirmations = 3;
 let userIsDonor = false;
 let userSelfSelected = false;
+let manualRecipientAddressEntry = false;
+
+let logText = "";
+let spin_css = "nf-hc-spin";
+let spin_css_tx;
+let isClipboardDoneClass = "hidden";
+let requestButtonEnabled = false;
+let sendButtonEnabled = false;
+let donorTxCheckButtonEnabled = false;
+let recipientTxCheckButtonEnabled = false;
+
 
 // Events ------------------------------
 function recipientNameChanged(e) {
   recipient.name = e.target.value;
   recipient.nameOverwritten = true;
-  if (recipient.name.length > 2) {
+  if (recipient.isAddressValid && recipient.name.length > 2) {
     requestButtonEnabled = true;
   } else {
     requestButtonEnabled = false;
   }
 }
+function recipientAddressChanged(e) {
+  recipient.address = e.target.value;
+  if (ethers.utils.isAddress(recipient.address)) {
+    recipient.address = ethers.utils.getAddress(recipient.address);
+    recipient.isAddressValid = true;
+  } else {
+    recipient.isAddressValid = false;
+  }
+  if (recipient.isAddressValid && recipient.name.length > 2) {
+    requestButtonEnabled = true;
+  } else {
+    requestButtonEnabled = false;
+  }
+}
+function recipientTxChanged(e) {
+  recipient.txhash = e.target.value;
+  if (recipient.txhash.length === 66) {
+    recipientTxCheckButtonEnabled = true;
+  } else {
+    recipientTxCheckButtonEnabled = false;
+  }
+}
+
 function donorNameChanged(e) {
   donor.name = e.target.value;
   donor.nameOverwritten = true;
@@ -463,7 +565,7 @@ function donorNameChanged(e) {
 }
 function donorTxChanged(e) {
   donor.txhash = e.target.value;
-  if (donor.name.length > 2) {
+  if (donor.txhash.length === 66) {
     donorTxCheckButtonEnabled = true;
   } else {
     donorTxCheckButtonEnabled = false;
@@ -505,7 +607,12 @@ async function requestGas(e) {
   }
 }
 
-
+/**
+* requestDonation() calls the contract function requestDonation(address payable _to, uint _amount, string memory _name, bytes8 _country) public
+*
+* @param none
+* @return nothing
+*/
 async function requestDonation() {
 
   const startSeconds = new Date();
@@ -594,15 +701,89 @@ async function requestDonation() {
   spin_css_tx = "";
 }
 
-async function checkDonationTransaction() {
+/**
+* requestDonationWithWebWallet() builds the url to call the contract function requestDonation(address payable _to, uint _amount, string memory _name, bytes8 _country) public with the webwallet
+*
+* @param none
+* @return nothing
+*/
+async function requestDonationWithWebWallet() {
   const startSeconds = new Date();
   try {
-    logText = logText + "\n" + getTime() + ": Waiting for transaction '" + donor.txhash;
+
+    logText = logText + "\n" + getTime() + ": Requesting with Webwallet " + recipient.amount + " NRG to '" + recipient.address + "'' from '" + recipient.name + "' in country '" + recipient.country + "'";
     transactionReciepts = [];
     spin_css_tx = "nf-hc-spin";
 
     const provider = new ethers.providers.JsonRpcProvider($web3URL);
-    const txResponse = await provider.getTransaction(donor.txhash).catch((e) => { e.step = "getTransaction"; throw (e); });
+
+    // The provider also allows signing transactions to
+    // send ether and pay to change state within the blockchain.
+    // For this, we need the account signer...
+    //const signer = provider.getSigner(recipient.address);
+    //const signer = ethers.Wallet.fromEncryptedJsonSync(json, password);
+    // Use a read-only signer as we call only view/pure functions here
+    const signer = new ethers.VoidSigner(recipient.address, provider);
+
+    // The Contract object
+    const faucet = new ethers.Contract(faucetInfo.contractAddress, abi, signer);
+
+    let lastConfirmation = -1;
+
+    let result = await buildCallrequestDonationArguments(faucet, recipient.address, recipient.name, recipient.country, recipient.amount);
+
+    if (result.status === 1) {
+      window.open(result.url,'_blank');
+    }
+
+    /*
+    let result = {
+      status: 0,
+      url: "",
+      error: {code: "JAVASCRIPT_911", reason: "callStatic returned null", message: "🥶 CALL 911 or shout U RTardApe",}
+    }; */
+
+    logText = logText + "\n" + getTime() + ": Building unsigned donation transaction finished in " + (new Date() - startSeconds)/1000 + " seconds";
+
+  } catch (e) {
+    // TODO REMOVE
+    console.log("catch in sendDonationWithWebWallet", e);
+    let reason = errorToReason(e);
+    let code = errorToCode(e);
+    logText = logText + "\n" + getTime() + ": Code: '" + code + "'";
+    logText = logText + "\n" + getTime() + ": Reason: '" + reason + "'";
+    logText = logText + "\n" + getTime() + ": Building unsigned request transaction FAILED in " + (new Date() - startSeconds)/1000 + " seconds";
+    // CALL_EXCEPTION is an contract error, INVALID_SIGNER means account is not unlocked
+    createErrorPopup(code, reason, (code === "INVALID_SIGNER" || code === "CALL_EXCEPTION" ? false : true));
+  }
+  spin_css_tx = "";
+}
+
+
+/**
+* checkTransaction(txhash) waits and shows confirmation for transaction hash
+*
+* @param txhash the hash to check
+* @return nothing
+*/
+async function checkTransaction(txhash) {
+  const startSeconds = new Date();
+  try {
+    logText = logText + "\n" + getTime() + ": Waiting for transaction '" + txhash;
+    transactionReciepts = [];
+    spin_css_tx = "nf-hc-spin";
+
+    // Inform GUI that we are waiting for a transaction, shows the spinning hourglass immediat, first block has txhash only set, blocknumber is not known yet
+    /* <ListItem  header="{spin_css_tx ? 'Waiting for transaction to be mined ...' : 'Transaction finished'}" title="TX: {transactionReciepts[0].transactionHash}"
+                  footer="{spin_css_tx ? `In progress, please wait for ${confirmations} confirmations`:''}" after="&nbsp;"> */
+        // Add to display queue
+    let txDisplayItem = {transactionHash: txhash, confirmations: confirmations, blockNumber: -1, time: getTime(), balance: 0, gasUsed: 'N/A',};
+    transactionReciepts.push(txDisplayItem);
+    transactionReciepts = transactionReciepts;
+
+
+    const provider = new ethers.providers.JsonRpcProvider($web3URL);
+    const txResponse = await provider.getTransaction(txhash).catch((e) => { e.step = "getTransaction"; throw (e); });
     console.log("txResponse", txResponse);
 
     let lastConfirmation = -1;
@@ -621,6 +802,18 @@ async function checkDonationTransaction() {
           logText = logText + "\n" + getTime() + ": Gas used: '" + receipt.gasUsed + "'";
           logText = logText + "\n" + getTime() + ":**************************************";
 
+          if (!receipt.time) {
+            receipt.time = getTime();
+          }
+          if (!receipt.value) {
+            receipt.value = ethers.utils.formatEther(txResponse.value);
+          }
+
+          if (receipt.confirmations === 1) {
+            transactionReciepts.shift();                // remove first element
+                                                        // essentially updating the first block
+          }
+
           transactionReciepts.push(receipt);
           transactionReciepts = transactionReciepts;
         }
@@ -628,13 +821,18 @@ async function checkDonationTransaction() {
         lastConfirmation = receipt.confirmations;
 
       } else if (receipt.confirmations === 0) {
+
+        if (receipt.blockNumber === null) {
+          receipt.blockNumber = -1;
+        }
+
         transactionReciepts.push(receipt);
         transactionReciepts = transactionReciepts;
       }
     };
     // END Callback ---------------------------------------------------------------------------------
 
-    // Did we get information about the transaction? If external node this can be null!!!!
+    // Did we get information about the transaction? If external node this can be null!
     if (txResponse) {
 
       // TODO REMOVE
@@ -651,45 +849,46 @@ async function checkDonationTransaction() {
           console.log("txResponse.timestamp:", txResponse.timestamp);
         }
 
-
         logText = logText + "\n" + getTime() + ":**************************************";
-        logText = logText + "\n" + getTime() + ": Transaction mined in block: '" + txResponse.blockNumberX + "'";
+        logText = logText + "\n" + getTime() + ": Transaction mined in block: '" + txResponse.blockNumber + "'";
         logText = logText + "\n" + getTime() + ":**************************************";
-
 
 /*        transactionHash
           <ListItem  header="{tr.confirmations} Confirmation(s) for block {tr.blockNumber}" title="Timestamp: {tr.time}, Balance: {tr.balance}" footer="Gas used: {tr.gasUsed}">
           </ListItem>
  */
-        let txDisplayItem = {transactionHash: donor.txhash, confirmations: txResponse.confirmations, blockNumber: txResponse.blockNumber, time: getTime(txResponse.timestamp*1000), balance: ethers.utils.formatEther(txResponse.value), gasUsed: 'N/A',};
-        transactionReciepts.push(txDisplayItem);
+        // Add to display queue
+        let txDisplayItem = {transactionHash: txhash, confirmations: txResponse.confirmations, blockNumber: txResponse.blockNumber, time: getTime(txResponse.timestamp*1000), value: ethers.utils.formatEther(txResponse.value), gasUsed: 'N/A',};
+        transactionReciepts.shift();                // remove first element
+        transactionReciepts.push(txDisplayItem);    // essentially updating the first block
         transactionReciepts = transactionReciepts;
 
         // TODO REMOVE
         console.log("txDisplayItem added:", txDisplayItem);
 
         lastConfirmation = txResponse.confirmations;
+      }
 
-      } else {
-
+      // Wait for more confirmations?
+      if (confirmations > lastConfirmation) {
         console.log("Waiting for:", txResponse.hash);
         provider.on(txResponse.hash, receiptHandler);
 
         // Wait for number of confirmations
-        txResponse.confirmations = 0;
+        //txResponse.confirmations = 0;
         const txReceipt = await txResponse.wait(confirmations).catch((e) => { e.step = "txResponse.wait"; throw (e); });
 
         provider.removeListener(txResponse.hash, receiptHandler);
       }
 
-      logText = logText + "\n" + getTime() + ": Sending donation finished in " + (new Date() - startSeconds)/1000 + " seconds";
+      logText = logText + "\n" + getTime() + ": Transaction finished in " + (new Date() - startSeconds)/1000 + " seconds";
       /* logText = logText + "\n" + getTime() + ": Status: '" + txResponse.status + "'";
       logText = logText + "\n" + getTime() + ": TX Hash: '" + txResponse.transactionHash + "'"; */
       logText = logText + "\n" + getTime() + ": Block: '" + txResponse.blockNumber + "'";
       /* logText = logText + "\n" + getTime() + ": Confirmations: '" + txResponse.confirmations + "'";
       logText = logText + "\n" + getTime() + ": Gas used: '" + txResponse.gasUsed + "'"; */
     } else {
-      createErrorPopup("INVALID_TRANSACTION", "TX hash '" + donor.txhash + "' seems to be invalid", false);
+      createErrorPopup("INVALID_TRANSACTION", "TX '" + txhash + "' seems to be invalid, please try again in a minute", false);
     }
 
   } catch (e) {
@@ -705,6 +904,12 @@ async function checkDonationTransaction() {
   spin_css_tx = "";
 }
 
+/**
+* sendDonation() calls the contract function Donation(string memory _name, bytes8 _country) public payable
+*
+* @param none
+* @return nothing
+*/
 async function sendDonation() {
   const startSeconds = new Date();
   try {
@@ -791,23 +996,77 @@ async function sendDonation() {
   spin_css_tx = "";
 }
 
+/**
+* sendDonationWithWebWallet() builds the url to call the contract function Donation(string memory _name, bytes8 _country) public payable from the webwallet
+*
+* @param none
+* @return nothing
+*/
 async function sendDonationWithWebWallet() {
-
   const startSeconds = new Date();
-  logText = logText + "\n" + getTime() + ": Sending " + donor.amount + " NRG to '" + faucetInfo.contractAddress + "'' from '" + donor.name + "' in country '" + donor.country + "'";
-
-  await sleep(2000);
-
-  logText = logText + "\n" + getTime() + ": Sending donation finished in " + (new Date() - startSeconds)/1000 + " seconds";
-}
-
-const dividerInNRG = "500";
-
-// fetch balance of recipient
-const getRecipientBalance = async () => {
   try {
 
-    if (recipient.address && recipient.address !== ethers.constants.AddressZero) {
+    logText = logText + "\n" + getTime() + ": Sending with Webwallet " + donor.amount + " NRG to '" + faucetInfo.contractAddress + "'' from '" + donor.name + "' in country '" + donor.country + "'";
+    transactionReciepts = [];
+    spin_css_tx = "nf-hc-spin";
+
+    const provider = new ethers.providers.JsonRpcProvider($web3URL);
+
+    // The provider also allows signing transactions to
+    // send ether and pay to change state within the blockchain.
+    // For this, we need the account signer...
+    //const signer = provider.getSigner(donor.address);
+    //const signer = ethers.Wallet.fromEncryptedJsonSync(json, password);
+    // Use a read-only signer as we call only view/pure functions
+    //const signer = new ethers.VoidSigner(fromAddress, provider);
+
+    // No signer needed here
+
+    // The Contract object
+    const faucet = new ethers.Contract(faucetInfo.contractAddress, abi, provider);
+
+    let lastConfirmation = -1;
+
+    let result = await buildCallDonationArguments(faucet, donor.name, donor.country, donor.amount);
+
+    if (result.status === 1) {
+      window.open(result.url,'_blank');
+    }
+
+    /*
+    let result = {
+      status: 0,
+      url: "",
+      error: {code: "JAVASCRIPT_911", reason: "callStatic returned null", message: "🥶 CALL 911 or shout U RTardApe",}
+    }; */
+
+    logText = logText + "\n" + getTime() + ": Building unsigned donation transaction finished in " + (new Date() - startSeconds)/1000 + " seconds";
+
+  } catch (e) {
+    // TODO REMOVE
+    console.log("catch in sendDonationWithWebWallet", e);
+    let reason = errorToReason(e);
+    let code = errorToCode(e);
+    logText = logText + "\n" + getTime() + ": Code: '" + code + "'";
+    logText = logText + "\n" + getTime() + ": Reason: '" + reason + "'";
+    logText = logText + "\n" + getTime() + ": Building unsigned donation transaction FAILED in " + (new Date() - startSeconds)/1000 + " seconds";
+    // CALL_EXCEPTION is an contract error, INVALID_SIGNER means account is not unlocked
+    createErrorPopup(code, reason, (code === "INVALID_SIGNER" || code === "CALL_EXCEPTION" ? false : true));
+  }
+  spin_css_tx = "";
+}
+
+/**
+* getRecipientBalance() gets the balance and name for recipient.address
+*
+* @param none
+* @return nothing
+*/
+const getRecipientBalance = async () => {
+  try {
+    recipient.isAddressValid = false;
+    if (recipient.address && recipient.address !== ethers.constants.AddressZero && ethers.utils.isAddress(recipient.address)) {
+      recipient.isAddressValid = true;
       const provider = new ethers.providers.JsonRpcProvider($web3URL);
       // The Contract object
       const faucet = new ethers.Contract($faucetAddress, abi, provider);
@@ -819,8 +1078,11 @@ const getRecipientBalance = async () => {
         recipient.name = await n;
       }
 
+      if (recipient.name.length > 2) {
+        requestButtonEnabled = true;
+      }
+
       recipient.balance = await b;
-      requestButtonEnabled = true;
 
       if (!userSelfSelected && recipient.balance && recipient.balance.gt( ethers.utils.parseEther(dividerInNRG)) ) {
         userIsDonor = true;
@@ -840,11 +1102,18 @@ const getRecipientBalance = async () => {
     throw(e);
   }
 }
-// fetch balance of donor
+
+/**
+* getDonorBalance() gets the balance and name for donor.address
+*
+* @param none
+* @return nothing
+*/
 const getDonorBalance = async () => {
   try {
-
-    if (donor.address && donor.address !== ethers.constants.AddressZero) {
+    donor.isAddressValid = false;
+    if (donor.address && donor.address !== ethers.constants.AddressZero && ethers.utils.isAddress(donor.address)) {
+      donor.isAddressValid = true;
       const provider = new ethers.providers.JsonRpcProvider($web3URL);
       // The Contract object
       const faucet = new ethers.Contract($faucetAddress, abi, provider);
@@ -877,9 +1146,26 @@ const getDonorBalance = async () => {
   }
 }
 
-// Load details about smart contract
+/**
+* getFaucetDetails() gets info about the contract
+*
+* @param faucetAddress address of the contract
+* @return is a structure named faucetDetails
+          let faucetDetails = {
+            version: 0,
+            balance: ethers.constants.Zero,
+            calculatedBalance: ethers.constants.Zero,
+            donorsCount: 0,
+            recipientsCount: 0,
+            owner: ethers.constants.AddressZero,
+            contractAddress: ethers.constants.AddressZero,
+            date: new Date(),
+            error: 'none yet',
+            lastRecipient: {name:"No one", address: ethers.constants.AddressZero, count: 0, amount: ethers.constants.Zero, country: "🗺", date: new Date(),},
+          };
+*
+*/
 const getFaucetDetails = async (faucetAddress) => {
-
 
   let fetchStep = "Setup Connection";
   let result = faucetInfo;
@@ -953,6 +1239,83 @@ const getFaucetDetails = async (faucetAddress) => {
 let faucetIVId;
 let balanceIVId;
 
+const keypressEvent = (e) => {
+  if (e.code === "Enter") {
+    if (e.target.id === "inputIDmanualRecipientAccount" || e.target.id === "inputIDRecipientNameWW") {
+      //console.log("keypress", e);
+      if (requestButtonEnabled) {
+        requestDonationWithWebWallet();
+      }
+    } else if (e.target.id === "inputIDDonorNameWW") {
+      if (sendButtonEnabled) {
+        sendDonationWithWebWallet();
+      }
+    } else if (e.target.id === "inputIDDonorName") {
+      if (sendButtonEnabled) {
+        sendDonation();
+      }
+    } else if (e.target.id === "inputIDRecipientName") {
+      if (requestButtonEnabled) {
+        requestDonation();
+      }
+    } else if (e.target.id === "inputIDcheckTXRecipient") {
+      if (recipientTxCheckButtonEnabled) {
+        checkTransaction(recipient.txhash);
+      }
+    } else if (e.target.id === "inputIDcheckTXDonor") {
+      if (donorTxCheckButtonEnabled) {
+        checkTransaction(donor.txhash);
+      }
+    }
+  }
+}
+
+const addKeypressEnterEvents = () => {
+  let inputAddress = document.getElementById("inputIDmanualRecipientAccount");
+  if (inputAddress) {
+    inputAddress.removeEventListener("keypress", keypressEvent);
+    inputAddress.addEventListener("keypress", keypressEvent);
+    //console.log("Added keypress for inputIDmanualRecipientAccount");
+  }
+  inputAddress = document.getElementById("inputIDcheckTXRecipient");
+  if (inputAddress) {
+    inputAddress.removeEventListener("keypress", keypressEvent);
+    inputAddress.addEventListener("keypress", keypressEvent);
+    //console.log("Added keypress for inputIDmanualRecipientAccount");
+  }
+  inputAddress = document.getElementById("inputIDcheckTXDonor");
+  if (inputAddress) {
+    inputAddress.removeEventListener("keypress", keypressEvent);
+    inputAddress.addEventListener("keypress", keypressEvent);
+    //console.log("Added keypress for inputIDmanualRecipientAccount");
+  }
+  inputAddress = document.getElementById("inputIDDonorNameWW");
+  if (inputAddress) {
+    inputAddress.removeEventListener("keypress", keypressEvent);
+    inputAddress.addEventListener("keypress", keypressEvent);
+    //console.log("Added keypress for inputIDmanualRecipientAccount");
+  }
+  inputAddress = document.getElementById("inputIDRecipientNameWW");
+  if (inputAddress) {
+    inputAddress.removeEventListener("keypress", keypressEvent);
+    inputAddress.addEventListener("keypress", keypressEvent);
+    //console.log("Added keypress for inputIDmanualRecipientAccount");
+  }
+  inputAddress = document.getElementById("inputIDDonorName");
+  if (inputAddress) {
+    inputAddress.removeEventListener("keypress", keypressEvent);
+    inputAddress.addEventListener("keypress", keypressEvent);
+    //console.log("Added keypress for inputIDmanualRecipientAccount");
+  }
+  inputAddress = document.getElementById("inputIDRecipientName");
+  if (inputAddress) {
+    inputAddress.removeEventListener("keypress", keypressEvent);
+    inputAddress.addEventListener("keypress", keypressEvent);
+    //console.log("Added keypress for inputIDmanualRecipientAccount");
+  }
+
+}
+
 function onShow() {
   console.log("OnShow smartcontract");
   visitedPages.update(() => {
@@ -966,6 +1329,8 @@ function onShow() {
   getCountryFlag().catch((e) => {createErrorPopup("An error occured", e)}).then((f) => {donor.country = f; recipient.country = f});
   recipient.address = $ethAccount.address;
   donor.address = $ethAccount.address;
+
+  addKeypressEnterEvents();
 
   // Initial load after 0.1 seconds for the user to notice it starts to load
   setTimeout( () => {
@@ -1001,6 +1366,8 @@ function onShow() {
 
   // Refresh recipient and donor balance every 5 seconds
   balanceIVId = setInterval( () => {
+
+    addKeypressEnterEvents();
 
     getRecipientBalance().catch((e) => {createErrorPopup("Recipient balance", e);});
     getDonorBalance().catch((e) => {createErrorPopup("Donor balance", e);});
@@ -1051,7 +1418,7 @@ function createErrorPopup(title, error, showGit) {
             <div class="navbar-bg" style="background-color: red"></div>
               <div class="navbar-inner">
                 <div class="title" style="font-size:1em;">${title}</div>
-                <div class="right"><a href="#" class="link popup-close">Close</a></div>
+                <div class="right"><a href="#" class="link popup-close">X</a></div>
               </div>
             </div>
             <div class="page-content">

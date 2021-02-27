@@ -27,6 +27,9 @@ contract OwnedContract {
     // 106 published to '0x1EDf7947F7b95bA658D0A74024Dd8092e4D4831c'
 
     // 107 one more require(_amount <= getBalance(), "not enough contract funds");
+    //     set name and country at every donation & request
+    //     fixed parent constructor calling
+    //     no abi changes
     // 107 not published yet
     uint16 constant public version = 107;
 
@@ -112,6 +115,9 @@ contract Faucet is OwnedContract {
         mapping(uint => Payment) payments;
     }
 
+    // Allow a request only every 4 hours
+    uint16 constant private graceTimeout = 14400; //60*60*4
+
     uint private totalBalance;
 
     address[] private Donors;
@@ -123,16 +129,14 @@ contract Faucet is OwnedContract {
     /**
      * @dev Set contract deployer as owner
      */
-    constructor() {
+    constructor() OwnedContract() {
         totalBalance = 0;
-        //super;
     }
 
     /**
      * @dev Delete the smart contract
      */
     function destroySmartContract() public isOwner {
-        //selfdestruct(super.getOwner());
         selfdestruct(super.getOwner());
     }
 
@@ -293,7 +297,6 @@ contract Faucet is OwnedContract {
         return Donations[_from].country;
     }
 
-
     /**
      * @dev Return Payments to Address name
      * @param  _to Address
@@ -396,7 +399,9 @@ contract Faucet is OwnedContract {
     }
 
      /**
-     * @dev called when contract receives funding
+     * @dev called to provide funding to contract
+     * @param _name Name of Recipient
+     * @param _country emoji flag
      */
     function Donation(string memory _name, bytes8 _country) public payable {
         require(msg.sender != address(0),  "address is null");
@@ -404,12 +409,14 @@ contract Faucet is OwnedContract {
 
         uint64 numPayments;
         numPayments = Donations[msg.sender].numPayments.add64(uint64(1));
+        assert(numPayments > 0);
         if (numPayments == 1) {
             Donations[msg.sender].index = uint64(Donors.length);
-            Donations[msg.sender].name = _name;
-            Donations[msg.sender].country = _country;
             Donors.push(msg.sender);
         }
+
+        Donations[msg.sender].name = _name;
+        Donations[msg.sender].country = _country;
 
         Donations[msg.sender].totalBalance = Donations[msg.sender].totalBalance.add(msg.value);
         Donations[msg.sender].numPayments = numPayments;
@@ -451,6 +458,8 @@ contract Faucet is OwnedContract {
      * @dev Request a donation from the faucet
      * @param _to address to send money to
      * @param _amount Amount of money to send
+     * @param _name Name of Recipient
+     * @param _country emoji flag
      */
     function requestDonation(address payable _to, uint _amount, string memory _name, bytes8 _country) public {
         require(_to != address(0), "null address supplied");
@@ -464,26 +473,22 @@ contract Faucet is OwnedContract {
         numPayments = Payments[_to].numPayments.add64(1);
         assert(numPayments > 0);
         if (numPayments == 1) {
-
-            // new Recipient
+          // new Recipient
             Payments[_to].index = uint64(Recipients.length);
-            Payments[_to].name = _name;
-            Payments[_to].country = _country;
             Recipients.push(_to);
         } else if (numPayments == 0) {
             revert("Internal error, integer overflow");
         } else {
-
             // check if the last payment is more than 12 hours ago
-            //for(uint i = Payments[_to].numPayments; i > 0; i--) {
-            //    timeLastTransfer = Math.max(timeLastTransfer, Payments[_to].payments[i].timestamp);
-            //}
-            timeLastTransfer = Payments[_to].payments[numPayments.sub64(2)].timestamp;
+            timeLastTransfer = Payments[_to].payments[numPayments.sub64(1)].timestamp;
 
-            if (timeLastTransfer > block.timestamp.sub(60*60*12)) {
-                revert("Only one request per 12 hours is possible");
+            if (timeLastTransfer > block.timestamp.sub( graceTimeout )) {     // 60*60*4
+                revert("Only one request per 4 hours is possible");
             }
         }
+
+        Payments[_to].name = _name;
+        Payments[_to].country = _country;
 
         Payments[_to].totalBalance = Payments[_to].totalBalance.add(_amount);
         Payments[_to].numPayments = numPayments;
@@ -499,9 +504,10 @@ contract Faucet is OwnedContract {
     /**
      * @dev Request bootstrap gas from the faucet
      * @param _to address to send the gas to
+     * @param _amount of gas to send
      */
     function giveBootstrapGas(address payable _to, uint _amount) public isOwner {
-        require(_amount <= 1 ether, "Max 1 NRG is more than enough gas!");
+        require(_amount <= 0.1 ether, "Max 0.1 NRG is more than enough gas!");
         _to.transfer(_amount);
     }
 }
