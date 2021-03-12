@@ -88,7 +88,7 @@
               radio
               radioIcon="start"
               title="Local"
-              value="http://localhost:49796"
+              value="http://127.0.0.1:49796"
               name="radio-url"
               id="small"
               onChange="{(e) => radioProviderChanged(e)}"
@@ -860,6 +860,7 @@ f7,
 
   async function ConnectToRPCProviderUrl() {
     let callsFinished = 0;
+    let callsFailed = 0;
     let complete = 2;
 
     // Reset fetched account infos
@@ -910,6 +911,7 @@ f7,
         })
         .catch(function (error) {
           callsFinished++;
+          callsFailed++;
           if (callsFinished > complete) {
             f7.dialog.close();
           }
@@ -920,6 +922,7 @@ f7,
     }
     catch (error) {
       callsFinished++;
+      callsFailed++;
       if (callsFinished > complete) {
         f7.dialog.close();
       }
@@ -940,6 +943,7 @@ f7,
       })
       .catch((error) => {
         callsFinished++;
+        callsFailed++;
         if (callsFinished > complete) f7.dialog.close();
         web3Error = error;
         console.log(error);
@@ -948,6 +952,7 @@ f7,
     }
     catch (error) {
         callsFinished++;
+        callsFailed++;
         if (callsFinished > complete) {
           f7.dialog.close();
         }
@@ -991,10 +996,15 @@ f7,
         })
         .catch((error) => {
             callsFinished++;
+            callsFailed++;
             if (callsFinished > complete) {
+              f7.dialog.close();
+
+              if (callsFailed < 3) {
                 connectedWeb3 = true;
-                f7.dialog.close();
+              }
             }
+
             web3Error = error;
             console.log(error);
             logConnect += `\n${getTime()}: 🤕 ${error}`;
@@ -1004,21 +1014,33 @@ f7,
                 balance: "-1",
             });
             if (isLocalNode) {
-                logConnect += `\n${getTime()}: 🤓 NOTE: Make sure personal is loaded in your node`;
-                logConnect += `\n${getTime()}: 🤓 "Example: ./energi --rpcapi personal,admin,web3,eth,debug,net,energi"`;
-                connectedColor = "var(--energi-color-red)";
+              logConnect += `\n${getTime()}: 🤓 NOTE: Make sure personal is loaded in your node`;
+              logConnect += `\n${getTime()}: 🤓 "Example: ./energi --rpcapi personal,admin,web3,eth,debug,net,energi"`;
+              connectedColor = "var(--energi-color-red)";
             } else {
+              if (connectedWeb3 === true) {
                 connectedColor = "var(--energi-color-green)";
+              }
             }
             if (!node_accounts[0]) {
-                toggleAccordionItem(1, true);
+              toggleAccordionItem(1, true);
             }
-            //make the parent to scroll into view, smoothly!
-            scrollTo("scrolltarget1");
+
+            if (connectedWeb3 === false) {
+              if (isLocalNode) {
+                createErrorPopup("LOCAL_CONNECT_FAILED", "Are you sure your localnode is running with --rpc? Check the listening processes with 'ss -t -l -p' and make sure energi3 is listening on port 49796! If you are sure, the most probable issue is the ad blocker or https upgrader, please try to disable all 'blocking/shields/MixedContentBlocking' for this site. You could also checkout the run_*.sh scripts in the energi folder. Still not working?", true);
+              } else {
+                createErrorPopup("REMOTE_CONNECT_FAILED", "Are you sure the remote node is running and you are allowed to connect? If you are sure, the most probable issue is the ad blocker or https upgrader, please try to disable all 'blocking/shields/force-https' for this site. You could also checkout the run_*.sh scripts in the energi folder on how to run your own node. Still not working?", true);
+              }
+            } else {
+              //make the parent to scroll into view, smoothly!
+              scrollTo("scrolltarget1");
+            }
         });
     }
     catch (error) {
         callsFinished++;
+        callsFailed++;
         if (callsFinished > complete) {
             f7.dialog.close();
         }

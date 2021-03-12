@@ -1,6 +1,6 @@
 // SPDX - License - Identifier: MIT
 // Copyright(c) 2020 Kim Il Yong
-// Utility functionto send NRG from to
+// Utility functions to send NRG from to
 
 var i;
 var time;
@@ -14,7 +14,7 @@ function sendNrg(from, to, value) {
     i = setInterval(waitForConfirmation, 5000);
 }
 
-// send all funds, so from goes to 0 wei (hopefully)
+// send all funds, so "from" balance goes to exactly zero (0) wei
 function sendAll(from, to) {
 
     var balance = eth.getBalance(from);
@@ -25,9 +25,18 @@ function sendAll(from, to) {
     var sendAmount = balance.sub(cost);
 
     time = new Date();
-    //tx = eth.getTransactionReceipt(eth.sendTransaction({from: from, to: to, gas: gas, gasPrice: gasPrice, value: sendAmount}));
-    txHash = eth.sendTransaction({from: from, to: to, gas: gas, gasPrice: gasPrice, value: sendAmount});
-    i = setInterval(waitForConfirmation, 5000);
+
+    if (sendAmount < 0) {
+        console.log("Insufficient funds, you need atleast '", cost, "' wei");
+    } else {
+
+        console.log("Sending wei:", sendAmount, "at GasPrice", gasPrice);
+
+        //tx = eth.getTransactionReceipt(eth.sendTransaction({from: from, to: to, gas: gas, gasPrice: gasPrice, value: sendAmount}));
+        console.log("eth.sendTransaction({ from:", from, ", to:", to, ", value:", sendAmount.toString(), ", gas: '21000', })")
+        txHash = eth.sendTransaction({ from: from, to: to, value: sendAmount.toString(), gas: "21000", });
+        i = setInterval(waitForConfirmation, 5000);
+    }
 }
 
 function waitForConfirmation() {

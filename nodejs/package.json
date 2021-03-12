@@ -841,7 +841,7 @@
             "resolved": "https://registry.npmjs.org/ethereumjs-util/-/ethereumjs-util-6.2.0.tgz",
             "version": "6.2.0"
         },
-        "ethers": "^5.0.24",
+        "ethers": "^5.0.32",
         "ethjs-unit": {
             "dependencies": {
                 "bn.js": {

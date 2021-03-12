@@ -10,13 +10,12 @@
 
  * Go into **EnergiHOME/bin**
 
- * Alternativly the energi core node 3.0.6 is included in Energi-Smart-Contract-Tutorial/energi
+ * Alternativly the energi core node 3.0.7 is included in Energi-Smart-Contract-Tutorial/energi
 
- * Create a startup script or run directly: This will need several hours to download the testnet blockchain
+ * Create a startup script or run directly: This will need several hours to download the testnet blockchain, please note that ````--rpccorsdomain "*" ```` is unsafe, dont use it in production!
 
 ``` bash
   ./energi3 --testnet --verbosity 3 --rpccorsdomain "*" --rpcport 49796 --rpcaddr "127.0.0.1" --rpcvhosts "localhost" --rpc --rpcapi admin,web3,eth,debug,personal,net,energi
-  >_
 ```
 
 ### 2. Create account(s) using the Energi Wallet
@@ -94,7 +93,7 @@ true
 
 * Go to the faucet and apply for some tNRGs
 
-[Energi3 Faucet](https://faucet.energi.software)
+[Energi3 Faucet](https://faucet.servht.ml)
 
 
 ### 5. Setup an easy to use solidity IDE

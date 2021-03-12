@@ -6,7 +6,8 @@ import { ethers } from "ethers";
 import { getTime, sleep } from "../js/utils.js";
 
 // Gas limit for contract calls
-const constGasLimit = "3000000";
+const constGasLimit = "500000";
+const constGasPrice = "20000000000";
 
 /*
 function getBalanceHistory
@@ -452,7 +453,8 @@ export const fetchFaucetDetailsAsync = async (faucet) => {
   let fetchStep = "getDetails";
   try {
 
-    console.log("Start fetching in web3utils fetchFaucetDetailsAsync");
+    // TODO REMOVE
+    //console.log("Start fetching in web3utils fetchFaucetDetailsAsync");
 
     let v = faucet.getVersion();
 
@@ -477,7 +479,8 @@ export const fetchFaucetDetailsAsync = async (faucet) => {
     result.contractAddress = await ca.catch((e) => { fetchStep = "getAddress"; throw (e);});
 
     result.error = "OK";
-    console.log("Faucet details async", result);
+    // TODO REMOVE
+    //console.log("Faucet details async", result);
     return result;
   }
   catch (e) {
@@ -515,7 +518,8 @@ export const fetchFaucetDetails = async (providerAddress, faucetAddress, abi) =>
       // The Contract object
       const faucet = new ethers.Contract(faucetAddress, abi, provider);
 
-      console.log("Start fetching in web3utils");
+      // TODO REMOVE
+      //console.log("Start fetching in web3utils");
       fetchStep = "getVersion";
       let r = await faucet.getVersion(); /* .catch((e) => {    console.log("getVersion failed:", e);
                                                           logText = logText + "\n" + getTime() + ": getVersion failed: " + e;
@@ -816,6 +820,7 @@ export const buildCallrequestDonationArguments = async (contract, recipientAddre
         console.log("Building webwallet URL for requesting", eth, "NRG to contract", contract.address);
 
         let url = "https://wallet.test3.energi.network/account/send/?gasLimit=" + constGasLimit + "&value=0";
+        url += "&gasPrice=" + constGasPrice;
         url += "&to=" + contract.address;
         url += "&data=" + unsignedTx.data;
         url += "&warnings=0&ts=" + Math.floor(new Date() / 1000);
@@ -1067,6 +1072,7 @@ export const buildCallDonationArguments = async (contract, donorName, donorCount
         console.log("Building webwallet URL for donating", eth, "NRG to contract", contract.address);
 
         let url = "https://wallet.test3.energi.network/account/send/?gasLimit=" + constGasLimit + "&value=" + eth.toString();
+        url += "&gasPrice=" + constGasPrice;
         url += "&to=" + contract.address;
         url += "&data=" + unsignedTx.data;
         url += "&warnings=0&ts=" + Math.floor(new Date() / 1000);

@@ -15,6 +15,7 @@ const execute = async () => {
   e("🦳", "White hair");
   e("🦱", "Curly hair");
   e("🦰", "Red hair");
+  e("🥠", "fortune cookie");
   e("🏻", "light skin tone");
   e("🏼", "medium-light skin tone");
   e("🏽", "medium skin tone");

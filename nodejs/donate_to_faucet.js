@@ -14,8 +14,15 @@ const execute = async () => {
 
     // 106 add country
     // 106 published to '0x1EDf7947F7b95bA658D0A74024Dd8092e4D4831c'
-    const contractAddr = "0x1EDf7947F7b95bA658D0A74024Dd8092e4D4831c";
-    const abi = require('./faucet106.abi.json');
+    //const contractAddr = "0x1EDf7947F7b95bA658D0A74024Dd8092e4D4831c";
+    //const abi = require('./faucet106.abi.json');
+
+    // 107 set name & country at every call
+    //     receipt donation every 4 hours
+    //     Max gas donation reduced from 1 to 0.1 NRG
+    // 107 published to '0x57B98F76bB39546F97BccD1EF0A38b2d9E074494'
+    const contractAddr = "0x57B98F76bB39546F97BccD1EF0A38b2d9E074494";
+    const abi = require('./faucet107.abi.json');
 
     // Different names from here on
 
@@ -23,13 +30,13 @@ const execute = async () => {
     //const country = "🇦🇹";
     //const fromAddress = "0x17fa844a3f96f2a8ae55e49c0e8ccf1bc628f90c";
 
-    //const name = "Алекс из Новосибирска 🥶";
-    //const country = "🇷🇺";
-    //const fromAddress = "0x771ddb07222a1f9442c91cf04f64f3164771bb62";
+    const name = "Алекс из Новосибирска 🥶";
+    const country = "🇷🇺";
+    const fromAddress = "0x771ddb07222a1f9442c91cf04f64f3164771bb62";
 
-    const name = "台湾 is not 💩中国💩";
-    const country = "🇹🇼";
-    const fromAddress = "0x7757a1f517d4680dba5d0ae9c984d3d394cc4a30";
+    //const name = "台湾 is not 中国";
+    //const country = "🇹🇼";
+    //const fromAddress = "0x7757a1f517d4680dba5d0ae9c984d3d394cc4a30";
 
     //const name = "免费西藏你中国混蛋 🤢🤮🤬"; // free tibet
     //const country = "🇨🇳";
@@ -39,7 +46,7 @@ const execute = async () => {
     const waitForConfirmations = 3;
 
     // how much do we want to spend
-    const spendeToFaucetInETH = "13"; // NRG
+    const spendeToFaucetInETH = "5000"; // NRG
 
     let privateKey;
     let currentName;

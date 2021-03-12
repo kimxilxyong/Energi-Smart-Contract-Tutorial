@@ -140,13 +140,13 @@ export const detectBrowser = (result) => {
   try {
     // Detect the users browser
     // TODO REMOVE
-    console.log("window.navigator", window.navigator);
-    console.log("window", window);
-    console.log("window.Notification", window.Notification);
+    //console.log("window.navigator", window.navigator);
+    //console.log("window", window);
+    //console.log("window.Notification", window.Notification);
 
     let browser = Bowser.getParser(window.navigator.userAgent);
     // TODO REMOVE
-    console.log("The current browser is", browser);
+    //console.log("The current browser is", browser);
 
     result.browser.details = browser;
     result.browser.name = browser.getBrowser().name;
@@ -184,10 +184,7 @@ export const getBrowserDetails = async (e) => {
 
   let result = initBrowserDetails();
 
-  // TODO REMOVE DEBUG ONLY
-  // dont disturb my circles while devving
-
-/*   result.date = new Date();
+  result.date = new Date();
   result.time = getTime();
 
   if (!window) {
@@ -204,7 +201,7 @@ export const getBrowserDetails = async (e) => {
   } catch (error) {
     result.wallet.error = error;
   }
- */
+
   return result;
 };
 
@@ -221,8 +218,9 @@ export const detectWallet = async (result) => {
       /* Detect the MetaMask Ethereum provider */
       /*****************************************/
       let browserProvider = await detectEthereumProvider();
-      console.log("browserProvider:", browserProvider);
-      console.log("window.ethereum:", window.ethereum);
+      // TODO REMOVE
+      //console.log("browserProvider:", browserProvider);
+      //console.log("window.ethereum:", window.ethereum);
 
       if (browserProvider !== window.ethereum) {
         console.error('ERROR Do you have multiple wallets installed?');
@@ -260,14 +258,15 @@ export const detectWallet = async (result) => {
       result.wallet.version = browserProvider.networkVersion;
 
     } else {
-      console.log("window.ethereum not defined!");
+      // TODO REMOVE
+      //console.log("window.ethereum not defined!");
       result.wallet.error = { reason: "Browser injected crypto wallet not enabled", code: "NO_ETHEREUM_PROVIDER", step: "check window.ethereum", };
       /* brave://settings/extensions
       Ethereum provider for using Dapps => Crypto Wallets */
     }
 
   } catch (error) {
-    console.log("detectWallet catch:", error);
+    //console.log("detectWallet catch:", error);
     if (error.message) {
       error.reason = error.message;
     }
@@ -286,8 +285,9 @@ export const requestWalletAccounts = async (result) => {
       /* Detect the MetaMask Ethereum provider */
       /*****************************************/
       let browserProvider = await detectEthereumProvider();
-      console.log("browserProvider:", browserProvider);
-      console.log("window.ethereum:", window.ethereum);
+      // TODO REMOVE
+      //console.log("browserProvider:", browserProvider);
+      //console.log("window.ethereum:", window.ethereum);
 
       if (browserProvider !== window.ethereum) {
         console.error('ERROR Do you have multiple wallets installed?');
@@ -370,7 +370,7 @@ export const requestWalletAccounts = async (result) => {
     }
 
   } catch (error) {
-    console.log("requestWalletAccounts catch:", error);
+    //console.log("requestWalletAccounts catch:", error);
     if (error.message) {
       error.reason = error.message;
     }
@@ -394,13 +394,14 @@ export const getCountryFlag = async () => {
       referrerPolicy: 'no-referrer',
     });
     // TODO REMOVE debug
-    console.log("Flag raw:", r);
+    //console.log("Flag raw:", r);
 
     let flag = "🇦🇶";
     if (r && r.status === 200) {
       try {
         r = await r.json();
-        console.log("Flag json:", r);
+        // TODO REMOVE
+        //console.log("Flag json:", r);
       } catch (e) {
         return "🏴󠁵󠁳󠁴󠁸󠁿";
       }
@@ -421,7 +422,7 @@ export const getCountryFlag = async () => {
             flag = "🏴‍☠️" + flag;
           }
           // TODO REMOVE debug
-          console.log("Flag JSON", r.json());
+          //console.log("Flag JSON", r.json());
         } catch (e) {
           if (!flag) {
             flag = "🇦🇶";

@@ -131,7 +131,14 @@
                         <div slot="media">📫</div>
                       </ListInput>
 
-                      <ListItem class="seperator"></ListItem>
+                      {#if recipient.balance && (recipient.balance.gt(0) || (recipient.lastUpdate && recipient.lastUpdate.length > 0))}
+                        <ListItem class="seperator"></ListItem>
+                        <ListItem  header="Balance" title="{ethers.utils.formatEther(recipient.balance)} NRG">
+                          <div slot="media">💹</div>
+                        </ListItem>
+                      {:else}
+                        <ListItem class="seperator"></ListItem>
+                      {/if}
 
                       <ListItem header="I want to execute the requesting TX with the Webwallet" title="Request {recipient.amount} NRGs to {recipient.address}">
                         <img slot="media" src="NRG16x16.png" alt="NRG" width="16" height="16">
@@ -183,7 +190,7 @@
               </ListItem>
 
               <!-- name="Nr of NRGs" inputReadonly style="margin-right: 10px;" -->
-              <ListInput value="{recipient.name}" onInput="{(e) => recipientNameChanged(e)}" onBlur="{(e) => recipientNameChanged(e)}" onInputClear="{()=>{recipient.name='';}}" label="Your Name" info="Your name, can by any string, min 3 characters" errorMessage="Not empty please!"
+              <ListInput value="{recipient.name}" onInput="{(e) => recipientNameChanged(e)}" onBlur="{(e) => recipientNameChanged(e)}" onInputClear="{()=>{recipient.name='';}}" label="Please tell us your nick" info="Your name, can by any string, min 3 characters" errorMessage="Not empty please!"
                 outline floatingLabel type="text" clearButton spellcheck="false" autocomplete="off"
                 inputId="inputIDRecipientName">
                 <div slot="media">{recipient.country}</div>
@@ -333,7 +340,7 @@
               </ListItem>
 
               <!-- name="Nr of NRGs" inputReadonly style="margin-right: 10px;" -->
-              <ListInput value="{donor.name}" onInput="{(e) => donorNameChanged(e)}" onBlur="{(e) => donorNameChanged(e)}" onInputClear="{()=>{donor.name='';}}" label="Your Name" info="Your name, can by any string, min 3 characters" errorMessage="Not empty please!"
+              <ListInput value="{donor.name}" onInput="{(e) => donorNameChanged(e)}" onBlur="{(e) => donorNameChanged(e)}" onInputClear="{()=>{donor.name='';}}" label="Please tell us your nick" info="Your name, can by any string, min 3 characters" errorMessage="Not empty please!"
                 outline floatingLabel type="text" clearButton spellcheck="false" autocomplete="off"
                 inputId="inputIDDonorName">
                 <div slot="media">{donor.country}</div>
@@ -450,8 +457,8 @@ import {
 import { errorToReason, errorToCode, getCountryFlag, timeDifference, copyToClipboard, getTime, scrollTo, sleep } from "../js/utils.js";
 import { buildCallrequestDonationArguments, buildCallDonationArguments, callRequest, callDonation, fetchFaucetDetailsAsync, fetchFaucetDetails } from "../js/web3utils.js";
 
-import {abi106} from '../js/abi.js';
-const abi = abi106;
+import {abi107} from '../js/abi.js';
+const abi = abi107;
 
 const dividerInNRG = "500";
 
@@ -477,6 +484,7 @@ let recipient = {
   address: ethers.constants.AddressZero,
   isAddressValid: false,
   signer: null,
+  lastUpdate: "",
 };
 
 let donor = {
@@ -488,6 +496,7 @@ let donor = {
   address: ethers.constants.AddressZero,
   isAddressValid: false,
   signer: null,
+  lastUpdate: "",
 };
 
 let result = {
@@ -572,10 +581,17 @@ function donorTxChanged(e) {
   }
 }
 // END Events --------------------------
-
+let insideGasPseudoMutex = false;
 async function requestGas(e) {
+
+  if (insideGasPseudoMutex) {
+    return;
+  }
+  insideGasPseudoMutex = true;
+
   try {
-    console.log("Request gas event:", e);
+    // TODO REMOVE
+    //console.log("Request gas event:", e);
     e.stopPropagation();
 
     if (recipient.address !== ethers.constants.AddressZero) {
@@ -587,24 +603,32 @@ async function requestGas(e) {
         if (json.error && json.error.code && json.error.message) {
           if (json.error.code === -32000 && json.error.message === "authentication needed: password or unlock") {
             createErrorPopup("NO_GAS_DONOR", "Account for gas donation is locked. Tell the admin to unlock it!", true);
-          } else if (json.error.code === 1) {
+          } else if (json.error.code === 1 || json.error.code === 2 || json.error.code === 3) {
             createErrorPopup("GAS_DONATION", "Server said: " + json.error.message, false);
           } else {
             createErrorPopup("GAS_SERVER_ERROR", json.error.code + ", " + json.error.message, true);
           }
+        } else if (json.transactionHash && json.status === true) {
+          createErrorPopup("SUCCESS", "Check your Transaction: " + json.transactionHash, false);
+          await checkTransaction(json.transactionHash);
+        } else {
+          createErrorPopup("FAILED", json, true);
         }
-
 
       } else {
         console.log("Request gas failed:", response);
+        createErrorPopup("HTTP_ERROR", (response.status ? response.status : "unknown") + " " + (response.url ? response.url : "while fetching /ajax/requestGas?toAdr=' + recipient.address"), true);
       }
     } else {
       createErrorPopup("INVALID_PARAMETER", "Recipient address not set", true);
     }
   } catch (e) {
     console.log("ERROR:", e);
-    return Promise.reject(e);
+    let reason = errorToReason(e);
+    let code = errorToCode(e);
+    createErrorPopup(code, reason, true);
   }
+  insideGasPseudoMutex = false;
 }
 
 /**
@@ -648,9 +672,14 @@ async function requestDonation() {
           logText = logText + "\n" + getTime() + ": TX Hash: '" + receipt.transactionHash + "'";
           logText = logText + "\n" + getTime() + ": Block: '" + receipt.blockNumber + "'";
           logText = logText + "\n" + getTime() + ": Gas used: '" + receipt.gasUsed + "'";
-          logText = logText + "\n" + getTime() + ":**************************************";
+          //logText = logText + "\n" + getTime() + ":**************************************";
 
-          receipt.balance = ethers.utils.formatEther(recipient.balance);
+          receipt.value = ethers.utils.formatEther(recipient.balance);
+
+          if (receipt.confirmations === 1) {
+            transactionReciepts.shift();                // remove first element
+                                                        // essentially updating the first block
+          }
 
           transactionReciepts.push(receipt);
           transactionReciepts = transactionReciepts;
@@ -660,6 +689,11 @@ async function requestDonation() {
 
       } else if (receipt.hash && receipt.confirmations === 0) {
         receipt.transactionHash = receipt.hash;
+
+        if (receipt.blockNumber === null) {
+          receipt.blockNumber = -1;
+        }
+
         transactionReciepts.push(receipt);
         transactionReciepts = transactionReciepts;
       }
@@ -680,6 +714,7 @@ async function requestDonation() {
       errorCode: "",
     }; */
 
+    logText = logText + "\n" + getTime() + ":*****************************************************";
     logText = logText + "\n" + getTime() + ": Reuesting donation finished in " + (new Date() - startSeconds)/1000 + " seconds";
     logText = logText + "\n" + getTime() + ": Status: '" + result.status + "'";
     logText = logText + "\n" + getTime() + ": Time: '" + result.time + "'";
@@ -687,6 +722,8 @@ async function requestDonation() {
     logText = logText + "\n" + getTime() + ": Block: '" + result.blockNumber + "'";
     logText = logText + "\n" + getTime() + ": Confirmations: '" + result.confirmations + "'";
     logText = logText + "\n" + getTime() + ": Gas used: '" + result.gasUsed + "'";
+    logText = logText + "\n" + getTime() + ":*****************************************************";
+    logText = logText + "\n" + getTime() + ":🏁 Finished 🏁";
   } catch (e) {
     // TODO REMOVE
     console.log("catch in requestDonation", e);
@@ -917,6 +954,7 @@ async function sendDonation() {
     logText = logText + "\n" + getTime() + ": Sending " + donor.amount + " NRG to faucet from '" + donor.name + "' in '" + donor.country + "' at address '" + donor.address + "'";
     transactionReciepts = [];
     spin_css_tx = "nf-hc-spin";
+    let lastValue = "";
 
     const provider = new ethers.providers.JsonRpcProvider($web3URL);
 
@@ -944,9 +982,19 @@ async function sendDonation() {
           logText = logText + "\n" + getTime() + ": TX Hash: '" + receipt.transactionHash + "'";
           logText = logText + "\n" + getTime() + ": Block: '" + receipt.blockNumber + "'";
           logText = logText + "\n" + getTime() + ": Gas used: '" + receipt.gasUsed + "'";
-          logText = logText + "\n" + getTime() + ":**************************************";
+          //logText = logText + "\n" + getTime() + ":**************************************";
 
-          receipt.balance = ethers.utils.formatEther(donor.balance);
+          if (receipt.value) {
+            receipt.value = ethers.utils.formatEther(receipt.value);
+            lastValue = receipt.value;
+          } else if (lastValue) {
+            receipt.value = lastValue;
+          }
+
+          if (receipt.confirmations === 1) {
+            transactionReciepts.shift();                // remove first element
+                                                        // essentially updating the first block
+          }
 
           transactionReciepts.push(receipt);
           transactionReciepts = transactionReciepts;
@@ -956,6 +1004,19 @@ async function sendDonation() {
 
       } else if (receipt.hash && receipt.confirmations === 0) {
         receipt.transactionHash = receipt.hash;
+
+        if (receipt.blockNumber === null) {
+          receipt.blockNumber = -1;
+        }
+        // TODO REMOVE
+        console.log("CALLBACK receipt.value", receipt.value);
+        if (receipt.value) {
+          receipt.value = ethers.utils.formatEther(receipt.value);
+          lastValue = receipt.value;
+          // TODO REMOVE
+          console.log("CALLBACK lastValue", lastValue);
+        }
+
         transactionReciepts.push(receipt);
         transactionReciepts = transactionReciepts;
       }
@@ -976,12 +1037,18 @@ async function sendDonation() {
       errorCode: "",
     }; */
 
+    logText = logText + "\n" + getTime() + ":**********************************************************************************";
     logText = logText + "\n" + getTime() + ": Sending donation finished in " + (new Date() - startSeconds)/1000 + " seconds";
     logText = logText + "\n" + getTime() + ": Status: '" + result.status + "'";
     logText = logText + "\n" + getTime() + ": TX Hash: '" + result.transactionHash + "'";
     logText = logText + "\n" + getTime() + ": Block: '" + result.blockNumber + "'";
     logText = logText + "\n" + getTime() + ": Confirmations: '" + result.confirmations + "'";
     logText = logText + "\n" + getTime() + ": Gas used: '" + result.gasUsed + "'";
+
+    logText = logText + "\n" + getTime() + ":**********************************************************************************";
+    logText = logText + "\n" + getTime() + ":🏁 Finished 🏁";
+    logText = logText + "\n" + getTime() + ":Thank you '" + donor.name + "' for donating " + donor.amount + " NRG";
+
   } catch (e) {
     // TODO REMOVE
     console.log("catch in sendDonation", e);
@@ -1076,13 +1143,20 @@ const getRecipientBalance = async () => {
       if (!recipient.nameOverwritten) {
         let n = faucet.getRecipientName(recipient.address);
         recipient.name = await n;
+        if (recipient.name.length < 3) {
+          requestButtonEnabled = false;
+        }
       }
 
       if (recipient.name.length > 2) {
         requestButtonEnabled = true;
       }
 
-      recipient.balance = await b;
+      recipient.balance = await b.catch((e) => { e.step = "getBalance"; throw (e); });
+      recipient.lastUpdate = getTime();
+
+      // TODO REMOVE
+      //console.log("RBalance", recipient.balance);
 
       if (!userSelfSelected && recipient.balance && recipient.balance.gt( ethers.utils.parseEther(dividerInNRG)) ) {
         userIsDonor = true;
@@ -1125,6 +1199,7 @@ const getDonorBalance = async () => {
       }
 
       donor.balance = await b.catch((e) => { e.step = "getBalance"; throw (e); });
+      donor.lastUpdate = getTime();
       sendButtonEnabled = true;
 
       if (!userSelfSelected && donor.balance && donor.balance.lt( ethers.utils.parseEther(dividerInNRG)) ) {
@@ -1188,37 +1263,49 @@ const getFaucetDetails = async (faucetAddress) => {
 
 
       fetchStep = "Fetch Details";
-      console.log("getFaucetDetails From FaucetAdr", faucetAddress);
+      // TODO REMOVE
+      //console.log("getFaucetDetails From FaucetAdr", faucetAddress);
       //let info = await fetchFaucetDetails($web3URL, faucetAddress, abi);
       let info = await fetchFaucetDetailsAsync(faucet);
-      console.log("getFaucetDetails result info", info);
+      // TODO REMOVE
+      //console.log("getFaucetDetails result info", info);
 
-      fetchStep = "GetLastRecipient";
-      // Get last Recipient Payment
-      // function getRecipientByIndex(uint _i) public view returns (address _recipient, uint _totalBalance, uint _numPayments, string memory _name, bytes8 _country)
-      let index = info.recipientsCount-1;
-      let r = await faucet.getRecipientByIndex(index).catch((e) => { console.log("getRecipientByIndex", index, "failed:", e); e.step = "faucet.getRecipientByIndex(" + index + ")"; throw (e);});
-      if (r) {
-        info.lastRecipient.name = r._name
-        info.lastRecipient.address = r._recipient;
-        info.lastRecipient.count = r._numPayments;
-        info.lastRecipient.amount = ethers.utils.formatEther( r._totalBalance );
 
-        console.log("getRecipientByIndex", index, "info", info);
+      if (info.recipientsCount > 0) {
+        fetchStep = "GetLastRecipient";
+        // Get last Recipient Payment
+        // function getRecipientByIndex(uint _i) public view returns (address _recipient, uint _totalBalance, uint _numPayments, string memory _name, bytes8 _country)
+        let index = info.recipientsCount-1;
+        let r = await faucet.getRecipientByIndex(index).catch((e) => { console.log("getRecipientByIndex", index, "failed:", e); e.step = "faucet.getRecipientByIndex(" + index + ")"; throw (e);});
+        if (r) {
+          info.lastRecipient.name = r._name
+          info.lastRecipient.address = r._recipient;
+          info.lastRecipient.count = r._numPayments;
+          info.lastRecipient.amount = ethers.utils.formatEther( r._totalBalance );
 
-        if (r._country === "0x5465727261000000") {    // Terra
-          info.lastRecipient.country = "🌎";
-        } else if (r._country === "0x0000000000000000") {    // Zero-bytes
-          info.lastRecipient.country = "🌍";
-        } else {
-          info.lastRecipient.country = ethers.utils.toUtf8String(r._country);
+          // TODO REMOVE
+          // console.log("getRecipientByIndex", index, "info", info);
+
+          if (r._country === "0x5465727261000000") {    // Terra
+            info.lastRecipient.country = "🌎";
+          } else if (r._country === "0x0000000000000000") {    // Zero-bytes
+            info.lastRecipient.country = "🌍";
+          } else {
+            info.lastRecipient.country = ethers.utils.toUtf8String(r._country);
+          }
+          fetchStep = "GetPaymentDetails";
+          let pd = await faucet.getPaymentDetails(info.lastRecipient.address, info.lastRecipient.count).catch((e) => { console.log("getPaymentDetails", info.lastRecipient.address, "payment", info.lastRecipient.count, "failed:", e); e.step = "faucet.getPaymentDetails(" + info.lastRecipient.address + ", " + info.lastRecipient.count + ")"; throw (e);});
+          if (pd) {
+            // TODO REMOVE
+            //console.log("DETAILS recipient: ", pd);
+            info.lastRecipient.date = pd._timestamp*1000;
+          }
         }
-        fetchStep = "GetPaymentDetails";
-        let pd = await faucet.getPaymentDetails(info.lastRecipient.address, info.lastRecipient.count).catch((e) => { console.log("getPaymentDetails", info.lastRecipient.address, "payment", info.lastRecipient.count, "failed:", e); e.step = "faucet.getPaymentDetails(" + info.lastRecipient.address + ", " + info.lastRecipient.count + ")"; throw (e);});
-        if (pd) {
-          console.log("DETAILS recipient: ", pd);
-          info.lastRecipient.date = pd._timestamp*1000;
-        }
+      } else {
+          info.lastRecipient.name = "None yet";
+          info.lastRecipient.address = ethers.constants.AddressZero;
+          info.lastRecipient.count = 0;
+          info.lastRecipient.amount = "-1";
       }
 
       info.date = new Date();
@@ -1230,7 +1317,10 @@ const getFaucetDetails = async (faucetAddress) => {
     if (!e.step) {
       e.step = fetchStep;
     }
-    throw(e);
+    let reason = errorToReason(e);
+    let code = errorToCode(e);
+    // CALL_EXCEPTION is an contract error, INVALID_SIGNER means account is not unlocked
+    createErrorPopup(code, reason, (code === "INVALID_SIGNER" || code === "CALL_EXCEPTION" ? false : true));
   }
   spin_css = "";
   return result;

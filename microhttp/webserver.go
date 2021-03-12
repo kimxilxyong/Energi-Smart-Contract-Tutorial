@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	ethereum "energi.world/core/gen3"
 	"energi.world/core/gen3/common"
@@ -30,12 +31,10 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 )
 
-
-
-const version = 101
+const version = 104
 const serverIPC = "/home/kim/.energicore3/testnet/energi3.ipc"
 const gasDonorAddress = "0x09ae1a5ddfd481cfd3cc4390b0e08a0832709a06"
-const weiGasDonation = 3020100 // 3 million wei for gas to send
+const weiGasDonation = 500432 * 20000000000  // 0.5 million gas * gasPrice for gas to send
 /*
 	Returns the most probable filepath and mime type
 */
@@ -137,7 +136,7 @@ func getSemanticFile(basedir string, subdir string, filename string) (string, st
 	return "", mime, err
 }
 
-func generalHandler(w http.ResponseWriter, r *http.Request) {
+func faucetGUIHandler(w http.ResponseWriter, r *http.Request) {
 	var subdir string
 	var accept []string
 	var accepts []string
@@ -171,6 +170,7 @@ func generalHandler(w http.ResponseWriter, r *http.Request) {
 	filename := strings.Split(r.URL.Path[len("/"):], "?")[0]
 	if filename == "" {
 		filename = "index.html"
+		log.Println("New client:", r.RemoteAddr)
 	}
 
 	filenamePath, mime, err := getSemanticFile("www", subdir, filename)
@@ -191,7 +191,67 @@ func generalHandler(w http.ResponseWriter, r *http.Request) {
 		//http.Error(w, "Not Found", http.StatusNotFound)
 		return
 	}
-	fmt.Println("Serving file ", filenamePath)
+	//fmt.Println("Serving file ", filenamePath)
+
+	w.Header().Set("Content-Type", mime+"; charset=UTF-8")
+	w.Header().Set("Content-Language", "en-US")
+	w.Write(body)
+}
+
+func htmlHandler(w http.ResponseWriter, r *http.Request) {
+	var subdir string
+	var accept []string
+	var accepts []string
+	var atype string
+	var adetail string
+
+	//fmt.Println("Incoming request: ", r.URL.Path)
+	//fmt.Println("Header: ", r.Header.Get("Accept"))
+
+	accepts = strings.Split(r.Header.Get("Accept"), ",")
+	accept = strings.Split(accepts[0], "/")
+	if len(accept) > 1 {
+		atype = accept[0]
+		adetail = accept[1]
+	}
+
+	if atype == "image" {
+		subdir = "images"
+	} else if atype == "text" {
+		if adetail == "javascript" {
+			subdir = "js"
+		} else if adetail == "html" {
+			subdir = ""
+		} else if adetail == "css" {
+			subdir = "css"
+		}
+	} else {
+		subdir = ""
+	}
+
+	filename := strings.Split(r.URL.Path[len("/"):], "?")[0]
+	if filename == "" {
+		filename = "index.html"
+		log.Println("New HTML client:", r.RemoteAddr)
+	}
+
+	filenamePath, mime, err := getSemanticFile("html", subdir, filename)
+	if err != nil {
+		filenamePath, mime, err = getSemanticFile("html", "static", filename)
+		if err != nil {
+			log.Println("ERROR:", err)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+	}
+
+	body, err := ioutil.ReadFile(filenamePath)
+	if err != nil {
+		log.Println("ERROR:", err)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	fmt.Println("HTML Serving file ", filenamePath)
 
 	w.Header().Set("Content-Type", mime+"; charset=UTF-8")
 	w.Header().Set("Content-Language", "en-US")
@@ -199,6 +259,8 @@ func generalHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func markdownHandler(w http.ResponseWriter, r *http.Request) {
+
+	log.Println("Incoming MD request:", r)
 
 	filename := r.URL.Path[len("/md/"):]
 
@@ -276,6 +338,8 @@ func ajaxHandlerRequestGas(w http.ResponseWriter, r *http.Request) {
 	var to string
 	var wei uint
 
+	log.Println("Gas request from: ", r.RemoteAddr)
+
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	w.Header().Set("Content-Language", "en-US")
 
@@ -291,8 +355,8 @@ func ajaxHandlerRequestGas(w http.ResponseWriter, r *http.Request) {
 
 	//  TODO check if sendGasTo is a valid address
 	if sendGasTo == "" {
-		fmt.Println("ERROR: Ajax data ", r.Form)
-		fmt.Println("ERROR: Adr ", r.Form["toAdr"])
+		log.Println("ERROR: Ajax data ", r.Form)
+		log.Println("ERROR: Adr ", r.Form["toAdr"])
 		//http.Error(w, r.Form.Encode(), http.StatusBadRequest)
 		//return
 		response.Status = false
@@ -300,24 +364,24 @@ func ajaxHandlerRequestGas(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// TODO security
 
-		fmt.Println("Incoming AJAX reuest, sendGasTo ", sendGasTo)
+		log.Println("Incoming AJAX request, sendGasTo ", sendGasTo)
 		balance, err := getBalance(gasDonorAddress);
 		if err != nil {
-			fmt.Println("ERROR: getBalance(gas) failed:", err)
+			log.Println("ERROR: getBalance(gas) failed:", err)
 			response.Status = false
 			response.Err = &MsgError{Code: 2, Message: "getBalance(gasDonorAddress) failed: " + err.Error() }
 		} else {
-			fmt.Println("Current gasFrom Balance: ",  weiToEther(&balance), "NRG")
+			log.Println("Current gasFrom Balance: ",  weiToEther(&balance), "NRG")
 
 			// Ceck the bablance of the requester
 			balance, err = getBalance(sendGasTo);
 			if err != nil {
-				fmt.Println("ERROR: getBalance(to) failed:", err)
+				log.Println("ERROR: getBalance(to) failed:", err)
 			} else {
-				fmt.Println("Current gasTo Balance: ",  weiToEther(&balance), "NRG")
+				log.Println("Current gasTo Balance: ",  weiToEther(&balance), "NRG")
 
-				weiInt := big.NewInt(weiGasDonation)
-
+				// Allow him to have double the gas donation
+				weiInt := big.NewInt(weiGasDonation*2)
 				if weiInt.Cmp(&balance) > 0  {
 					tx, from, to, wei, err = sendGas(sendGasTo)
 					response.Err = err
@@ -331,11 +395,12 @@ func ajaxHandlerRequestGas(w http.ResponseWriter, r *http.Request) {
 					response.From = from
 					response.Wei = wei
 				} else {
+					// requester balance is more than double weiGasDonation
 					response.To = sendGasTo
 					response.Wei = weiGasDonation
 					response.Status = false
-					response.Err = &MsgError{Code: 3, Message: "You have enough gas" }
-					fmt.Println("You have enough gas",  response)
+					response.Err = &MsgError{Code: 3, Message: "You have enough gas (" + balance.String() + ")"}
+					log.Println("You have enough gas",  response)
 				}
 			}
 	  }
@@ -344,25 +409,36 @@ func ajaxHandlerRequestGas(w http.ResponseWriter, r *http.Request) {
 	// create json from response struct
 	jsonResponse, err := json.Marshal(response)
 	if err != nil {
-		fmt.Println("ERROR: ", err)
+		log.Println("ERROR json.Marshal: ", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	fmt.Println("jsonResponse ", string(jsonResponse))
+	log.Println("jsonResponse ", string(jsonResponse))
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Write(jsonResponse)
 }
+
+var lastGasToAddress string
+var lastGasCount time.Duration
 
 // returns the transaction hash
 func sendGas(gasToAddress string) (hexutil.Bytes, string, string, uint, error) {
 	var err error
 	var ec *rpc.Client // NOTE: rpc NOT ethclient
 
+	if (lastGasToAddress == gasToAddress) {
+		lastGasCount++
+		time.Sleep((50*lastGasCount) * time.Millisecond)
+	} else {
+		lastGasCount = 0
+		lastGasToAddress = gasToAddress
+	}
+
 	ctx := context.Background()
 
 	ec, err = rpc.DialContext(ctx, serverIPC)
 	if err != nil {
-		fmt.Println("ERROR: could not connect to Ethereum gateway:", err)
+		log.Println("ERROR: could not connect to Ethereum gateway:", err)
 	}
 	defer ec.Close()
 
@@ -380,7 +456,7 @@ func sendGas(gasToAddress string) (hexutil.Bytes, string, string, uint, error) {
 
 	err = ec.CallContext(ctx, &hex, "eth_sendTransaction", toCallArg(msg))
 	if err != nil {
-		fmt.Println("ERROR: eth_sendTransaction failed:", err)
+		log.Println("ERROR: eth_sendTransaction failed:", err)
 	}
 	return hex, gasDonorAddress, gasToAddress, weiGasDonation, err
 }
@@ -410,6 +486,9 @@ func getBalance(address string) (big.Int, error) {
 
 func main() {
 
+	lastGasCount = 0
+	log.SetFlags(log.LstdFlags)
+
 	path, err := os.Getwd()
 	if err != nil {
 		log.Println(err)
@@ -423,21 +502,30 @@ func main() {
 			os.Exit(1)
 		}
 
-		fmt.Println("Server version", version)
-		fmt.Println("IPC: ", serverIPC)
-		fmt.Println("Gas Donor: ", gasDonorAddress)
-		fmt.Println("Gas Donation amount: ", weiGasDonation, "wei")
-		fmt.Println("Gas Balance: ",  weiToEther(&balance), "NRG")
-		fmt.Println("Start serving files in", filepath.Join(path, "www"))
-		fmt.Println("Start serving AJAX gas donation reguests under /ajax/requestGas")
+		log.Println("Server version", version)
+		log.Println("IPC: ", serverIPC)
+		log.Println("Gas Donor: ", gasDonorAddress)
+		log.Println("Gas Donation amount: ", weiGasDonation, "wei")
+		log.Println("Gas Balance: ",  weiToEther(&balance), "NRG")
+		log.Println("Start serving files in", filepath.Join(path, "www"))
+		log.Println("Start serving AJAX gas donation reguests under /ajax/requestGas")
 	}
 
 	http.HandleFunc("/ajax/requestGas", ajaxHandlerRequestGas)
-	http.HandleFunc("/md/", markdownHandler)
-	http.HandleFunc("/", generalHandler)
+	http.HandleFunc("www.servht.ml/md/", markdownHandler)
+	http.HandleFunc("www.servht.ml/", htmlHandler)
+
+	http.HandleFunc("faucet.servht.ml/ajax/requestGas", ajaxHandlerRequestGas)
+	http.HandleFunc("faucet.servht.ml/", faucetGUIHandler)
+
+	http.HandleFunc("localhost/ajax/requestGas", ajaxHandlerRequestGas)
+	http.HandleFunc("localhost/md/", markdownHandler)
+	http.HandleFunc("localhost/", faucetGUIHandler)
 
 	//log.Fatal(http.ListenAndServeTLS(":443", "ssl_server.crt", "ssl_server.key", nil))
-	log.Fatal(http.ListenAndServeTLS(":8443", "ssl_server.crt", "ssl_server.key", nil))
+
+	log.Println("Listening on :443 with ssl_server.crt, ssl_server.key")
+	log.Fatal(http.ListenAndServeTLS(":443", "ssl_server.crt", "ssl_server.key", nil))
 
 	print("Exiting server")
 	os.Exit(0)

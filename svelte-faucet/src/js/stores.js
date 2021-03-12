@@ -7,8 +7,8 @@
 import { writable } from 'svelte/store';
 
 // Version 106
-export const faucetAddress = writable("0x1EDf7947F7b95bA658D0A74024Dd8092e4D4831c");
-export const gasDonorAddress = writable("0x3b5abf9b81d5b62df65bf63e163463d0aa42e53b");
+export const faucetAddress = writable("0x57B98F76bB39546F97BccD1EF0A38b2d9E074494");
+export const gasDonorAddress = writable("0x09ae1a5ddfd481cfd3cc4390b0e08a0832709a06");
 
 export const web3URL = writable("https://nodeapi.test3.energi.network");
 

@@ -325,8 +325,8 @@ import {
 } from "../js/stores.js";
 //import {  } from "../js/web3utils.js";
 import { detectBrowser, timeDifference, copyToClipboard, getTime, scrollTo, sleep } from "../js/utils.js";
-import {abi106} from '../js/abi.js';
-const abi = abi106;
+import {abi107} from '../js/abi.js';
+const abi = abi107;
 
 let countMaxLogLength = 3000;
 let animateSwingClass = "animate__animated animate__swing animate__infinite colorturkis";
@@ -402,13 +402,11 @@ const loadFaucetStatistics = () => {
                     status.color = 'colorred';
                   };
                   c = c;
-                  /* activityBaseStatus = "Loading failed"; */
-                  timeAgoDisplayItems[0].base = "Loading failed";
-                  /* currentActivity = activityBaseStatus; */
-                  timeAgoDisplayItems[0].current = timeAgoDisplayItems[0].base;
-
-                  /* lastUpdated = new Date(); */
-                  timeAgoDisplayItems[0].last = new Date();
+                  if (timeAgoDisplayItems.length > 0) {
+                    timeAgoDisplayItems[0].base = "Loading failed";
+                    timeAgoDisplayItems[0].current = timeAgoDisplayItems[0].base;
+                    timeAgoDisplayItems[0].last = new Date();
+                  }
                   logText = logText + "\n" + getTime() + ": " + e;
                   logText = logText + "\n" + getTime() + ": Fechting faucet data failed in " + (new Date() - startSeconds)/1000 + " seconds"
                 }
@@ -416,19 +414,20 @@ const loadFaucetStatistics = () => {
     .then(
         (res) => {
                     // TODO REMOVE
-                    console.log("getFaucetDetails.then:", res);
+                    //console.log("getFaucetDetails.then:", res);
                     if (res) {
                       c = res;
                       status.error = 'OK - faucet details loaded';
                       status.color = 'colorgreen';
                       // TODO REMOVE
-                      console.log("getFaucetDetails.then.status:", status);
-                      /* activityBaseStatus = "Loading finished"; */
-                      timeAgoDisplayItems[0].base = "Loading finished";
-                      /* currentActivity = activityBaseStatus; */
-                      timeAgoDisplayItems[0].current = timeAgoDisplayItems[0].base;
-                      /* lastUpdated = new Date(); */
-                      timeAgoDisplayItems[0].last = new Date();
+                      //console.log("getFaucetDetails.then.status:", status);
+
+                      if (timeAgoDisplayItems.length > 0) {
+                        timeAgoDisplayItems[0].base = "Loading finished";
+                        timeAgoDisplayItems[0].current = timeAgoDisplayItems[0].base;
+                        timeAgoDisplayItems[0].last = new Date();
+                      }
+
                       logText = logText + "\n" + getTime() + ": Fechting faucet data finished in " + (new Date() - startSeconds)/1000 + " seconds"
                     }
                   }
@@ -657,7 +656,7 @@ const getDonor = async (faucet, index) => {
     logText = logText + "\n" + getTime() + ": Fechting donor finished in " + (new Date() - startSeconds)/1000 + " seconds";
 
     // TODO REMOVE
-    console.log("DEBUG return fetchedDonor: ", fetchedDonor);
+    //console.log("DEBUG return fetchedDonor: ", fetchedDonor);
     return fetchedDonor;
 
   } catch (e) {
@@ -796,7 +795,7 @@ const getRecipient = async (faucet, index) => {
     logText = logText + "\n" + getTime() + ": Fechting recipient finished in " + (new Date() - startSeconds)/1000 + " seconds";
 
     // TODO REMOVE
-    console.log("DEBUG return fetchedRecipient: ", fetchedRecipient);
+    //console.log("DEBUG return fetchedRecipient: ", fetchedRecipient);
     return fetchedRecipient;
 
   } catch (e) {
@@ -826,13 +825,15 @@ const getFaucetDetails = async (faucetAddress, gasDonorAddress) => {
       // The Contract object
       const faucet = new ethers.Contract(faucetAddress, abi, signer);
 
-      console.log("Start fetching");
+      // TODO REMOVE
+      //console.log("Start fetching");
       fetchStep = "getVersion";
       let r = await faucet.getVersion(); /* .catch((e) => {    console.log("getVersion failed:", e);
                                                           logText = logText + "\n" + getTime() + ": getVersion failed: " + e;
                                                       }); */
       if (r) {
-        console.log("Faucet Version:", r);
+        // TODO REMOVE
+        //console.log("Faucet Version:", r);
         result.version = r;
       };
 
@@ -840,7 +841,8 @@ const getFaucetDetails = async (faucetAddress, gasDonorAddress) => {
       r = await faucet.getOwner(); /* .catch((e) => {  logText = logText + "\n" + getTime() + ": getOwner failed: " + e;
                                                   console.log("getOwner failed:", e); }); */
       if (r) {
-        console.log("Faucet Owner:", r);
+        // TODO REMOVE
+        //console.log("Faucet Owner:", r);
         result.owner = r;
       }
 
@@ -849,35 +851,40 @@ const getFaucetDetails = async (faucetAddress, gasDonorAddress) => {
                                                   logText = logText + "\n" + getTime() + ": getBalance failed: " + e;
                                                   }); */
       if (r) {
-        console.log("Faucet Balance:", parseFloat(ethers.utils.formatEther(r)));
+        // TODO REMOVE
+        //console.log("Faucet Balance:", parseFloat(ethers.utils.formatEther(r)));
         result.balance = r;
       }
 
       fetchStep = "getCalculatedBalance";
       r = await faucet.getCalculatedBalance();/* .catch((e) => { console.log("getCalculatedBalance failed:", e); }); */
       if (r) {
-        console.log("Faucet Calculated Balance:", parseFloat(ethers.utils.formatEther(r)));
+        // TODO REMOVE
+        //console.log("Faucet Calculated Balance:", parseFloat(ethers.utils.formatEther(r)));
         result.calculatedBalance = r;
     }
 
       fetchStep = "getDonorCount";
       r = await faucet.getDonorCount(); /* .catch((e) => { console.log("getDonorCount failed:", e); }); */
       if (r) {
-        console.log("Donor Count:", r);
+        // TODO REMOVE
+        //console.log("Donor Count:", r);
         result.donorsCount = r;
       }
 
       fetchStep = "getRecipientsCount";
       r = await faucet.getRecipientsCount(); /* .catch((e) => { console.log("getRecipientsCount failed:", e); }); */
       if (r) {
-        console.log("Recipients Count:", r);
+        // TODO REMOVE
+        //console.log("Recipients Count:", r);
         result.recipientsCount = r;
       }
 
       fetchStep = "getAddress";
       r = await faucet.getAddress(); /* .catch((e) => { console.log("getAddress failed:", e); }); */
       if (r) {
-        console.log("Address:", r);
+        // TODO REMOVE
+        //console.log("Address:", r);
         result.contractAddress = r;
       }
 

@@ -8,10 +8,10 @@
   width: 0;
   height: 0;
 }
-#RIGHTSIDEBAR,
+/* #RIGHTSIDEBAR
 .RIGHTSIDEBAR {
   background-image: url("../images/background_right.png");
- }
+ } */
 
  #logtextarea textarea {
   color: var(--energi-color-yellow);

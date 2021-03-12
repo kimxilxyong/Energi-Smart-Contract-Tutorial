@@ -30,7 +30,7 @@ contract OwnedContract {
     //     set name and country at every donation & request
     //     fixed parent constructor calling
     //     no abi changes
-    // 107 not published yet
+    // 107 published to 0x57B98F76bB39546F97BccD1EF0A38b2d9E074494
     uint16 constant public version = 107;
 
     // The creator of this contract

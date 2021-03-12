@@ -299,7 +299,8 @@
   }
 
   const updateBrowserDetails = () => {
-    console.log("getBrowserDetails...");
+    // TODO REMOVE
+    //console.log("getBrowserDetails...");
     getBrowserDetails().catch((e) => {
       console.log("ERROR getBrowserDetails", e);
       browserDetails.browser.error = e;
