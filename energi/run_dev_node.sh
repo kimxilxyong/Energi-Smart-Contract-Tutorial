@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2020 Kim Il Yong
 ##############################################################################################################
-# Description: This script is to start energi core in testmode as a provider for the deployed faucet
+# Description: This script is to start energi core in testmode as a provider for the faucet deployed on a local running microhttp
 # 🥶 ATTENTION: don't run --rpccorsdomain "*" on a server with real money! 🥵
 #
 # Download ethers.js
@@ -17,4 +17,5 @@
 #
 ##############################################################################################################
 
-./energi3 --testnet --verbosity 3 --vmdebug --gcmode=archive --syncmode=full --preload utils.js,peers.js,send.js,stake.js --rpccorsdomain "https://faucet.servht.ml" --rpc --rpcaddr "127.0.0.1" --rpcvhosts "localhost" --rpcapi admin,web3,eth,debug,personal,net,energi console
+./energi3 --testnet --verbosity 3 --gcmode=archive --syncmode=full --preload utils.js,peers.js,send.js,stake.js --rpccorsdomain "*" --rpc --rpcaddr "127.0.0.1" --rpcvhosts "localhost" --rpcapi admin,web3,eth,debug,personal,net,energi console
+

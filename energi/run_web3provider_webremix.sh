@@ -1,10 +1,9 @@
 #!/bin/bash
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2020 Kim Il Yong
-
-
 #####################################################################
 # Description: This script is to start energi core in testmode as a web3 provider for remix desktop IDE
+# 🥶 ATTENTION: don't run --rpccorsdomain "*" on a server with real money! 🥵
 #
 # Download Remix
 # https://github.com/ethereum/remix-desktop/releases
@@ -13,7 +12,6 @@
 # DEPLOY & RUN TRANSACTIONS -> ENVIRONMENT -> Web3 Provider -> http://localhost:39796 -> OK
 #
 #####################################################################
-
 
 ./energi3 --testnet --gcmode=archive --syncmode=full --verbosity 3 --rpccorsdomain "https://remix.ethereum.org" --vmdebug --rpc --rpcport 39796 --rpcaddr "127.0.0.1" --rpcvhosts "localhost" --rpcapi admin,web3,eth,debug,personal,net,energi console
 
