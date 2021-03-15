@@ -137,7 +137,9 @@
             </div>
         </ListItem>
         <ListItem title="Result: {status.error}" class="{status.color}"></ListItem>
-        <ListItem title="Activity: { timeAgoDisplayItems[0] ? timeAgoDisplayItems[0].current : 'refresh not activated'}"></ListItem>
+        <ListItem title="Activity: { timeAgoDisplayItems[0] ? timeAgoDisplayItems[0].current : 'refresh not activated'}">
+          <div slot="media" class="{spin_css}">🌼</div>
+        </ListItem>
       </List>
     </CardContent>
   </Card>
@@ -333,6 +335,7 @@ let animateSwingClass = "animate__animated animate__swing animate__infinite colo
 let isClipboardDoneClass1 = "hidden";
 let isClipboardDoneClass2 = "hidden";
 
+let spin_css = "nf-hc-spin";
 let d_nf_hc_spin = "";
 let r_nf_hc_spin = "";
 let donorsColor = "";
@@ -373,7 +376,9 @@ let c = result;
 let status = {error: "none yet, wait a second 🥸", color: ""};
 
 const loadFaucetStatistics = () => {
-  /* currentActivity = "Details loading ..."; */
+
+  spin_css = "nf-hc-spin";
+
   timeAgoDisplayItems[0].current = "Details loading ...";
   const startSeconds = new Date();
   if (logText.length == 0 || logText.length > countMaxLogLength) {
@@ -385,6 +390,7 @@ const loadFaucetStatistics = () => {
   getFaucetDetails($faucetAddress, $gasDonorAddress)
     .catch(
         (e) => {
+                  spin_css = "";
                   console.log(".catch:", e);
                   if (e && e.reason) {
                     if (e.code) {
@@ -413,6 +419,7 @@ const loadFaucetStatistics = () => {
     )
     .then(
         (res) => {
+                    spin_css = "";
                     // TODO REMOVE
                     //console.log("getFaucetDetails.then:", res);
                     if (res) {

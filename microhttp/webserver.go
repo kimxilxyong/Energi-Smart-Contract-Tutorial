@@ -31,7 +31,7 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 )
 
-const version = 104
+const version = 105
 const serverIPC = "/home/kim/.energicore3/testnet/energi3.ipc"
 const gasDonorAddress = "0x09ae1a5ddfd481cfd3cc4390b0e08a0832709a06"
 const weiGasDonation = 500432 * 20000000000  // 0.5 million gas * gasPrice for gas to send
@@ -54,6 +54,14 @@ func getSemanticFile(basedir string, subdir string, filename string) (string, st
 		fmt.Println("ERROR Unknown request ", filename)
 		err = errors.New("Unknown request " + filename)
 		return "", mime, err
+	}
+
+	if filename == "js/app.js.LICENSE.txt" {
+		fullfilepath = filepath.Join(basedir, filename)
+		if _, err := os.Stat(fullfilepath); err == nil {
+			mime = "text/plain"
+			return fullfilepath, mime, nil
+		}
 	}
 
 	if ext == "css" {

@@ -43,7 +43,7 @@
       <br />
       <List>
         <ListItem class="seperator"></ListItem>
-        <ListItem class="colortuerkis" title="Implementation status for faucet version 0.1  🚀"></ListItem>
+        <ListItem class="colortuerkis" title="Implementation status for faucet version 0.2  🚀"></ListItem>
         <ListItem class="colorgreen" title="Account management"></ListItem>
         <ListItem title="Keystore: partial, not finished">
           <div slot="media">❌</div>
