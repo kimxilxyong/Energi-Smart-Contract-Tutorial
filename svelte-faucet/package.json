@@ -36,7 +36,7 @@
     "rollup-plugin-svelte": "^6.1.1",
     "scrypt-kdf": "^2.0.1",
     "serialize-javascript": "^4.0.0",
-    "svelte": "^3.31.0",
+    "svelte": "^3.49.0",
     "svelte-preprocess": "^4.6.1",
     "svelte-spa-router": "^3.1.0",
     "svelte-web3": "^0.1.4",
