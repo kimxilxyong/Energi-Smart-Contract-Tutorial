@@ -33,7 +33,7 @@ import (
 
 const version = 105
 const serverIPC = "/home/kim/.energicore3/testnet/energi3.ipc"
-const gasDonorAddress = "0x09ae1a5ddfd481cfd3cc4390b0e08a0832709a06"
+const gasDonorAddress = "0xdc67d898cc5fdd982308d1cb0c2301913f8f438c"
 const weiGasDonation = 500432 * 20000000000  // 0.5 million gas * gasPrice for gas to send
 /*
 	Returns the most probable filepath and mime type

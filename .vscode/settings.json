@@ -8,5 +8,33 @@
     "**/.git/subtree-cache/**": true,
     "**/microhttp/www/**": true,
   },
-
+  "eslint.options": {
+    "ecmaVersion": 9,
+    "max-len": [
+      {
+        "code": 450,
+        "tabWidth": 2,
+        "ignoreUrls": true
+      }
+    ],
+    "ecmaFeatures": {
+      "modules": true,
+      "spread" : true,
+      "restParams" : true
+    },
+  },
+  "eslint.format.enable": true,
+  "eslint.validate": [
+    "svelte",
+    "javascript",
+    "css",
+  ],
+  "eslint.probe": [
+    "svelte",
+    "javascript",
+    "css",
+  ],
+  "eslint.codeAction.showDocumentation": {
+    "enable": true
+  }
 }

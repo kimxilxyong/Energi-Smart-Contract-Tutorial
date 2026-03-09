@@ -1,0 +1,28 @@
+{
+    "env": {
+        "browser": true
+    },
+    "parserOptions": {
+        "ecmaFeatures": {
+            "impliedStrict": true
+        },
+        "ecmaVersion": 9,
+        "sourceType": "module"
+    },
+    "plugins": [
+        "svelte3"
+    ],
+    "overrides": [
+        {
+          "files": [
+            "*.svelte"
+          ],
+          "processor": "svelte3/svelte3"
+        }
+    ],
+    "rules": {
+        "semi": "error",
+        "no-console": 0
+    },
+    "extends": "eslint:recommended"
+}
